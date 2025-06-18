@@ -4,6 +4,7 @@ import { useProofs } from '../hooks/useProofs';
 import * as api from '../api/apiService';
 
 const BANCAS_PREDEFINIDAS = ["Cespe/Cebraspe", "FGV", "FCC", "Quadrix", "IBFC", "Outra"];
+const RESULTADOS_POSSIVEIS = ["Aprovado", "Classificado", "Reprovado", "Eliminado"];
 
 const ProofFormContent = ({ proofData, type = 'CONCURSO', onSave }) => {
     const { handleAddProof, fetchProofs } = useProofs();
@@ -17,7 +18,10 @@ const ProofFormContent = ({ proofData, type = 'CONCURSO', onSave }) => {
         totalQuestoes: type === 'CONCURSO' ? 120 : 50,
         tipoPontuacao: 'liquida',
         orgao: '',
-        cargo: ''
+        cargo: '',
+        notaDiscursiva: null,
+        resultadoObjetiva: null,
+        resultadoDiscursiva: null,
     });
 
     const [formData, setFormData] = useState(getInitialFormData());
@@ -33,6 +37,9 @@ const ProofFormContent = ({ proofData, type = 'CONCURSO', onSave }) => {
                 tipoPontuacao: proofData.tipoPontuacao || 'liquida',
                 orgao: proofData.orgao || '',
                 cargo: proofData.cargo || '',
+                notaDiscursiva: proofData.notaDiscursiva,
+                resultadoObjetiva: proofData.resultadoObjetiva,
+                resultadoDiscursiva: proofData.resultadoDiscursiva,
             });
         } else {
             setFormData(getInitialFormData());
@@ -41,14 +48,18 @@ const ProofFormContent = ({ proofData, type = 'CONCURSO', onSave }) => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        setFormData(prev => ({ ...prev, [name]: value === "" ? null : value }));
     };
 
     const handleSubmit = async () => {
         setIsSaving(true);
         const toastId = toast.loading('Salvando...');
         try {
-            const dataToSave = { ...formData, type };
+            const dataToSave = { 
+                ...formData,
+                notaDiscursiva: formData.notaDiscursiva ? parseFloat(formData.notaDiscursiva) : null,
+                type 
+            };
             if (proofData?.id) {
                 await api.updateProofDetails(proofData.id, dataToSave);
                 toast.success("Dados atualizados com sucesso!", { id: toastId });
@@ -67,7 +78,7 @@ const ProofFormContent = ({ proofData, type = 'CONCURSO', onSave }) => {
         }
     };
     
-    const totalSteps = 2;
+    const totalSteps = type === 'CONCURSO' ? 3 : 2;
     const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, totalSteps));
     const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
 
@@ -108,6 +119,23 @@ const ProofFormContent = ({ proofData, type = 'CONCURSO', onSave }) => {
                         <select name="tipoPontuacao" value={formData.tipoPontuacao || 'liquida'} onChange={handleChange} className="w-full p-2 border bg-white dark:bg-gray-700 rounded-md">
                             <option value="liquida">Líquida (Certo/Errado)</option>
                             <option value="bruta">Bruta (Múltipla Escolha)</option>
+                        </select>
+                    </>
+                )}
+
+                {currentStep === 3 && type === 'CONCURSO' && (
+                    <>
+                        <h3 className="text-lg font-semibold">Resultados</h3>
+                        <input type="number" step="0.01" name="notaDiscursiva" placeholder="Nota da Discursiva (opcional)" value={formData.notaDiscursiva || ''} onChange={handleChange} className="w-full p-2 border bg-white dark:bg-gray-700 rounded-md"/>
+                        
+                        <select name="resultadoObjetiva" value={formData.resultadoObjetiva || ''} onChange={handleChange} className="w-full p-2 border bg-white dark:bg-gray-700 rounded-md">
+                            <option value="">-- Resultado da Objetiva --</option>
+                            {RESULTADOS_POSSIVEIS.map(r => <option key={r} value={r}>{r}</option>)}
+                        </select>
+
+                        <select name="resultadoDiscursiva" value={formData.resultadoDiscursiva || ''} onChange={handleChange} className="w-full p-2 border bg-white dark:bg-gray-700 rounded-md">
+                             <option value="">-- Resultado da Discursiva --</option>
+                            {RESULTADOS_POSSIVEIS.map(r => <option key={r} value={r}>{r}</option>)}
                         </select>
                     </>
                 )}

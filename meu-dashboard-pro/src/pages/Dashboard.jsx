@@ -9,6 +9,27 @@ import { PencilIcon, TrashIcon } from '../components/icons';
 import ConfirmationModal from '../components/common/ConfirmationModal';
 import ProofForm from '../components/ProofForm';
 
+const getResultBadge = (result) => {
+    if (!result) return <span className="text-gray-500">-</span>;
+
+    const baseClasses = "px-2.5 py-0.5 rounded-full text-xs font-semibold tracking-wide";
+    let colorClasses = "";
+
+    switch (result.toLowerCase()) {
+        case 'aprovado':
+        case 'classificado':
+            colorClasses = "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300";
+            break;
+        case 'reprovado':
+        case 'eliminado':
+            colorClasses = "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300";
+            break;
+        default:
+            return <span className="text-gray-500">-</span>;
+    }
+    return <span className={`${baseClasses} ${colorClasses}`}>{result}</span>;
+}
+
 const Dashboard = () => {
     const { proofs, consolidatedData, isLoading, dashboardFilter, setDashboardFilter, openDeleteModal } = useProofs();
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -32,21 +53,11 @@ const Dashboard = () => {
             }
         },
         { accessorKey: 'resultadoObjetiva', header: 'Resultado Objetiva',
-            cell: ({ row }) => {
-                const resultado = row.original.resultadoObjetiva;
-                if (resultado === 'CLASSIFICADO') return <span className="font-semibold text-green-600 dark:text-green-400">{resultado}</span>;
-                if (resultado === 'ELIMINADO') return <span className="font-semibold text-red-600 dark:text-red-400">{resultado}</span>;
-                return '-';
-            }
+            cell: ({ row }) => getResultBadge(row.original.resultadoObjetiva)
         },
         { accessorKey: 'notaDiscursiva', header: 'Discursiva', cell: info => typeof info.getValue() === 'number' ? <span className="font-bold">{info.getValue().toFixed(2).replace('.', ',')}</span> : '-' },
         { accessorKey: 'resultadoDiscursiva', header: 'Resultado Discursiva',
-            cell: ({ row }) => {
-                const resultado = row.original.resultadoDiscursiva;
-                if (resultado === 'CLASSIFICADO') return <span className="font-semibold text-green-600 dark:text-green-400">{resultado}</span>;
-                if (resultado === 'ELIMINADO') return <span className="font-semibold text-red-600 dark:text-red-400">{resultado}</span>;
-                return '-';
-            }
+            cell: ({ row }) => getResultBadge(row.original.resultadoDiscursiva)
         },
         {
             id: 'actions',

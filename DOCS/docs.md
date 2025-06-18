@@ -251,78 +251,49 @@ Para configurar e executar o projeto em um ambiente de desenvolvimento local:
       ```bash
       npm install
       ```
-    - **Configuração do Banco de Dados (Prisma)**:
-        - Certifique-se de que o arquivo `backend/prisma/schema.prisma` está configurado corretamente. Para desenvolvimento com SQLite, a variável de ambiente `DATABASE_URL` no arquivo `backend/.env` (crie-o se não existir) deve ser algo como:
-          ```env
-          DATABASE_URL="file:./dev.db"
-          ```
-        - Crie e aplique as migrações do banco de dados. Este comando lê o `schema.prisma`, cria o arquivo de banco de dados (ex: `dev.db`) e executa as migrações para definir as tabelas:
-          ```bash
-          npx prisma migrate dev --name init 
-          ```
-          (Substitua `init` por um nome descritivo para a migração, se desejar).
-    - Inicie o servidor backend:
+    - Execute as migrações do banco de dados:
       ```bash
-      node server.js
-      # Ou, para desenvolvimento com recarregamento automático (se tiver nodemon instalado):
-      # nodemon server.js
+      npx prisma migrate dev
       ```
-    - O servidor backend estará rodando, por padrão, em `http://localhost:3001`.
+    - Inicie o servidor do backend:
+      ```bash
+      npm run dev
+      ```
+      O servidor estará rodando em `http://localhost:3001`.
 
 3.  **Configuração do Frontend**:
-    - **Abra um novo terminal**. Não use o mesmo terminal onde o backend está rodando.
-    - Navegue até a pasta do frontend:
+    - Em um novo terminal, navegue até a pasta do frontend:
       ```bash
-      cd meu-dashboard-pro 
-      # (Se você estiver na raiz do projeto, caso contrário, ajuste o caminho)
+      cd meu-dashboard-pro
       ```
     - Instale as dependências:
       ```bash
       npm install
       ```
-    - Inicie o servidor de desenvolvimento Vite:
+    - Inicie a aplicação de desenvolvimento:
       ```bash
       npm run dev
       ```
-    - A aplicação frontend estará acessível, por padrão, em `http://localhost:5173`.
+      A aplicação estará acessível em `http://localhost:5173`.
 
-**Nota**: É crucial rodar o backend e o frontend em terminais separados, pois são processos distintos.
+**Observação**: Certifique-se de que ambos os servidores (frontend e backend) estejam em execução simultaneamente para que a aplicação funcione corretamente.
 
-## 8. Estrutura do Projeto e Funcionalidades (Visão Geral Adicional)
-A aplicação é rica em funcionalidades, organizadas de forma modular.
+## 8. Log de Alterações (Changelog)
+Esta seção documenta as principais mudanças e melhorias implementadas no projeto ao longo do tempo.
 
-**Funcionalidades Implementadas (Revisão)**:
-- **Cadastro Unificado com Wizard**: Os formulários de cadastro de "Provas Oficiais" e "Simulados" foram unificados em um único componente reutilizável (`ProofFormContent.jsx`). Este formulário adota um formato de "wizard" (múltiplas etapas) com barra de progresso, melhorando a experiência do usuário ao tornar o processo de cadastro mais guiado e intuitivo. A mesma experiência é fornecida tanto nas páginas de cadastro dedicadas quanto nos modais de edição.
-- **Cards de Visualização Aprimorados**: Os cards que exibem os concursos e simulados (`ContestCard.jsx`) foram aprimorados para incluir:
-    - **Status da Prova**: Um indicador visual colorido informa o estado atual de cada item (ex: "Pendente", "Finalizada").
-    - **Diferenciação Visual**: Simulados agora são claramente distintos de concursos, com um rótulo "SIMULADO" e uma cor de borda diferente.
-    - **Exibição Robusta de Dados**: A lógica para exibir informações como banca e órgão foi melhorada para lidar com campos vazios de forma elegante.
-- **Página de Gerenciamento Focada**: Ao clicar para editar uma prova, o usuário é levado para uma página com um layout simplificado (`FocusedLayout`) que remove a navegação principal e foca nas tarefas de gerenciamento.
-- **Gerenciamento por Abas**: Dentro da página de detalhes de uma prova (`ProofDetail.jsx`), todas as funcionalidades são organizadas em abas:
-    - **Informações**: Cadastro de matérias e quantidade de questões (`InfoTab.jsx`).
-    - **Gabaritos Oficiais e do Usuário**: Interfaces com modais para inserir os gabaritos preliminar, definitivo (`OfficialKeysTab.jsx`) e do usuário (`UserAnswersTab.jsx`). Após salvar um gabarito da banca, a correção é refeita automaticamente sem a necessidade de recarregar a página.
-    - **Resultado Final**: Exibição detalhada do desempenho por matéria em tabela e uma grade de gabarito visual (`ResultGrid.jsx`). O gabarito visual foi atualizado para espelhar a lógica de correção do backend, exibindo cada questão com uma cor distinta para acerto, erro, em branco ou **anulada** (`ResultTab.jsx`).
-    - **Simuladores**: Ferramentas para simular o impacto de anulações (`SimulateAnnulmentTab.jsx`). A simulação no frontend agora espelha a lógica de correção do backend, utilizando o gabarito definitivo como prioridade e o preliminar como fallback para garantir a precisão do cálculo. A lógica ajusta corretamente a pontuação (especialmente a nota líquida), considerando o estado original da questão (acerto, erro ou branco) antes de aplicar a anulação.
-- **Motor de Correção (Backend)**: Lógica robusta (`corrigirProva`) que compara os gabaritos, identifica acertos, erros, brancos e anuladas, e calcula a pontuação líquida e o aproveitamento final com base nas regras de negócio (incluindo as regras para questões anuladas).
-- **Visualização de Dados**:
-    - **Dashboard**: Apresenta dados consolidados com filtro por tipo.
-    - **Controle de Concursos**: Tabela para gerenciamento rápido.
-    - **Evolução**: Gráfico de linha do tempo do desempenho.
-    - **Histórico**: Visualização em cards detalhados.
+- **v1.3.0 (18/06/2025)**
+    - **Wizard de Resultados**: Adicionada uma nova etapa de "Resultados" ao formulário de cadastro/edição de concursos. Agora é possível inserir a nota da prova discursiva e os resultados de aprovação (`Aprovado`, `Reprovado`, etc.).
+    - **Melhoria Visual na Tabela**: Os resultados na tabela de "Controle de Concursos" agora são exibidos como "badges" coloridos, facilitando a identificação rápida do status (ex: verde para "Aprovado", vermelho para "Reprovado").
 
-**Correções de Bugs e Melhorias**:
-- **Refatoração de Formulários**: Toda a lógica de criação e edição de provas/simulados foi centralizada, eliminando código duplicado e inconsistente das páginas `AddProof.jsx`, `AddSimulado.jsx` e do antigo `ContestFormModal`.
-- **Correção de Inconsistências Visuais**: Resolvido um bug onde a tabela de "Dados Consolidados" não exibia corretamente todas as colunas e um problema de formatação que exibia percentuais incorretos.
-- **Correção de Importação de Módulos**: Solucionado um erro de compilação no `Dashboard.jsx` relacionado à importação de ícones. Foi criado um arquivo `index.js` no diretório `components/icons/` para centralizar as exportações, tornando o sistema de importação mais robusto e modular.
+- **v1.2.0 (17/06/2025)**
+    - **Unificação de Formulários**: Substituídos os formulários `AddProof.jsx`, `AddSimulado.jsx` e o modal de edição por um único componente reutilizável e multi-etapas (`ProofFormContent.jsx`), simplificando a manutenção e garantindo uma UI consistente.
+    - **Melhoria no Card de Concursos**: O `ContestCard.jsx` foi redesenhado para exibir o nome completo do órgão, a nota de aproveitamento e um status visual claro (`Pendente`, `Finalizado`), melhorando a hierarquia da informação e a usabilidade. O componente `ProofLogo` foi removido.
 
-## 9. Próximos Passos e Possíveis Melhorias
-A base do projeto é sólida e permite diversas expansões futuras:
+- **v1.1.0 (16/06/2025)**
+    - **Refatoração Visual do Dashboard**: Corrigida a formatação de percentuais e adicionados cabeçalhos ausentes na tabela de dados consolidados. A lógica de cálculo foi centralizada no componente `StatsRow` para garantir consistência.
+    - **Centralização de Utilitários**: Criada a função `formatPercent` em `src/utils/formatters.js` para padronizar a formatação de porcentagens em toda a aplicação, removendo implementações duplicadas.
 
-- **Autenticação de Usuários**: Implementar um sistema de login e cadastro para que múltiplos usuários possam utilizar a plataforma de forma isolada.
-- **Análise de Erros por Tópico/Conteúdo**: Expandir o modelo de dados para permitir o cadastro do tópico ou conteúdo programático de cada questão, possibilitando uma análise mais granular dos pontos fortes e fracos.
-- **Melhorias na Simulação**: Adicionar mais opções de simulação, como alteração de gabarito de questões específicas.
-- **Relatórios Avançados**: Geração de PDFs ou planilhas com os resultados e análises.
-- **Internacionalização (i18n)**: Embora o foco atual seja PT-BR, preparar a aplicação para suportar múltiplos idiomas.
-- **Testes Automatizados**: Introduzir testes unitários (ex: Jest, Vitest) para as lógicas de correção e componentes, e testes de integração (ex: Cypress, Playwright) para as funcionalidades chave.
-- **Deployment**: Publicar a aplicação em serviços como Vercel (frontend) e Render ou Fly.io (backend/DB).
-- **Otimizações de Performance**: Análise e otimização de queries de banco de dados e performance do frontend para grandes volumes de dados.
+- **v1.0.0 (15/06/2025)**
+    - Lançamento inicial do projeto.
+    - Funcionalidades principais: Cadastro de provas e simulados, upload de gabaritos (usuário e oficial), correção automática, visualização de resultados por disciplina e cálculo de aproveitamento.
+    - Backend com Node.js/Express/Prisma e frontend com React/Vite/Tailwind CSS.
