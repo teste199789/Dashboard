@@ -37,11 +37,9 @@ const Header = () => {
       </header>
 
       {/* Navegação de Desktop */}
-      <nav className="hidden md:flex space-x-2 mb-8 bg-white dark:bg-gray-800 p-2 rounded-lg shadow-sm">
+      <nav className="hidden md:flex flex-wrap gap-2 mb-8 bg-white dark:bg-gray-800 p-2 rounded-lg shadow-sm">
         <NavButton to="/">Dashboard</NavButton>
-        <NavButton to="/controle-concursos">Controle</NavButton>
-        <NavButton to="/meus-concursos">Evolução</NavButton>
-        <NavButton to="/minhas-provas">Histórico</NavButton>
+        <NavButton to="/meus-concursos">Meus Concursos</NavButton>
         <NavButton to="/cadastrar-prova">Cadastrar Prova</NavButton>
         <NavButton to="/cadastrar-simulado">Cadastrar Simulado</NavButton>
       </nav>
@@ -50,9 +48,7 @@ const Header = () => {
       {isMenuOpen && (
         <nav onClick={closeMenu} className="flex flex-col space-y-2 md:hidden mb-8 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
           <NavButton to="/">Dashboard</NavButton>
-          <NavButton to="/controle-concursos">Controle</NavButton>
-          <NavButton to="/meus-concursos">Evolução</NavButton>
-          <NavButton to="/minhas-provas">Histórico</NavButton>
+          <NavButton to="/meus-concursos">Meus Concursos</NavButton>
           <NavButton to="/cadastrar-prova">Cadastrar Prova</NavButton>
           <NavButton to="/cadastrar-simulado">Cadastrar Simulado</NavButton>
         </nav>

@@ -103,7 +103,7 @@ function calculateOverallPerformance(proof, calculatedResults) {
     } else {
         pontuacaoFinal = totals.acertos;
     }
-    const percentage = totalQuestoesParaCalculo > 0 ? (pontuacaoFinal / totalQuestoesParaCalculo) : 0;
+    const percentage = totalQuestoesParaCalculo > 0 ? (pontuacaoFinal / totalQuestoesParaCalculo) * 100 : 0;
     return { percentage: Math.max(0, percentage) };
 }
 

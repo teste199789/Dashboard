@@ -9,12 +9,10 @@ import FocusedLayout from './layouts/FocusedLayout';
 
 // Importação das Páginas
 import Dashboard from './pages/Dashboard';
-import MyContests from './pages/MyContests';
-import ProofsList from './pages/ProofsList';
+import MeusConcursos from './pages/MeusConcursos';
 import AddProof from './pages/AddProof';
 import AddSimulado from './pages/AddSimulado';
 import ProofDetail from './pages/ProofDetail';
-import Controle from './pages/Controle';
 
 // ÚNICA DEFINIÇÃO DA FUNÇÃO APP
 function App() {
@@ -33,9 +31,7 @@ function App() {
           {/* Rotas que usam o Layout Principal */}
           <Route element={<MainLayout />}>
             <Route path="/" element={<Dashboard />} />
-            <Route path="/controle-concursos" element={<Controle />} />
-            <Route path="/meus-concursos" element={<MyContests />} />
-            <Route path="/minhas-provas" element={<ProofsList />} />
+            <Route path="/meus-concursos" element={<MeusConcursos />} />
             <Route path="/cadastrar-prova" element={<AddProof />} />
             <Route path="/cadastrar-simulado" element={<AddSimulado />} />
           </Route>

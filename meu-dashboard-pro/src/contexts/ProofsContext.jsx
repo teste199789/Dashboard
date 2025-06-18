@@ -10,7 +10,7 @@ export const useProofs = () => {
 };
 
 export const ProofsProvider = ({ children }) => {
-    const [proofsList, setProofsList] = useState([]);
+    const [proofs, setProofs] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [modalState, setModalState] = useState({ isOpen: false, proofId: null });
@@ -20,7 +20,7 @@ export const ProofsProvider = ({ children }) => {
         setError(null);
         try {
             const data = await api.getProofs();
-            setProofsList(data);
+            setProofs(data);
         } catch (e) {
             console.error("Erro ao buscar dados:", e);
             setError("Não foi possível carregar os dados.");
@@ -49,7 +49,7 @@ export const ProofsProvider = ({ children }) => {
         try {
             await api.gradeProof(proofId);
             const updatedProof = await api.getProofById(proofId);
-            setProofsList(currentList => 
+            setProofs(currentList => 
                 currentList.map(p => 
                     p.id === proofId ? updatedProof : p
                 )
@@ -79,7 +79,7 @@ export const ProofsProvider = ({ children }) => {
     };
 
     const consolidatedData = useMemo(() => {
-        const filteredProofs = proofsList.filter(proof => {
+        const filteredProofs = proofs.filter(proof => {
             if (dashboardFilter === 'TODOS') return true;
             return (proof.type || 'CONCURSO') === dashboardFilter;
         });
@@ -125,11 +125,11 @@ export const ProofsProvider = ({ children }) => {
         totaisGerais.percentualBruta = universoBrutoGeral > 0 ? acertosReaisGerais / universoBrutoGeral : 0;
         totaisGerais.percentualLiquidos = totaisGerais.totalQuestoes > 0 ? Math.max(0, pontuacaoLiquidaGeral / totaisGerais.totalQuestoes) : 0;
         return { disciplinas: processedDisciplinas, totais: totaisGerais };
-    }, [proofsList, dashboardFilter]);
+    }, [proofs, dashboardFilter]);
 
     
     const value = {
-        proofsList,
+        proofs,
         consolidatedData,
         isLoading,
         error,
