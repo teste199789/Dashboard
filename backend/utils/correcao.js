@@ -6,57 +6,82 @@ function parseGabarito(gabaritoString) {
     }));
 }
 
+const findSubjectForQuestion = (questionNumber, subjects) => {
+    const subject = subjects.find(s => questionNumber >= s.questaoInicio && questionNumber <= s.questaoFim);
+    return subject ? subject.nome : 'Não encontrada';
+};
+
 function corrigirProva(proof) {
-    const { totalQuestoes, userAnswers, gabaritoDefinitivo, gabaritoPreliminar, subjects } = proof;
-    const gabaritoBaseParaCorrecao = gabaritoDefinitivo || gabaritoPreliminar;
+    const {
+        userAnswers,
+        gabaritoDefinitivo,
+        gabaritoPreliminar,
+        totalQuestoes,
+        subjects
+    } = proof;
 
-    const userMap = parseGabarito(userAnswers);
-    const definMap = parseGabarito(gabaritoBaseParaCorrecao);
-    const prelimMap = parseGabarito(gabaritoPreliminar);
+    const gabaritoFinal = gabaritoDefinitivo || gabaritoPreliminar;
 
-    const resultadoPorMateria = {};
-    if (subjects) {
-        subjects.forEach(m => {
-            if (m.nome) {
-                resultadoPorMateria[m.nome] = { disciplina: m.nome, acertos: 0, erros: 0, brancos: 0, anuladas: 0 };
-            }
-        });
+    if (!userAnswers || !gabaritoFinal) {
+        return {
+            resultados: subjects.map(s => ({
+                disciplina: s.nome,
+                acertos: 0,
+                erros: 0,
+                brancos: 0,
+                anuladas: 0
+            })),
+            log: [{
+                error: "Gabaritos insuficientes para correção."
+            }]
+        };
     }
+
+    const userAnswersMap = parseGabarito(userAnswers);
+    const gabaritoFinalMap = parseGabarito(gabaritoFinal);
+
+    const resultadoPorMateria = subjects.reduce((acc, subject) => {
+        acc[subject.nome] = {
+            disciplina: subject.nome,
+            acertos: 0,
+            erros: 0,
+            brancos: 0,
+            anuladas: 0
+        };
+        return acc;
+    }, {});
 
     for (let i = 1; i <= totalQuestoes; i++) {
-        const iStr = String(i);
-        const respostaUser = userMap.get(iStr);
-        const respostaDefin = definMap.get(iStr);
-        const respostaPrelim = prelimMap.get(iStr);
-        const materiaInfo = subjects.find(s => s.nome && i >= s.questaoInicio && i <= s.questaoFim);
-        
-        if (!materiaInfo || !resultadoPorMateria[materiaInfo.nome]) {
-            continue;
-        }
-        
-        const materiaDaQuestao = resultadoPorMateria[materiaInfo.nome];
-        const isAnnulled = gabaritoDefinitivo && gabaritoPreliminar && respostaPrelim && respostaDefin && respostaPrelim !== respostaDefin;
+        const qStr = String(i);
+        const materiaDaQuestao = findSubjectForQuestion(i, subjects);
 
-        if (isAnnulled) {
-            materiaDaQuestao.anuladas++;
-            materiaDaQuestao.acertos++; 
-            continue;
-        }
-        if (!respostaUser) {
-            materiaDaQuestao.brancos++;
-            continue;
-        }
-        if (respostaUser === respostaDefin) {
-            materiaDaQuestao.acertos++;
+        if (!resultadoPorMateria[materiaDaQuestao]) continue;
+
+        const respostaUser = userAnswersMap.get(qStr);
+        const respostaFinal = gabaritoFinalMap.get(qStr);
+
+        // A questão é considerada anulada se a resposta no gabarito final for 'X', 'N' ou 'ANULADA' (ignorando espaços e maiúsculas/minúsculas).
+        const finalAnswerUpper = respostaFinal ? respostaFinal.trim().toUpperCase() : '';
+        const isAnulada = finalAnswerUpper === 'X' || finalAnswerUpper === 'ANULADA' || finalAnswerUpper === 'N';
+
+        if (isAnulada) {
+            // REGRA: Questão anulada sempre conta como acerto, mesmo que o usuário tenha deixado em branco.
+            resultadoPorMateria[materiaDaQuestao].anuladas++;
+            resultadoPorMateria[materiaDaQuestao].acertos++;
         } else {
-            materiaDaQuestao.erros++;
+            if (!respostaUser || respostaUser.trim() === '') {
+                resultadoPorMateria[materiaDaQuestao].brancos++;
+            } else if (respostaUser === respostaFinal) {
+                resultadoPorMateria[materiaDaQuestao].acertos++;
+            } else {
+                resultadoPorMateria[materiaDaQuestao].erros++;
+            }
         }
     }
-    
-    // Garante que o retorno seja sempre um objeto com a estrutura esperada
+
     return {
         resultados: Object.values(resultadoPorMateria),
-        log: [] // Retorna um log vazio, pois a depuração anterior foi concluída
+        log: []
     };
 }
 

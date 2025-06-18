@@ -147,50 +147,58 @@ app.put('/api/proofs/:id/details', async (req, res) => {
 
 // --- ROTA DE CORREÇÃO (COM VERIFICAÇÃO DE SEGURANÇA) ---
 app.post('/api/proofs/:id/grade', async (req, res) => {
-    try {
-        const { id } = req.params;
-        const proofId = parseInt(id);
+    const { id } = req.params;
+    const proofId = parseInt(id);
 
+    console.log(`[GRADE_START] Iniciando correção para a prova ID: ${proofId}`);
+
+    try {
+        // Busca os dados mais recentes da prova, garantindo que temos os últimos gabaritos.
         const proofData = await prisma.proof.findUnique({
             where: { id: proofId },
             include: { subjects: true },
         });
 
-        if (!proofData || !proofData.userAnswers || (!proofData.gabaritoDefinitivo && !proofData.gabaritoPreliminar)) {
-            return res.status(400).json({ error: "Para corrigir, preencha seu gabarito e pelo menos um dos gabaritos da banca." });
-        }
-        if (!proofData.subjects || proofData.subjects.length === 0) {
-            return res.status(400).json({ error: "As matérias do concurso não foram definidas." });
+        if (!proofData) {
+            console.error(`[GRADE_ERROR] Prova com ID ${proofId} não encontrada.`);
+            return res.status(404).send('Prova não encontrada.');
         }
 
-        // Chama a correção e pega os resultados
-        const correctionData = corrigirProva(proofData);
+        console.log('[GRADE_DATA] Dados da prova antes da correção:', JSON.stringify(proofData, null, 2));
 
-        // VERIFICAÇÃO DE SEGURANÇA
-        if (!correctionData || !correctionData.resultados) {
-            throw new Error("A função de correção não retornou um resultado válido.");
-        }
+        // Chama a função de correção com os dados da prova.
+        const { resultados } = corrigirProva(proofData);
+        
+        console.log('[GRADE_RESULTS] Resultados calculados (brutos):', JSON.stringify(resultados, null, 2));
 
-        const { resultados: resultadosPorMateria } = correctionData;
-        const performanceGeral = calculateOverallPerformance(proofData, resultadosPorMateria);
+        const { percentage } = calculateOverallPerformance(proofData, resultados);
 
-        await prisma.proof.update({
-            where: { id: proofId },
-            data: { aproveitamento: performanceGeral.percentage }
-        });
+        // Prepara os dados dos resultados para inserção no banco.
+        const dataToCreate = resultados.map(r => ({
+            ...r,
+            proofId: proofId,
+        }));
+        
+        console.log('[GRADE_DB_PREP] Dados prontos para a transação no banco:', JSON.stringify(dataToCreate, null, 2));
 
-        const dataToCreate = resultadosPorMateria.map(r => ({ ...r, proofId }));
-
+        // Executa a exclusão e criação dos resultados em uma transação para garantir atomicidade.
         await prisma.$transaction([
             prisma.result.deleteMany({ where: { proofId: proofId } }),
             prisma.result.createMany({ data: dataToCreate }),
         ]);
 
-        res.status(200).json({ message: "Prova corrigida com sucesso!" });
+        // Atualiza o campo de aproveitamento na prova principal.
+        await prisma.proof.update({
+            where: { id: proofId },
+            data: { aproveitamento: percentage },
+        });
+
+        console.log(`[GRADE_SUCCESS] Correção da prova ID: ${proofId} finalizada com sucesso.`);
+        res.status(200).json({ message: "Prova corrigida e resultados atualizados com sucesso!" });
 
     } catch (error) {
-        console.error("ERRO AO CORRIGIR PROVA:", error);
-        res.status(500).json({ error: "Falha no processo de correção." });
+        console.error(`[GRADE_FATAL] Erro catastrófico ao corrigir a prova ID: ${proofId}:`, error);
+        res.status(500).json({ error: "Falha crítica no processo de correção." });
     }
 });
 

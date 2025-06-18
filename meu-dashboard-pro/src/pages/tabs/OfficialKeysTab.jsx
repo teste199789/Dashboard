@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import toast from 'react-hot-toast'; // Importa a biblioteca de notificações
 import * as api from '../../api/apiService';
 import AnswerGrid from '../../components/common/AnswerGrid';
 import Modal from '../../components/common/Modal'; // <-- Importa o novo componente Modal
@@ -20,7 +21,7 @@ const mapToString = (map) => {
         .join(',');
 };
 
-const OfficialKeysTab = ({ proof }) => {
+const OfficialKeysTab = ({ proof, refreshProof }) => {
     const [preliminarMap, setPreliminarMap] = useState(() => stringToMap(proof.gabaritoPreliminar));
     const [definitivoMap, setDefinitivoMap] = useState(() => stringToMap(proof.gabaritoDefinitivo));
     const [isSaving, setIsSaving] = useState(false);
@@ -44,17 +45,30 @@ const OfficialKeysTab = ({ proof }) => {
 
     const handleSaveAndClose = async () => {
         setIsSaving(true);
+        const loadingToast = toast.loading('Salvando gabaritos...');
+
         try {
+            // Passo 1: Atualiza os detalhes da prova (gabaritos)
             await api.updateProofDetails(proof.id, {
                 gabaritoPreliminar: mapToString(preliminarMap),
                 gabaritoDefinitivo: mapToString(definitivoMap),
             });
-            alert('Gabaritos salvos com sucesso!');
-            setEditingKey(null); // Fecha o modal após salvar
+
+            toast.success('Gabaritos salvos com sucesso!', { id: loadingToast });
+
+            // Passo 2: Dispara a nova correção
+            const correctionToast = toast.loading('Processando nova correção...');
+            await api.gradeProof(proof.id);
+            toast.success('Correção finalizada! Os resultados foram atualizados.', { id: correctionToast });
+            
+            // Passo 3: Atualiza os dados da prova dinamicamente, sem recarregar a página.
+            await refreshProof();
+
         } catch (error) {
-            alert('Falha ao salvar os gabaritos.');
+            toast.error('Falha ao salvar ou corrigir. Tente novamente.', { id: loadingToast });
         } finally {
             setIsSaving(false);
+            setEditingKey(null); // Fecha o modal independentemente do resultado
         }
     };
 
@@ -86,7 +100,7 @@ const OfficialKeysTab = ({ proof }) => {
 
     return (
         <div className="p-6 flex flex-col items-center justify-center min-h-[300px] space-y-4">
-            <h3 className="text-xl font-bold text-gray-800 mb-4">Gabaritos Oficiais da Banca</h3>
+            <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">Gabaritos Oficiais da Banca</h3>
             
             {/* Botões que abrem os modais */}
             <button
@@ -98,7 +112,7 @@ const OfficialKeysTab = ({ proof }) => {
 
             <button
                 onClick={() => openModal('definitivo')}
-                className="w-full max-w-sm bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition shadow-md"
+                className="w-full max-w-sm bg-green-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-700 transition shadow-md"
             >
                 PÓS-RECURSOS (DEFINITIVO)
             </button>
