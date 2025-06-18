@@ -65,7 +65,8 @@ const SimulateAnnulmentTab = ({ proof }) => {
             // O ponto só é adicionado se o usuário não tinha acertado originalmente.
             if (userAnswer !== officialAnswer) {
                 // Se o usuário tinha errado (deu uma resposta), o erro é removido.
-                if (userAnswer) {
+                // Isso é crucial para a pontuação líquida.
+                if (userAnswer && userAnswer !== '') { // Verifica se houve uma resposta (não foi em branco)
                     simulatedErros--;
                 }
                 // Em ambos os casos (erro ou branco), ele ganha o ponto do acerto.

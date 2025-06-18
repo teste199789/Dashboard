@@ -188,8 +188,8 @@ O arquivo `correcao.js` contém a lógica principal para processar e avaliar as 
     2. Calcula a `pontuacaoFinal`:
         - Se `tipoPontuacao` for `'liquida'`, `pontuacaoFinal = acertos - erros`.
         - Caso contrário (ex: `'bruta'`), `pontuacaoFinal = acertos`.
-    3. Calcula o percentual: `(pontuacaoFinal / totalQuestoesParaCalculo)`. Garante que o percentual não seja negativo.
-- **Saída**: Objeto `{ percentage: Float }` representando o aproveitamento (ex: `{ percentage: 0.75 }` para 75%).
+    3. Calcula o percentual: `(pontuacaoFinal / totalQuestoesParaCalculo) * 100`. Garante que o percentual não seja negativo.
+- **Saída**: Objeto `{ percentage: Float }` representando o aproveitamento em uma escala de 0 a 100 (ex: `{ percentage: 75.0 }` para 75%).
 
 ## 6. Estrutura do Frontend (`meu-dashboard-pro/src/`)
 O código-fonte do frontend está organizado da seguinte maneira para promover modularidade e manutenibilidade:
@@ -215,8 +215,10 @@ O código-fonte do frontend está organizado da seguinte maneira para promover m
     - `AddProof.jsx`, `AddSimulado.jsx`: Formulários para adicionar novas provas e simulados.
     - `ProofDetail.jsx`: Página para visualizar e gerenciar os detalhes de uma prova específica, contendo abas.
     - `Controle.jsx`: Página com a tabela de controle de concursos.
-    - `MyContests.jsx` (ou `ProofsList.jsx`): Lista as provas e simulados cadastrados.
-    - `tabs/`: Componentes que representam o conteúdo de cada aba dentro da página `ProofDetail.jsx` (ex: `InfoTab.jsx`, `OfficialKeysTab.jsx`, `ResultTab.jsx`).
+    - `MeusConcursos.jsx`: Página que exibe a evolução do desempenho através de um gráfico de linha e uma visão geral dos concursos e simulados em formato de cards. Esta página contém abas para alternar entre as visualizações.
+    - `tabs/`: Contém os componentes que funcionam como "abas" em diferentes partes da aplicação.
+        - Dentro de `ProofDetail.jsx`: `InfoTab.jsx`, `OfficialKeysTab.jsx`, `ResultTab.jsx`, etc., para gerenciar uma prova específica.
+        - Dentro de `MeusConcursos.jsx`: `DesempenhoTab.jsx` (exibe o gráfico de evolução) e `VisaoGeralTab.jsx` (exibe os cards de concursos/simulados).
 - **`utils/`**: Funções utilitárias diversas.
     - `calculators.js`: Funções para cálculos específicos do frontend.
     - `formatters.js`: Funções para formatação de dados (ex: datas, percentuais).

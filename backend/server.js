@@ -147,39 +147,29 @@ app.put('/api/proofs/:id/details', async (req, res) => {
 
 // --- ROTA DE CORREÇÃO (COM VERIFICAÇÃO DE SEGURANÇA) ---
 app.post('/api/proofs/:id/grade', async (req, res) => {
-    try {
-        const { id } = req.params;
-        const proofId = parseInt(id);
+    const { id } = req.params;
+    const proofId = parseInt(id);
 
+    try {
         const proofData = await prisma.proof.findUnique({
             where: { id: proofId },
             include: { subjects: true },
         });
 
-        if (!proofData || !proofData.userAnswers || (!proofData.gabaritoDefinitivo && !proofData.gabaritoPreliminar)) {
-            return res.status(400).json({ error: "Para corrigir, preencha seu gabarito e pelo menos um dos gabaritos da banca." });
-        }
-        if (!proofData.subjects || proofData.subjects.length === 0) {
-            return res.status(400).json({ error: "As matérias do concurso não foram definidas." });
+        if (!proofData) {
+            return res.status(404).send('Prova não encontrada.');
         }
 
-        // Chama a correção e pega os resultados
-        const correctionData = corrigirProva(proofData);
-
-        // VERIFICAÇÃO DE SEGURANÇA
-        if (!correctionData || !correctionData.resultados) {
-            throw new Error("A função de correção não retornou um resultado válido.");
-        }
-
-        const { resultados: resultadosPorMateria } = correctionData;
-        const performanceGeral = calculateOverallPerformance(proofData, resultadosPorMateria);
+        const { resultados } = corrigirProva(proofData);
+        
+        const { percentage } = calculateOverallPerformance(proofData, resultados);
 
         await prisma.proof.update({
             where: { id: proofId },
-            data: { aproveitamento: performanceGeral.percentage }
+            data: { aproveitamento: percentage }
         });
 
-        const dataToCreate = resultadosPorMateria.map(r => ({ ...r, proofId }));
+        const dataToCreate = resultados.map(r => ({ ...r, proofId }));
 
         await prisma.$transaction([
             prisma.result.deleteMany({ where: { proofId: proofId } }),

@@ -6,58 +6,56 @@ function parseGabarito(gabaritoString) {
     }));
 }
 
+const findSubjectForQuestion = (questionNumber, subjects) => {
+    const subject = subjects.find(s => questionNumber >= s.questaoInicio && questionNumber <= s.questaoFim);
+    return subject ? subject.nome : 'Não encontrada';
+};
+
 function corrigirProva(proof) {
-    const { totalQuestoes, userAnswers, gabaritoDefinitivo, gabaritoPreliminar, subjects } = proof;
-    const gabaritoBaseParaCorrecao = gabaritoDefinitivo || gabaritoPreliminar;
-
-    const userMap = parseGabarito(userAnswers);
-    const definMap = parseGabarito(gabaritoBaseParaCorrecao);
-    const prelimMap = parseGabarito(gabaritoPreliminar);
-
-    const resultadoPorMateria = {};
-    if (subjects) {
-        subjects.forEach(m => {
-            if (m.nome) {
-                resultadoPorMateria[m.nome] = { disciplina: m.nome, acertos: 0, erros: 0, brancos: 0, anuladas: 0 };
-            }
-        });
+    const gabaritoOficial = proof.gabaritoDefinitivo || proof.gabaritoPreliminar;
+    if (!proof.userAnswers || !gabaritoOficial) {
+        return { 
+            resultados: proof.subjects.map(s => ({ disciplina: s.nome, acertos: 0, erros: 0, brancos: 0, anuladas: 0 })),
+            log: [{ error: "Gabaritos insuficientes para correção." }] 
+        };
     }
 
-    for (let i = 1; i <= totalQuestoes; i++) {
-        const iStr = String(i);
-        const respostaUser = userMap.get(iStr);
-        const respostaDefin = definMap.get(iStr);
-        const respostaPrelim = prelimMap.get(iStr);
-        const materiaInfo = subjects.find(s => s.nome && i >= s.questaoInicio && i <= s.questaoFim);
-        
-        if (!materiaInfo || !resultadoPorMateria[materiaInfo.nome]) {
-            continue;
-        }
-        
-        const materiaDaQuestao = resultadoPorMateria[materiaInfo.nome];
-        const isAnnulled = gabaritoDefinitivo && gabaritoPreliminar && respostaPrelim && respostaDefin && respostaPrelim !== respostaDefin;
+    const userAnswersMap = parseGabarito(proof.userAnswers);
+    const gabaritoOficialMap = parseGabarito(gabaritoOficial);
+    const gabaritoPreliminarMap = parseGabarito(proof.gabaritoPreliminar);
 
-        if (isAnnulled) {
-            materiaDaQuestao.anuladas++;
-            materiaDaQuestao.acertos++; 
-            continue;
-        }
-        if (!respostaUser) {
-            materiaDaQuestao.brancos++;
-            continue;
-        }
-        if (respostaUser === respostaDefin) {
-            materiaDaQuestao.acertos++;
+    const resultadoPorMateria = proof.subjects.reduce((acc, subject) => {
+        acc[subject.nome] = { disciplina: subject.nome, acertos: 0, erros: 0, brancos: 0, anuladas: 0 };
+        return acc;
+    }, {});
+
+    for (let i = 1; i <= proof.totalQuestoes; i++) {
+        const qStr = String(i);
+        const materiaDaQuestao = findSubjectForQuestion(i, proof.subjects);
+
+        if (!resultadoPorMateria[materiaDaQuestao]) continue;
+
+        const respostaUser = userAnswersMap.get(qStr);
+        const respostaOficial = gabaritoOficialMap.get(qStr);
+        const respostaPreliminar = gabaritoPreliminarMap.get(qStr);
+
+        const isAnulada = !!(proof.gabaritoDefinitivo && respostaPreliminar && respostaOficial !== respostaPreliminar);
+
+        if (isAnulada) {
+            resultadoPorMateria[materiaDaQuestao].anuladas++;
+            resultadoPorMateria[materiaDaQuestao].acertos++;
         } else {
-            materiaDaQuestao.erros++;
+            if (!respostaUser) {
+                resultadoPorMateria[materiaDaQuestao].brancos++;
+            } else if (respostaUser === respostaOficial) {
+                resultadoPorMateria[materiaDaQuestao].acertos++;
+            } else {
+                resultadoPorMateria[materiaDaQuestao].erros++;
+            }
         }
     }
-    
-    // Garante que o retorno seja sempre um objeto com a estrutura esperada
-    return {
-        resultados: Object.values(resultadoPorMateria),
-        log: [] // Retorna um log vazio, pois a depuração anterior foi concluída
-    };
+
+    return { resultados: Object.values(resultadoPorMateria), log: [] };
 }
 
 function calculateOverallPerformance(proof, calculatedResults) {
@@ -78,7 +76,7 @@ function calculateOverallPerformance(proof, calculatedResults) {
     } else {
         pontuacaoFinal = totals.acertos;
     }
-    const percentage = totalQuestoesParaCalculo > 0 ? (pontuacaoFinal / totalQuestoesParaCalculo) : 0;
+    const percentage = totalQuestoesParaCalculo > 0 ? (pontuacaoFinal / totalQuestoesParaCalculo) * 100 : 0;
     return { percentage: Math.max(0, percentage) };
 }
 
