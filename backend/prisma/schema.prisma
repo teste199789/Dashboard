@@ -1,0 +1,59 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Proof {
+  id                 Int       @id @default(autoincrement())
+  createdAt          DateTime  @default(now())
+  titulo             String
+  banca              String
+  data               DateTime
+  totalQuestoes      Int   
+  tipoPontuacao      String?   
+  aproveitamento     Float?   
+  inscritos          Int? 
+
+  gabaritoPreliminar String?
+  gabaritoDefinitivo String?
+  userAnswers        String?
+  simulacaoAnuladas  String?
+  type               String    @default("CONCURSO")
+
+  orgao              String?   
+  cargo              String?   
+  notaDiscursiva     Float?    
+  resultadoObjetiva  String?   // CLASSIFICADO, ELIMINADO
+  resultadoDiscursiva String?   // CLASSIFICADO, ELIMINADO
+  resultadoFinal     String?  
+
+  results   Result[]
+  subjects  Subject[]
+}
+
+model Subject {
+  id              Int    @id @default(autoincrement())
+  nome            String
+  questoes        Int
+  questaoInicio   Int    // <-- Campo necessário
+  questaoFim      Int    // <-- Campo necessário
+
+  proof   Proof @relation(fields: [proofId], references: [id], onDelete: Cascade)
+  proofId Int
+}
+
+model Result {
+  id          Int    @id @default(autoincrement())
+  disciplina  String
+  acertos     Int
+  erros       Int
+  brancos     Int
+  anuladas    Int
+
+  proof     Proof @relation(fields: [proofId], references: [id], onDelete: Cascade)
+  proofId   Int
+}
