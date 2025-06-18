@@ -1,12 +1,8 @@
 import React, { useState, useMemo } from 'react';
-import StatsRow from '../../components/common/StatsRow';
 import { useProofs } from '../../hooks/useProofs';
-import ScoreCard from '../../components/common/ScoreCard';
-import * as api from '../../api/apiService';
 import toast from 'react-hot-toast';
-
-const normalizeText = (text = '') => 
-    text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+import ResultGrid from '../../components/common/ResultGrid';
+import { formatPercent } from '../../utils/formatters';
 
 const ResultTab = ({ proof, refreshProof }) => {
     const [isGrading, setIsGrading] = useState(false);
@@ -22,55 +18,48 @@ const ResultTab = ({ proof, refreshProof }) => {
         } catch (err) {
             setError("Falha ao corrigir a prova. Verifique se todos os gabaritos e matérias foram preenchidos corretamente.");
             toast.error("Falha ao corrigir a prova.");
-            console.error("ERRO DETALHADO NO FRONTEND:", err);
         } finally {
             setIsGrading(false);
         }
     };
 
-    const displayData = useMemo(() => {
+    const performanceData = useMemo(() => {
         if (!proof || !proof.results || proof.results.length === 0) {
             return null;
         }
 
-        // --- LÓGICA DE CÁLCULO FINAL E CORRETA ---
+        const subjectQuestionMap = new Map(proof.subjects.map(s => [s.disciplina || s.nome, s.questoes]));
 
-        // 1. Cria um mapa para fácil acesso ao total de questões original de cada matéria
-        const subjectQuestionMap = new Map(proof.subjects.map(s => [s.nome, s.questoes]));
-
-        // 2. Calcula os dados detalhados para cada linha da tabela
         const detailedResults = proof.results.map(item => {
-            // Pega o total de questões original do mapa
             const totalQuestoesNaMateria = subjectQuestionMap.get(item.disciplina) || 0;
-            const acertosReais = item.acertos - item.anuladas;
-            const pontuacaoLiquida = acertosReais - item.erros + item.anuladas;
+            const pontuacaoLiquida = item.acertos - item.erros;
             
-            const universoBruto = acertosReais + item.erros;
-            const percentualBruta = universoBruto > 0 ? acertosReais / universoBruto : 0;
-            
+            const percentualBruta = totalQuestoesNaMateria > 0 ? (item.acertos / totalQuestoesNaMateria) : 0;
             const percentualLiquidos = totalQuestoesNaMateria > 0 ? Math.max(0, pontuacaoLiquida / totalQuestoesNaMateria) : 0;
             
-            return { ...item, totalQuestoes: totalQuestoesNaMateria, acertosLiquidos: pontuacaoLiquida, percentualBruta, percentualLiquidos };
+            return { 
+                ...item, 
+                questoes: totalQuestoesNaMateria, 
+                liquidos: pontuacaoLiquida, 
+                percentualBruta, 
+                percentualLiquidos 
+            };
         });
 
-        // 3. Calcula a linha de "Total" a partir dos resultados detalhados
-        const totaisGerais = detailedResults.reduce((acc, current) => {
+        const totals = detailedResults.reduce((acc, current) => {
             acc.acertos += current.acertos;
             acc.erros += current.erros;
             acc.brancos += current.brancos;
             acc.anuladas += current.anuladas;
-            acc.acertosLiquidos += current.acertosLiquidos;
+            acc.questoes += current.questoes;
+            acc.liquidos += current.liquidos;
             return acc;
-        }, { disciplina: 'Total', acertos: 0, erros: 0, brancos: 0, anuladas: 0, acertosLiquidos: 0 });
-
-        totaisGerais.totalQuestoes = proof.totalQuestoes;
-        const acertosReaisGerais = totaisGerais.acertos - totaisGerais.anuladas;
-        const universoBrutoGeral = acertosReaisGerais + totaisGerais.erros;
-
-        totaisGerais.percentualBruta = universoBrutoGeral > 0 ? acertosReaisGerais / universoBrutoGeral : 0;
-        totaisGerais.percentualLiquidos = proof.aproveitamento;
-
-        return { detailedResults, totals: totaisGerais };
+        }, { disciplina: 'Total', acertos: 0, erros: 0, brancos: 0, anuladas: 0, questoes: 0, liquidos: 0 });
+        
+        totals.percentualBruta = totals.questoes > 0 ? (totals.acertos / totals.questoes) : 0;
+        totals.percentualLiquidos = totals.questoes > 0 ? Math.max(0, totals.liquidos / totals.questoes) : 0;
+        
+        return { detailedResults, totals };
 
     }, [proof]);
 
@@ -86,24 +75,65 @@ const ResultTab = ({ proof, refreshProof }) => {
 
             {error && <div className="my-4 p-3 bg-red-100 text-red-700 rounded-lg">{error}</div>}
             
-            {!displayData ? (
+            {!performanceData ? (
                 <div className="text-center text-gray-500 py-10 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                    <p>Nenhum resultado calculado ainda.</p>
+                    <p>Nenhum resultado calculado ainda. Clique em "Corrigir" para ver a análise.</p>
                 </div>
             ) : (
-                <div>
-                    <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">Desempenho Detalhado por Matéria</h3>
-                    <div className="text-sm text-gray-800 dark:text-gray-200 border dark:border-gray-700 rounded-lg overflow-hidden">
-                        <div className="hidden md:grid grid-cols-9 text-center font-semibold bg-gray-200 dark:bg-gray-700 py-3 border-b-2 dark:border-gray-600">
-                            <p className="text-left pl-4">Matéria</p>
-                            <p>Acertos</p><p>Erros</p><p>Brancos</p><p>Anuladas</p>
-                            <p>Questões</p><p>Líquidos</p><p>% Bruta</p><p>% Líquidos</p>
+                <div className="space-y-8">
+                    {/* Tabela de Desempenho */}
+                    <div>
+                        <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">Desempenho Detalhado por Matéria</h3>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-sm text-left text-gray-600 dark:text-gray-300">
+                                <thead className="text-xs text-gray-700 uppercase bg-gray-100 dark:bg-gray-700 dark:text-gray-300">
+                                    <tr>
+                                        <th scope="col" className="px-6 py-3">Matéria</th>
+                                        <th scope="col" className="px-6 py-3 text-center">Acertos</th>
+                                        <th scope="col" className="px-6 py-3 text-center">Erros</th>
+                                        <th scope="col" className="px-6 py-3 text-center">Brancos</th>
+                                        <th scope="col" className="px-6 py-3 text-center">Anuladas</th>
+                                        <th scope="col" className="px-6 py-3 text-center">Questões</th>
+                                        <th scope="col" className="px-6 py-3 text-center">Líquidos</th>
+                                        <th scope="col" className="px-6 py-3 text-center">% Bruta</th>
+                                        <th scope="col" className="px-6 py-3 text-center">% Líquidos</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {performanceData.detailedResults.map((item, index) => (
+                                        <tr key={index} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                            <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">{item.disciplina}</th>
+                                            <td className="px-6 py-4 text-center">{item.acertos}</td>
+                                            <td className="px-6 py-4 text-center">{item.erros}</td>
+                                            <td className="px-6 py-4 text-center">{item.brancos}</td>
+                                            <td className="px-6 py-4 text-center">{item.anuladas}</td>
+                                            <td className="px-6 py-4 text-center">{item.questoes}</td>
+                                            <td className="px-6 py-4 text-center font-bold">{item.liquidos}</td>
+                                            <td className="px-6 py-4 text-center">{formatPercent(item.percentualBruta)}</td>
+                                            <td className="px-6 py-4 text-center">{formatPercent(item.percentualLiquidos)}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                                <tfoot className="font-bold bg-teal-50 dark:bg-teal-900/50 text-gray-800 dark:text-gray-100">
+                                    <tr className="border-t-2 border-teal-200 dark:border-teal-700">
+                                        <th scope="row" className="px-6 py-3 text-base">Total</th>
+                                        <td className="px-6 py-3 text-center">{performanceData.totals.acertos}</td>
+                                        <td className="px-6 py-3 text-center">{performanceData.totals.erros}</td>
+                                        <td className="px-6 py-3 text-center">{performanceData.totals.brancos}</td>
+                                        <td className="px-6 py-3 text-center">{performanceData.totals.anuladas}</td>
+                                        <td className="px-6 py-3 text-center">{performanceData.totals.questoes}</td>
+                                        <td className="px-6 py-3 text-center text-lg">{performanceData.totals.liquidos}</td>
+                                        <td className="px-6 py-3 text-center">{formatPercent(performanceData.totals.percentualBruta)}</td>
+                                        <td className="px-6 py-3 text-center">{formatPercent(performanceData.totals.percentualLiquidos)}</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
                         </div>
-                        <div className="divide-y dark:divide-gray-700">
-                            {displayData.detailedResults.map((item, index) => <StatsRow key={index} item={item} />)}
-                        </div>
-                        <StatsRow item={displayData.totals} isFooter={true} />
                     </div>
+
+                    {/* Grade de Respostas */}
+                    <ResultGrid proof={proof} />
+
                 </div>
             )}
         </div>

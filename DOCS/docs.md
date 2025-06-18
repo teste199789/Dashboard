@@ -200,7 +200,7 @@ O código-fonte do frontend está organizado da seguinte maneira para promover m
     - `apiService.js`: Contém funções para realizar chamadas HTTP para o backend (ex: buscar provas, criar prova, corrigir prova).
 - **`assets/`**: Arquivos estáticos como imagens e SVGs.
 - **`components/`**: Componentes React reutilizáveis usados em várias partes da aplicação.
-    - `common/`: Subdiretório para componentes genéricos e utilitários (ex: `Modal.jsx`, `LoadingSpinner.jsx`, `ThemeToggle.jsx`).
+    - `common/`: Subdiretório para componentes genéricos e utilitários (ex: `Modal.jsx`, `LoadingSpinner.jsx`, `ThemeToggle.jsx`, `ResultGrid.jsx`).
     - `icons/`: Componentes de ícones SVG.
 - **`contexts/`**:
     - `ProofsContext.jsx`: Gerencia o estado global relacionado às provas (lista de provas, carregamento, funções de CRUD e correção).
@@ -293,7 +293,7 @@ A aplicação é rica em funcionalidades, organizadas de forma modular.
 - **Gerenciamento por Abas**: Dentro da página de detalhes de uma prova (`ProofDetail.jsx`), todas as funcionalidades são organizadas em abas:
     - **Informações**: Cadastro de matérias e quantidade de questões (`InfoTab.jsx`).
     - **Gabaritos Oficiais e do Usuário**: Interfaces com modais para inserir os gabaritos preliminar, definitivo (`OfficialKeysTab.jsx`) e do usuário (`UserAnswersTab.jsx`).
-    - **Resultado Final**: Exibição detalhada do desempenho por matéria e visualização gráfica do gabarito (`ResultTab.jsx`).
+    - **Resultado Final**: Exibição detalhada do desempenho por matéria em tabela e uma grade de gabarito visual (`ResultGrid.jsx`) que mostra cada questão como acerto, erro ou em branco (`ResultTab.jsx`).
     - **Simuladores**: Ferramentas para simular o impacto de anulações (`SimulateAnnulmentTab.jsx`). A simulação no frontend agora espelha a lógica de correção do backend, utilizando o gabarito definitivo como prioridade e o preliminar como fallback para garantir a precisão do cálculo. A lógica ajusta corretamente a pontuação (especialmente a nota líquida), considerando o estado original da questão (acerto, erro ou branco) antes de aplicar a anulação.
 - **Motor de Correção (Backend)**: Lógica robusta (`corrigirProva`) que compara os gabaritos, identifica acertos, erros, brancos e anuladas, e calcula a pontuação líquida e o aproveitamento final com base nas regras de negócio (incluindo as regras para questões anuladas).
 - **Visualização de Dados**:
