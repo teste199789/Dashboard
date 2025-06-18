@@ -281,6 +281,13 @@ Para configurar e executar o projeto em um ambiente de desenvolvimento local:
 ## 8. Log de Alterações (Changelog)
 Esta seção documenta as principais mudanças e melhorias implementadas no projeto ao longo do tempo.
 
+- **v1.4.0 (19/06/2025)**
+    - **Melhoria da Experiência do Usuário (UX)**:
+        - **Ações Contextuais**: A tabela de controle no Dashboard agora exibe ações inteligentes (ex: "Preencher Gabarito", "Corrigir", "Lançar Resultado") com base no estado de cada concurso, guiando o usuário no fluxo de trabalho.
+        - **Navegação Inteligente**: A página de detalhes da prova agora abre automaticamente na aba mais relevante (ex: "Meu Gabarito" se estiver em branco, "Resultado" se a prova já foi corrigida), melhorando a navegação.
+        - **Wizard Direto ao Ponto**: O formulário de edição agora abre diretamente na etapa de "Resultados" quando essa ação é selecionada no dashboard.
+    - **Correção de Bug**: Corrigido o cálculo de porcentagens na aba "Resultado Final", que exibia valores incorretos (ex: 0,80% em vez de 80%).
+
 - **v1.3.0 (18/06/2025)**
     - **Wizard de Resultados**: Adicionada uma nova etapa de "Resultados" ao formulário de cadastro/edição de concursos. Agora é possível inserir a nota da prova discursiva e os resultados de aprovação (`Aprovado`, `Reprovado`, etc.).
     - **Melhoria Visual na Tabela**: Os resultados na tabela de "Controle de Concursos" agora são exibidos como "badges" coloridos, facilitando a identificação rápida do status (ex: verde para "Aprovado", vermelho para "Reprovado").

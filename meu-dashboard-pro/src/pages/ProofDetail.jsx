@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import * as api from '../api/apiService';
 import { formatDate } from '../utils/formatters';
 import { useProofs } from '../hooks/useProofs';
@@ -18,8 +18,20 @@ import ProofForm from '../components/ProofForm';
 
 const BANCAS_PREDEFINIDAS = ["Cespe/Cebraspe", "FGV", "FCC", "Outra"];
 
+const getSmartTab = (proof) => {
+    const hasUserAnswers = proof.userAnswers && proof.userAnswers.length > 0;
+    const hasOfficialKey = (proof.gabaritoDefinitivo && proof.gabaritoDefinitivo.length > 0) || (proof.gabaritoPreliminar && proof.gabaritoPreliminar.length > 0);
+    const isGraded = proof.results && proof.results.length > 0;
+
+    if (!hasUserAnswers) return 'meuGabarito';
+    if (!hasOfficialKey) return 'gabaritos';
+    if (!isGraded) return 'resultado'; // A aba de resultado tem o botão de corrigir
+    return 'resultado'; // Padrão para a aba de resultados se tudo estiver preenchido
+};
+
 const ProofDetail = () => {
     const { proofId } = useParams();
+    const location = useLocation();
     const [proof, setProof] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('info');
@@ -31,13 +43,25 @@ const ProofDetail = () => {
         try {
             const data = await api.getProofById(proofId);
             setProof(data);
+
+            // Lógica de aba inteligente
+            const queryParams = new URLSearchParams(location.search);
+            const urlTab = queryParams.get('tab');
+
+            if (urlTab) {
+                setActiveTab(urlTab);
+            } else {
+                const smartTab = getSmartTab(data);
+                setActiveTab(smartTab);
+            }
+
         } catch (err) {
             console.error("Falha ao buscar detalhes da prova:", err);
             setProof(null);
         } finally {
             setIsLoading(false);
         }
-    }, [proofId]);
+    }, [proofId, location.search]);
 
     useEffect(() => {
         fetchProof();

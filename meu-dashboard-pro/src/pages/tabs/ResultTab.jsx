@@ -34,8 +34,8 @@ const ResultTab = ({ proof, refreshProof }) => {
             const totalQuestoesNaMateria = subjectQuestionMap.get(item.disciplina) || 0;
             const pontuacaoLiquida = item.acertos - item.erros;
             
-            const percentualBruta = totalQuestoesNaMateria > 0 ? (item.acertos / totalQuestoesNaMateria) : 0;
-            const percentualLiquidos = totalQuestoesNaMateria > 0 ? Math.max(0, pontuacaoLiquida / totalQuestoesNaMateria) : 0;
+            const percentualBruta = totalQuestoesNaMateria > 0 ? (item.acertos / totalQuestoesNaMateria) * 100 : 0;
+            const percentualLiquidos = totalQuestoesNaMateria > 0 ? Math.max(0, pontuacaoLiquida / totalQuestoesNaMateria) * 100 : 0;
             
             return { 
                 ...item, 
@@ -56,8 +56,8 @@ const ResultTab = ({ proof, refreshProof }) => {
             return acc;
         }, { disciplina: 'Total', acertos: 0, erros: 0, brancos: 0, anuladas: 0, questoes: 0, liquidos: 0 });
         
-        totals.percentualBruta = totals.questoes > 0 ? (totals.acertos / totals.questoes) : 0;
-        totals.percentualLiquidos = totals.questoes > 0 ? Math.max(0, totals.liquidos / totals.questoes) : 0;
+        totals.percentualBruta = totals.questoes > 0 ? (totals.acertos / totals.questoes) * 100 : 0;
+        totals.percentualLiquidos = totals.questoes > 0 ? Math.max(0, totals.liquidos / totals.questoes) * 100 : 0;
         
         return { detailedResults, totals };
 

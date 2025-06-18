@@ -8,6 +8,8 @@ import LoadingSpinner from '../components/common/LoadingSpinner.jsx';
 import { PencilIcon, TrashIcon } from '../components/icons';
 import ConfirmationModal from '../components/common/ConfirmationModal';
 import ProofForm from '../components/ProofForm';
+import ContestActions from '../components/common/ContestActions';
+import toast from 'react-hot-toast';
 
 const getResultBadge = (result) => {
     if (!result) return <span className="text-gray-500">-</span>;
@@ -31,11 +33,34 @@ const getResultBadge = (result) => {
 }
 
 const Dashboard = () => {
-    const { proofs, consolidatedData, isLoading, dashboardFilter, setDashboardFilter, openDeleteModal } = useProofs();
+    const { proofs, consolidatedData, isLoading, dashboardFilter, setDashboardFilter, openDeleteModal, handleGradeProof, fetchProofs } = useProofs();
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [editingContest, setEditingContest] = useState(null);
+    const [modalConfig, setModalConfig] = useState({ contest: null, initialStep: 1 });
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [selectedId, setSelectedId] = useState(null);
+
+    const openModal = (contest = null, initialStep = 1) => {
+        setModalConfig({ contest, initialStep });
+        setIsModalOpen(true);
+    };
+
+    const closeModal = () => {
+        setIsModalOpen(false);
+        // Resetar para o padrão ao fechar
+        setModalConfig({ contest: null, initialStep: 1 });
+    }
+
+    const onGrade = async (proofId) => {
+        const toastId = toast.loading('Corrigindo prova...');
+        try {
+            await handleGradeProof(proofId);
+            await fetchProofs(); // Re-buscar para garantir que todos os dados (incluindo `results`) estão atualizados.
+            toast.success('Prova corrigida com sucesso!', { id: toastId });
+        } catch (err) {
+            console.error(err);
+            toast.error('Falha ao corrigir a prova.', { id: toastId });
+        }
+    };
 
     const columns = useMemo(() => [
         { accessorKey: 'titulo', header: 'Nome', cell: info => <span className="font-bold text-gray-800 dark:text-gray-100">{info.getValue()}</span> },
@@ -52,7 +77,7 @@ const Dashboard = () => {
                 return <span className={`font-bold ${getPerformanceColor(value)}`}>{`${(value).toFixed(2).replace('.', ',')}%`}</span>;
             }
         },
-        { accessorKey: 'resultadoObjetiva', header: 'Resultado Objetiva',
+        { accessorKey: 'resultadoObjetiva', header: 'Resultado',
             cell: ({ row }) => getResultBadge(row.original.resultadoObjetiva)
         },
         { accessorKey: 'notaDiscursiva', header: 'Discursiva', cell: info => typeof info.getValue() === 'number' ? <span className="font-bold">{info.getValue().toFixed(2).replace('.', ',')}</span> : '-' },
@@ -63,13 +88,15 @@ const Dashboard = () => {
             id: 'actions',
             header: 'Ações',
             cell: ({ row }) => (
-                <div className="flex items-center gap-2">
-                    <button onClick={() => openModal(row.original)} className="p-2 text-gray-500 hover:text-blue-600" title="Editar"><PencilIcon className="w-5 h-5"/></button>
-                    <button onClick={() => openDeleteModal(row.original.id)} className="p-2 text-gray-500 hover:text-red-600" title="Deletar"><TrashIcon className="w-5 h-5"/></button>
-                </div>
+                <ContestActions
+                    proof={row.original}
+                    onEdit={openModal}
+                    onDelete={openDeleteModal}
+                    onGrade={onGrade}
+                />
             )
         }
-    ], [openDeleteModal]);
+    ], []);
 
     const tableData = useMemo(() => proofs.filter(p => (p.type || 'CONCURSO') === 'CONCURSO'), [proofs]);
     const table = useReactTable({ data: tableData, columns, getCoreRowModel: getCoreRowModel() });
@@ -78,9 +105,10 @@ const Dashboard = () => {
 
     const { disciplinas, totais } = consolidatedData;
 
-    const openModal = (contest = null) => {
-        setEditingContest(contest);
-        setIsModalOpen(true);
+    const handleDeleteProof = () => {
+        // Implemente a lógica para deletar o concurso com o ID selecionado
+        console.log('Deletando concurso com ID:', selectedId);
+        setIsDeleteModalOpen(false);
     };
 
     const FilterButton = ({ filterValue, label }) => (
@@ -95,12 +123,6 @@ const Dashboard = () => {
             {label}
         </button>
     );
-
-    const handleDeleteProof = () => {
-        // Implemente a lógica para deletar o concurso com o ID selecionado
-        console.log('Deletando concurso com ID:', selectedId);
-        setIsDeleteModalOpen(false);
-    };
 
     return (
         <div className="space-y-6">
@@ -180,8 +202,9 @@ const Dashboard = () => {
             />
             <ProofForm
                 isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                proofData={editingContest}
+                onClose={closeModal}
+                proofData={modalConfig.contest}
+                initialStep={modalConfig.initialStep}
                 type="CONCURSO"
             />
         </div>

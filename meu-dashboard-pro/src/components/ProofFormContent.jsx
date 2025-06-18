@@ -6,10 +6,10 @@ import * as api from '../api/apiService';
 const BANCAS_PREDEFINIDAS = ["Cespe/Cebraspe", "FGV", "FCC", "Quadrix", "IBFC", "Outra"];
 const RESULTADOS_POSSIVEIS = ["Aprovado", "Classificado", "Reprovado", "Eliminado"];
 
-const ProofFormContent = ({ proofData, type = 'CONCURSO', onSave }) => {
+const ProofFormContent = ({ proofData, type = 'CONCURSO', onSave, initialStep = 1 }) => {
     const { handleAddProof, fetchProofs } = useProofs();
     const [isSaving, setIsSaving] = useState(false);
-    const [currentStep, setCurrentStep] = useState(1);
+    const [currentStep, setCurrentStep] = useState(initialStep);
 
     const getInitialFormData = () => ({
         titulo: '',
@@ -27,7 +27,7 @@ const ProofFormContent = ({ proofData, type = 'CONCURSO', onSave }) => {
     const [formData, setFormData] = useState(getInitialFormData());
 
     useEffect(() => {
-        setCurrentStep(1);
+        setCurrentStep(initialStep || 1);
         if (proofData) {
             setFormData({
                 titulo: proofData.titulo || '',
@@ -44,7 +44,7 @@ const ProofFormContent = ({ proofData, type = 'CONCURSO', onSave }) => {
         } else {
             setFormData(getInitialFormData());
         }
-    }, [proofData, type]);
+    }, [proofData, type, initialStep]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
