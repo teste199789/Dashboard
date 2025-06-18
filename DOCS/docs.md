@@ -22,6 +22,7 @@ O projeto adota uma arquitetura moderna baseada em JavaScript, com uma separaç�
 - **Gráficos e Tabelas**:
     - `Recharts`: Biblioteca usada para criar os gráficos de evolução de desempenho.
     - `TanStack Table (React Table)`: Utilizada para construir a "Tabela de Controle", uma interface rica para visualização e gerenciamento dos concursos.
+    - `react-chartjs-2` e `chart.js`: Utilizadas para a renderização de gráficos de desempenho mais detalhados.
 - **Notificações**: `React Hot Toast` é usado para exibir notificações "toast" (alertas discretos) de sucesso ou erro, melhorando a experiência do usuário.
 </details>
 
@@ -222,6 +223,7 @@ O código-fonte do frontend está organizado da seguinte maneira para promover m
 - **`utils/`**: Funções utilitárias diversas.
     - `calculators.js`: Funções para cálculos específicos do frontend.
     - `formatters.js`: Funções para formatação de dados (ex: datas, percentuais).
+    - `styleHelpers.js`: Funções auxiliares de estilização, como `getPerformanceColor`, que padroniza as cores de feedback visual (vermelho, amarelo, verde) com base no desempenho.
 - **`App.css`, `index.css`**: Arquivos CSS globais e de configuração do Tailwind CSS.
 
 ## 7. Guia de Instalação e Execução

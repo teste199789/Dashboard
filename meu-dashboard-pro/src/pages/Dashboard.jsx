@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { useReactTable, getCoreRowModel, flexRender } from '@tanstack/react-table';
 import { useProofs } from '../hooks/useProofs';
 import { formatDate, formatPercent } from '../utils/formatters';
+import { getPerformanceColor } from '../utils/styleHelpers';
 import StatsRow from '../components/common/StatsRow.jsx';
 import LoadingSpinner from '../components/common/LoadingSpinner.jsx';
 import ContestFormModal from '../components/ContestFormModal';
@@ -19,7 +20,18 @@ const Dashboard = () => {
         { accessorKey: 'orgao', header: 'Órgão' },
         { accessorKey: 'banca', header: 'Banca' },
         { accessorKey: 'cargo', header: 'Cargo' },
-        { accessorKey: 'aproveitamento', header: 'Objetiva (%)', cell: info => typeof info.getValue() === 'number' ? <span className={`font-bold ${info.getValue() >= 50 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>{formatPercent(info.getValue())}</span> : <span className="text-xs text-gray-500">PENDENTE</span> },
+        { 
+            accessorKey: 'aproveitamento', 
+            header: 'Objetiva (%)', 
+            cell: info => {
+                const value = info.getValue();
+                if (typeof value !== 'number') {
+                    return <span className="text-xs text-gray-500">PENDENTE</span>;
+                }
+                const colorClass = getPerformanceColor(value * 100); 
+                return <span className={`font-bold ${colorClass}`}>{formatPercent(value)}</span>;
+            } 
+        },
         { accessorKey: 'resultadoObjetiva', header: 'Resultado Objetiva',
             cell: ({ row }) => {
                 const resultado = row.original.resultadoObjetiva;
