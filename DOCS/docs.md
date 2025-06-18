@@ -306,6 +306,9 @@ A aplicação é rica em funcionalidades, organizadas de forma modular.
     - **Evolução**: Gráfico de linha do tempo do desempenho.
     - **Histórico**: Visualização em cards detalhados.
 
+**Correções de Bugs e Melhorias**:
+- **Correção de Inconsistências Visuais**: Resolvido um bug onde a tabela de "Dados Consolidados" não exibia corretamente todas as colunas (como "Questões" e "Líquidos") e um problema de formatação que exibia percentuais incorretos (ex: "8000,00%") na tabela de "Controle de Concursos". A lógica foi ajustada no componente `StatsRow.jsx` para calcular e exibir os dados corretamente, e o `Dashboard.jsx` foi atualizado para garantir a formatação correta dos percentuais e a estrutura do cabeçalho da tabela.
+
 ## 9. Próximos Passos e Possíveis Melhorias
 A base do projeto é sólida e permite diversas expansões futuras:
 

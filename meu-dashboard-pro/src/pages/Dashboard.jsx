@@ -20,17 +20,14 @@ const Dashboard = () => {
         { accessorKey: 'orgao', header: 'Órgão' },
         { accessorKey: 'banca', header: 'Banca' },
         { accessorKey: 'cargo', header: 'Cargo' },
-        { 
-            accessorKey: 'aproveitamento', 
-            header: 'Objetiva (%)', 
-            cell: info => {
-                const value = info.getValue();
-                if (typeof value !== 'number') {
-                    return <span className="text-xs text-gray-500">PENDENTE</span>;
-                }
-                const colorClass = getPerformanceColor(value * 100); 
-                return <span className={`font-bold ${colorClass}`}>{formatPercent(value)}</span>;
-            } 
+        {
+            accessorKey: 'aproveitamento',
+            header: 'Objetiva (%)',
+            cell: ({ row }) => {
+                const value = row.original.aproveitamento;
+                if (typeof value !== 'number') return '-';
+                return <span className={`font-bold ${getPerformanceColor(value)}`}>{`${(value).toFixed(2).replace('.', ',')}%`}</span>;
+            }
         },
         { accessorKey: 'resultadoObjetiva', header: 'Resultado Objetiva',
             cell: ({ row }) => {
@@ -74,11 +71,11 @@ const Dashboard = () => {
     };
 
     const FilterButton = ({ filterValue, label }) => (
-        <button 
+        <button
             onClick={() => setDashboardFilter(filterValue)}
             className={`flex-1 py-2 px-4 rounded-lg font-semibold transition-all duration-300 text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 dark:focus:ring-offset-gray-900 focus:ring-teal-500 ${
-                dashboardFilter === filterValue 
-                ? 'bg-white dark:bg-gray-700 shadow-md text-teal-600 dark:text-teal-400' 
+                dashboardFilter === filterValue
+                ? 'bg-white dark:bg-gray-700 shadow-md text-teal-600 dark:text-teal-400'
                 : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
             }`}
         >
@@ -101,9 +98,15 @@ const Dashboard = () => {
                 {disciplinas && disciplinas.length > 0 ? (
                     <div className="text-sm text-gray-800 dark:text-gray-200">
                         <div className="hidden md:grid grid-cols-9 text-center font-semibold bg-teal-200 dark:bg-teal-800/50 py-3 border-b-2 border-teal-300 dark:border-teal-700">
-                            <p className="text-left pl-4">Disciplinas</p>
-                            <p>Acertos</p><p>Erros</p><p>Brancos</p><p>Anuladas</p>
-                            <p>Questões</p><p>Líquidos</p><p>% Bruta</p><p>% Líquidos</p>
+                            <div className="col-span-1 text-left pl-4">Disciplinas</div>
+                            <div className="col-span-1">Acertos</div>
+                            <div className="col-span-1">Erros</div>
+                            <div className="col-span-1">Brancos</div>
+                            <div className="col-span-1">Anuladas</div>
+                            <div className="col-span-1">Questões</div>
+                            <div className="col-span-1">Líquidos</div>
+                            <div className="col-span-1">% Bruta</div>
+                            <div className="col-span-1">% Líquidos</div>
                         </div>
                         <div className="divide-y divide-gray-200 dark:divide-gray-700">
                             {disciplinas.map(item => <StatsRow key={item.id} item={item} />)}
