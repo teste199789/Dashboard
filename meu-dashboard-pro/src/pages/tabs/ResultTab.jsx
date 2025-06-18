@@ -85,23 +85,41 @@ const ResultTab = ({ proof, refreshProof }) => {
                     <div>
                         <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">Desempenho Detalhado por Matéria</h3>
                         <div className="overflow-x-auto">
-                            <table className="w-full text-sm text-left text-gray-600 dark:text-gray-300">
-                                <thead className="text-xs text-gray-700 uppercase bg-gray-100 dark:bg-gray-700 dark:text-gray-300">
+                            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                <thead className="bg-gray-50 dark:bg-gray-800">
                                     <tr>
-                                        <th scope="col" className="px-6 py-3">Matéria</th>
-                                        <th scope="col" className="px-6 py-3 text-center">Acertos</th>
-                                        <th scope="col" className="px-6 py-3 text-center">Erros</th>
-                                        <th scope="col" className="px-6 py-3 text-center">Brancos</th>
-                                        <th scope="col" className="px-6 py-3 text-center">Anuladas</th>
-                                        <th scope="col" className="px-6 py-3 text-center">Questões</th>
-                                        <th scope="col" className="px-6 py-3 text-center">Líquidos</th>
-                                        <th scope="col" className="px-6 py-3 text-center">% Bruta</th>
-                                        <th scope="col" className="px-6 py-3 text-center">% Líquidos</th>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">
+                                            Disciplinas
+                                        </th>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">
+                                            Acertos
+                                        </th>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">
+                                            Erros
+                                        </th>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">
+                                            Brancos
+                                        </th>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">
+                                            Anuladas
+                                        </th>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">
+                                            Questões
+                                        </th>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">
+                                            Líquidos
+                                        </th>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">
+                                            % Bruta
+                                        </th>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">
+                                            % Líquidos
+                                        </th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
                                     {performanceData.detailedResults.map((item, index) => (
-                                        <tr key={index} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                        <tr key={index} className={item.disciplina === 'Total' ? 'font-bold bg-gray-50 dark:bg-gray-800' : ''}>
                                             <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">{item.disciplina}</th>
                                             <td className="px-6 py-4 text-center">{item.acertos}</td>
                                             <td className="px-6 py-4 text-center">{item.erros}</td>

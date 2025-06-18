@@ -83,47 +83,60 @@ export const ProofsProvider = ({ children }) => {
             if (dashboardFilter === 'TODOS') return true;
             return (proof.type || 'CONCURSO') === dashboardFilter;
         });
+
         const disciplineTotals = {};
+
+        // Passo 1: Agregue os resultados brutos do backend
         filteredProofs.forEach(proof => {
-            if (proof.results && proof.results.length > 0 && proof.subjects && proof.subjects.length > 0) {
-                const subjectQuestionMap = new Map(proof.subjects.map(s => [s.nome, s.questoes]));
+            if (proof.results && proof.results.length > 0) {
                 proof.results.forEach(result => {
                     const { disciplina, acertos, erros, brancos, anuladas } = result;
                     if (!disciplineTotals[disciplina]) {
-                        disciplineTotals[disciplina] = { acertos: 0, erros: 0, brancos: 0, anuladas: 0, totalQuestoes: 0 };
+                        disciplineTotals[disciplina] = { disciplina, acertos: 0, erros: 0, brancos: 0, anuladas: 0, totalQuestoes: 0 };
                     }
                     disciplineTotals[disciplina].acertos += acertos;
                     disciplineTotals[disciplina].erros += erros;
                     disciplineTotals[disciplina].brancos += brancos;
                     disciplineTotals[disciplina].anuladas += anuladas;
-                    disciplineTotals[disciplina].totalQuestoes += subjectQuestionMap.get(disciplina) || 0;
+                    
+                    // Encontra a matéria correspondente para somar o total de questões
+                    const subjectInfo = proof.subjects.find(s => s.nome === disciplina);
+                    if (subjectInfo) {
+                        disciplineTotals[disciplina].totalQuestoes += subjectInfo.questoes;
+                    }
                 });
             }
         });
-        const processedDisciplinas = Object.entries(disciplineTotals).map(([nome, totais], index) => {
-            const acertosReais = totais.acertos - totais.anuladas;
-            const pontuacaoLiquida = acertosReais - totais.erros;
-            const universoBruto = acertosReais + totais.erros;
+
+        // Passo 2: Calcule os percentuais e pontos líquidos para cada disciplina
+        const processedDisciplinas = Object.values(disciplineTotals).map((totais, index) => {
+            const liquidos = totais.acertos - totais.erros;
+            const percentualBruta = totais.totalQuestoes > 0 ? (totais.acertos / totais.totalQuestoes) : 0;
+            const percentualLiquidos = totais.totalQuestoes > 0 ? Math.max(0, liquidos / totais.totalQuestoes) : 0;
             return {
-                id: index, disciplina: nome, ...totais, acertosLiquidos: pontuacaoLiquida,
-                percentualBruta: universoBruto > 0 ? acertosReais / universoBruto : 0,
-                percentualLiquidos: totais.totalQuestoes > 0 ? Math.max(0, pontuacaoLiquida / totais.totalQuestoes) : 0,
+                id: index,
+                ...totais,
+                questoes: totais.totalQuestoes, // Renomeia para consistência
+                liquidos,
+                percentualBruta,
+                percentualLiquidos,
             };
         });
+
+        // Passo 3: Calcule os totais gerais a partir dos dados já processados
         const totaisGerais = processedDisciplinas.reduce((acc, current) => {
             acc.acertos += current.acertos;
             acc.erros += current.erros;
             acc.brancos += current.brancos;
             acc.anuladas += current.anuladas;
-            acc.totalQuestoes += current.totalQuestoes;
+            acc.questoes += current.questoes;
             return acc;
-        }, { disciplina: 'Total', acertos: 0, erros: 0, brancos: 0, anuladas: 0, totalQuestoes: 0 });
-        const acertosReaisGerais = totaisGerais.acertos - totaisGerais.anuladas;
-        const pontuacaoLiquidaGeral = acertosReaisGerais - totaisGerais.erros;
-        const universoBrutoGeral = acertosReaisGerais + totaisGerais.erros;
-        totaisGerais.acertosLiquidos = pontuacaoLiquidaGeral;
-        totaisGerais.percentualBruta = universoBrutoGeral > 0 ? acertosReaisGerais / universoBrutoGeral : 0;
-        totaisGerais.percentualLiquidos = totaisGerais.totalQuestoes > 0 ? Math.max(0, pontuacaoLiquidaGeral / totaisGerais.totalQuestoes) : 0;
+        }, { disciplina: 'Total', acertos: 0, erros: 0, brancos: 0, anuladas: 0, questoes: 0 });
+
+        totaisGerais.liquidos = totaisGerais.acertos - totaisGerais.erros;
+        totaisGerais.percentualBruta = totaisGerais.questoes > 0 ? (totaisGerais.acertos / totaisGerais.questoes) : 0;
+        totaisGerais.percentualLiquidos = totaisGerais.questoes > 0 ? Math.max(0, totaisGerais.liquidos / totaisGerais.questoes) : 0;
+        
         return { disciplinas: processedDisciplinas, totais: totaisGerais };
     }, [proofs, dashboardFilter]);
 

@@ -3,10 +3,13 @@ import VisaoGeralTab from './tabs/VisaoGeralTab';
 import DesempenhoTab from './tabs/DesempenhoTab';
 import { useProofs } from '../hooks/useProofs';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import { useReactTable, getCoreRowModel } from '@tanstack/react-table';
+import ContestFormModal from '../components/ContestFormModal';
 
 const MeusConcursos = () => {
     const [viewType, setViewType] = useState('CONCURSO');
     const { proofs, loading, error } = useProofs();
+    const [editingContest, setEditingContest] = useState(null);
     
     const FilterButton = ({ filterValue, label }) => (
         <button 
@@ -18,6 +21,17 @@ const MeusConcursos = () => {
             {label}
         </button>
     );
+
+    const formatPercentage = (value) => {
+        if (typeof value !== 'number') return '-';
+        return `${value.toFixed(2).replace('.', ',')}%`;
+    };
+
+    const handleDelete = async (id) => {
+        if (window.confirm('Tem certeza que deseja excluir este concurso?')) {
+            // ... existing code ...
+        }
+    };
 
     if (loading) return <div className="flex justify-center items-center h-64"><LoadingSpinner /></div>;
     if (error) return <div className="text-center text-red-500 mt-8">{error}</div>;
