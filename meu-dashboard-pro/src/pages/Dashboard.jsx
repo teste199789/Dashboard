@@ -5,14 +5,16 @@ import { formatDate, formatPercent } from '../utils/formatters';
 import { getPerformanceColor } from '../utils/styleHelpers';
 import StatsRow from '../components/common/StatsRow.jsx';
 import LoadingSpinner from '../components/common/LoadingSpinner.jsx';
-import ContestFormModal from '../components/ContestFormModal';
-import PencilIcon from '../components/icons/PencilIcon';
-import TrashIcon from '../components/icons/TrashIcon';
+import { PencilIcon, TrashIcon } from '../components/icons';
+import ConfirmationModal from '../components/common/ConfirmationModal';
+import ProofForm from '../components/ProofForm';
 
 const Dashboard = () => {
     const { proofs, consolidatedData, isLoading, dashboardFilter, setDashboardFilter, openDeleteModal } = useProofs();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingContest, setEditingContest] = useState(null);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [selectedId, setSelectedId] = useState(null);
 
     const columns = useMemo(() => [
         { accessorKey: 'titulo', header: 'Nome', cell: info => <span className="font-bold text-gray-800 dark:text-gray-100">{info.getValue()}</span> },
@@ -83,6 +85,12 @@ const Dashboard = () => {
         </button>
     );
 
+    const handleDeleteProof = () => {
+        // Implemente a lógica para deletar o concurso com o ID selecionado
+        console.log('Deletando concurso com ID:', selectedId);
+        setIsDeleteModalOpen(false);
+    };
+
     return (
         <div className="space-y-6">
             <div className="flex justify-center p-1 bg-gray-200/70 dark:bg-gray-800/50 rounded-xl max-w-sm mx-auto">
@@ -152,10 +160,18 @@ const Dashboard = () => {
                 </div>
             </div>
 
-            <ContestFormModal
+            <ConfirmationModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={handleDeleteProof}
+                title="Confirmar Exclusão"
+                message="Tem certeza de que deseja excluir este concurso? Esta ação não pode ser desfeita."
+            />
+            <ProofForm
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                contestData={editingContest}
+                proofData={editingContest}
+                type="CONCURSO"
             />
         </div>
     );

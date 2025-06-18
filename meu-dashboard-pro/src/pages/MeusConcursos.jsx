@@ -3,13 +3,13 @@ import VisaoGeralTab from './tabs/VisaoGeralTab';
 import DesempenhoTab from './tabs/DesempenhoTab';
 import { useProofs } from '../hooks/useProofs';
 import LoadingSpinner from '../components/common/LoadingSpinner';
-import { useReactTable, getCoreRowModel } from '@tanstack/react-table';
-import ContestFormModal from '../components/ContestFormModal';
+import ProofForm from '../components/ProofForm';
 
 const MeusConcursos = () => {
     const [viewType, setViewType] = useState('CONCURSO');
     const { proofs, loading, error } = useProofs();
-    const [editingContest, setEditingContest] = useState(null);
+    const [isFormOpen, setIsFormOpen] = useState(false);
+    const [editingProof, setEditingProof] = useState(null);
     
     const FilterButton = ({ filterValue, label }) => (
         <button 
@@ -22,9 +22,14 @@ const MeusConcursos = () => {
         </button>
     );
 
+    const handleOpenForm = (proof = null) => {
+        setEditingProof(proof);
+        setIsFormOpen(true);
+    };
+
     const handleDelete = async (id) => {
         if (window.confirm('Tem certeza que deseja excluir este concurso?')) {
-            // ... existing code ...
+            // ... Lógica de exclusão que já existe no useProofs
         }
     };
 
@@ -38,9 +43,14 @@ const MeusConcursos = () => {
 
     return (
         <div className="space-y-8">
-            <div className="bg-gray-200 dark:bg-gray-700/50 p-1 rounded-lg flex max-w-sm mx-auto">
-                <FilterButton filterValue="CONCURSO" label="Concursos" />
-                <FilterButton filterValue="SIMULADO" label="Simulados" />
+             <div className="flex justify-between items-center">
+                <div className="bg-gray-200 dark:bg-gray-700/50 p-1 rounded-lg flex max-w-sm mx-auto">
+                    <FilterButton filterValue="CONCURSO" label="Concursos" />
+                    <FilterButton filterValue="SIMULADO" label="Simulados" />
+                </div>
+                <button onClick={() => handleOpenForm(null)} className="bg-teal-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-teal-700 transition-colors">
+                    + Novo
+                </button>
             </div>
 
             <div>
@@ -49,6 +59,13 @@ const MeusConcursos = () => {
                     <VisaoGeralTab proofs={dataToShow} />
                 </div>
             </div>
+
+            <ProofForm 
+                isOpen={isFormOpen}
+                onClose={() => setIsFormOpen(false)}
+                proofData={editingProof}
+                type={viewType}
+            />
         </div>
     );
 };
