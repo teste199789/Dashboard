@@ -292,7 +292,11 @@ Para configurar e executar o projeto em um ambiente de desenvolvimento local:
 A aplicação é rica em funcionalidades, organizadas de forma modular.
 
 **Funcionalidades Implementadas (Revisão)**:
-- **Cadastro Dual**: Formulários distintos para "Provas Oficiais" e "Simulados", que são salvos com um `type` diferente no banco.
+- **Cadastro Unificado com Wizard**: Os formulários de cadastro de "Provas Oficiais" e "Simulados" foram unificados em um único componente reutilizável (`ProofFormContent.jsx`). Este formulário adota um formato de "wizard" (múltiplas etapas) com barra de progresso, melhorando a experiência do usuário ao tornar o processo de cadastro mais guiado e intuitivo. A mesma experiência é fornecida tanto nas páginas de cadastro dedicadas quanto nos modais de edição.
+- **Cards de Visualização Aprimorados**: Os cards que exibem os concursos e simulados (`ContestCard.jsx`) foram aprimorados para incluir:
+    - **Status da Prova**: Um indicador visual colorido informa o estado atual de cada item (ex: "Pendente", "Finalizada").
+    - **Diferenciação Visual**: Simulados agora são claramente distintos de concursos, com um rótulo "SIMULADO" e uma cor de borda diferente.
+    - **Exibição Robusta de Dados**: A lógica para exibir informações como banca e órgão foi melhorada para lidar com campos vazios de forma elegante.
 - **Página de Gerenciamento Focada**: Ao clicar para editar uma prova, o usuário é levado para uma página com um layout simplificado (`FocusedLayout`) que remove a navegação principal e foca nas tarefas de gerenciamento.
 - **Gerenciamento por Abas**: Dentro da página de detalhes de uma prova (`ProofDetail.jsx`), todas as funcionalidades são organizadas em abas:
     - **Informações**: Cadastro de matérias e quantidade de questões (`InfoTab.jsx`).
@@ -307,7 +311,9 @@ A aplicação é rica em funcionalidades, organizadas de forma modular.
     - **Histórico**: Visualização em cards detalhados.
 
 **Correções de Bugs e Melhorias**:
-- **Correção de Inconsistências Visuais**: Resolvido um bug onde a tabela de "Dados Consolidados" não exibia corretamente todas as colunas (como "Questões" e "Líquidos") e um problema de formatação que exibia percentuais incorretos (ex: "8000,00%") na tabela de "Controle de Concursos". A lógica foi ajustada no componente `StatsRow.jsx` para calcular e exibir os dados corretamente, e o `Dashboard.jsx` foi atualizado para garantir a formatação correta dos percentuais e a estrutura do cabeçalho da tabela.
+- **Refatoração de Formulários**: Toda a lógica de criação e edição de provas/simulados foi centralizada, eliminando código duplicado e inconsistente das páginas `AddProof.jsx`, `AddSimulado.jsx` e do antigo `ContestFormModal`.
+- **Correção de Inconsistências Visuais**: Resolvido um bug onde a tabela de "Dados Consolidados" não exibia corretamente todas as colunas e um problema de formatação que exibia percentuais incorretos.
+- **Correção de Importação de Módulos**: Solucionado um erro de compilação no `Dashboard.jsx` relacionado à importação de ícones. Foi criado um arquivo `index.js` no diretório `components/icons/` para centralizar as exportações, tornando o sistema de importação mais robusto e modular.
 
 ## 9. Próximos Passos e Possíveis Melhorias
 A base do projeto é sólida e permite diversas expansões futuras:
