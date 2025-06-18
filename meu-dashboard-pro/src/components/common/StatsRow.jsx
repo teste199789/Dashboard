@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatPercent } from '../../utils/formatters';
 
 const StatsRow = ({ item, isFooter = false }) => {
   const textClass = isFooter ? 'font-bold' : '';
@@ -9,11 +10,6 @@ const StatsRow = ({ item, isFooter = false }) => {
   
   const percentualBruta = totalQuestoes > 0 ? (item.acertos / totalQuestoes) * 100 : 0;
   const percentualLiquidos = totalQuestoes > 0 ? (acertosLiquidos / totalQuestoes) * 100 : 0;
-
-  const formatPercent = (value) => {
-    if (typeof value !== 'number') return 'N/A';
-    return `${value.toFixed(2).replace('.', ',')}%`;
-  };
 
   return (
     <div className={`grid grid-cols-9 text-center items-center py-3 ${bgClass}`}>

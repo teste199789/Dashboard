@@ -22,11 +22,6 @@ const MeusConcursos = () => {
         </button>
     );
 
-    const formatPercentage = (value) => {
-        if (typeof value !== 'number') return '-';
-        return `${value.toFixed(2).replace('.', ',')}%`;
-    };
-
     const handleDelete = async (id) => {
         if (window.confirm('Tem certeza que deseja excluir este concurso?')) {
             // ... existing code ...

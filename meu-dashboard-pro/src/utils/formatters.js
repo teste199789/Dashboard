@@ -1,8 +1,8 @@
 export const formatPercent = (value) => {
-  if (isNaN(value) || !isFinite(value)) {
-    return '0,00%';
+  if (typeof value !== 'number' || isNaN(value) || !isFinite(value)) {
+    return '-';
   }
-  return `${(value * 100).toFixed(2).replace('.', ',')}%`;
+  return `${(value).toFixed(2).replace('.', ',')}%`;
 };
 
 // Nova função para formatar a data
