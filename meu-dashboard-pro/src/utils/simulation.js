@@ -1,5 +1,3 @@
-import { standardNormalTable } from 'simple-statistics';
-
 /**
  * Calcula o Z-Score, que mede quantos desvios padrão uma observação está da média.
  * @param {number} x - O valor da observação (ex: nota do usuário).
@@ -13,6 +11,34 @@ function getZScore(x, mean, stdDev) {
 }
 
 /**
+ * Implementação robusta da função de distribuição normal cumulativa (CDF)
+ * Usando a aproximação de Abramowitz and Stegun
+ * @param {number} z - O Z-score
+ * @returns {number} O valor da CDF (entre 0 e 1)
+ */
+function normalCDF(z) {
+    if (z < -6) return 0;
+    if (z > 6) return 1;
+    
+    const sign = z >= 0 ? 1 : -1;
+    z = Math.abs(z);
+    
+    // Constantes para a aproximação
+    const a1 =  0.254829592;
+    const a2 = -0.284496736;
+    const a3 =  1.421413741;
+    const a4 = -1.453152027;
+    const a5 =  1.061405429;
+    const p  =  0.3275911;
+    
+    // Aproximação
+    const t = 1.0 / (1.0 + p * z);
+    const y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-z * z);
+    
+    return 0.5 * (1 + sign * y);
+}
+
+/**
  * Calcula o percentil de um valor em uma distribuição normal.
  * O percentil representa a porcentagem de observações abaixo do valor dado.
  * @param {number} x - O valor para o qual o percentil será calculado.
@@ -21,9 +47,10 @@ function getZScore(x, mean, stdDev) {
  * @returns {number} O percentil (entre 0 e 1).
  */
 export function calculatePercentile(x, mean, stdDev) {
+    if (stdDev <= 0) return 0.5; // Se não há variação, todos estão na média
+    
     const z = getZScore(x, mean, stdDev);
-    // standardNormalTable (CDF) nos dá a área à esquerda do Z-score.
-    return standardNormalTable[Math.round(z * 100) / 100] || (z < 0 ? 0 : 1);
+    return normalCDF(z);
 }
 
 /**
@@ -35,7 +62,7 @@ export function calculatePercentile(x, mean, stdDev) {
 export function calculatePosition(percentile, totalCandidates) {
     // A posição é (1 - percentil) * total. Arredondamos para cima.
     const position = Math.ceil((1 - percentile) * totalCandidates);
-    return Math.max(1, position); // Garante que a posição seja no mínimo 1.
+    return Math.max(1, Math.min(totalCandidates, position)); // Garante que a posição esteja entre 1 e total
 }
 
 /**
@@ -46,7 +73,7 @@ export function calculatePosition(percentile, totalCandidates) {
  * @returns {Array<Object>} Um array de objetos { x, y } para o gráfico.
  */
 export function generateDistributionData(mean, stdDev, points = 100) {
-    if (!stdDev) return [];
+    if (!stdDev || stdDev <= 0) return [];
     
     // Define o alcance do eixo X (geralmente 3-4 desvios padrão da média)
     const minX = mean - 4 * stdDev;

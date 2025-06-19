@@ -135,7 +135,7 @@ const ProofDetail = () => {
                     {activeTab === 'meuGabarito' && <UserAnswersTab proof={proof} refreshProof={fetchProof} />}
                     {activeTab === 'resultado' && <ResultTab proof={proof} refreshProof={fetchProof} handleGradeProof={handleGradeProof} />}
                     {activeTab === 'simulacao' && <SimulateAnnulmentTab proof={proof} refreshProof={fetchProof} />}
-                    {activeTab === 'ranking' && <RankingTab proof={proof} />}
+                    {activeTab === 'ranking' && <RankingTab proof={proof} refreshProof={fetchProof} />}
                 </div>
             </div>
             
