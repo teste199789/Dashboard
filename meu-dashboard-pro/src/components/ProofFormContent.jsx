@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { useProofs } from '../hooks/useProofs';
 import * as api from '../api/apiService';
+import SmartBankSelector from './common/SmartBankSelector';
 
 const BANCAS_PREDEFINIDAS = ["Cespe/Cebraspe", "FGV", "FCC", "Quadrix", "IBFC", "Outra"];
 const RESULTADOS_POSSIVEIS = ["Aprovado", "Classificado", "Reprovado", "Eliminado"];
@@ -22,6 +23,10 @@ const ProofFormContent = ({ proofData, type = 'CONCURSO', onSave, initialStep = 
         notaDiscursiva: null,
         resultadoObjetiva: null,
         resultadoDiscursiva: null,
+        regraAnulacao: null,
+        valorAnulacao: null,
+        tipoNotaCorte: null,
+        precisaoDecimal: null
     }), [type]);
 
     const [formData, setFormData] = useState(getInitialFormData());
@@ -40,11 +45,15 @@ const ProofFormContent = ({ proofData, type = 'CONCURSO', onSave, initialStep = 
                 notaDiscursiva: proofData.notaDiscursiva,
                 resultadoObjetiva: proofData.resultadoObjetiva,
                 resultadoDiscursiva: proofData.resultadoDiscursiva,
+                regraAnulacao: proofData.regraAnulacao,
+                valorAnulacao: proofData.valorAnulacao,
+                tipoNotaCorte: proofData.tipoNotaCorte,
+                precisaoDecimal: proofData.precisaoDecimal
             });
         } else {
             setFormData(getInitialFormData());
         }
-    }, [proofData, type, initialStep, getInitialFormData]);
+    }, [proofData, type, getInitialFormData, initialStep]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -112,14 +121,27 @@ const ProofFormContent = ({ proofData, type = 'CONCURSO', onSave, initialStep = 
                 {currentStep === 2 && (
                     <>
                         <h3 className="text-lg font-semibold">Detalhes da Prova</h3>
-                         <select name="banca" value={formData.banca || ''} onChange={handleChange} className="w-full p-2 border bg-white dark:bg-gray-700 rounded-md">
-                            {BANCAS_PREDEFINIDAS.map(b => <option key={b} value={b}>{b}</option>)}
-                        </select>
+                        
+                        <SmartBankSelector
+                            selectedBank={formData.organizadora}
+                            selectedTipoPontuacao={formData.tipoPontuacao}
+                            onBankChange={(banca) => setFormData(prev => ({ ...prev, organizadora: banca }))}
+                            onTipoPontuacaoChange={(tipo) => setFormData(prev => ({ ...prev, tipoPontuacao: tipo }))}
+                            onConfigChange={(config) => {
+                                setFormData(prev => ({
+                                    ...prev,
+                                    regraAnulacao: config.regraAnulacao,
+                                    valorAnulacao: config.valorAnulacao,
+                                    tipoNotaCorte: config.tipoNotaCorte,
+                                    precisaoDecimal: config.precisaoDecimal,
+                                    tipoPontuacao: config.tipoPontuacao
+                                }));
+                            }}
+                            currentRegraAnulacao={formData.regraAnulacao}
+                            currentValorAnulacao={formData.valorAnulacao}
+                        />
+                        
                         <input type="number" name="totalQuestoes" placeholder="Nº de Questões" value={formData.totalQuestoes || ''} onChange={handleChange} className="w-full p-2 border bg-white dark:bg-gray-700 rounded-md"/>
-                        <select name="tipoPontuacao" value={formData.tipoPontuacao || 'liquida'} onChange={handleChange} className="w-full p-2 border bg-white dark:bg-gray-700 rounded-md">
-                            <option value="liquida">Líquida (Certo/Errado)</option>
-                            <option value="bruta">Bruta (Múltipla Escolha)</option>
-                        </select>
                     </>
                 )}
 

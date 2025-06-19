@@ -55,22 +55,24 @@ export const getProofById = async (id) => {
     return response.json();
 };
 
-export const updateProofDetails = async (id, details) => {
-    const response = await fetch(`${API_URL}/proofs/${id}/details`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(details),
-    });
-    
-    if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        const errorMessage = errorData.error || `Erro de HTTP! Status: ${response.status}`;
-        const error = new Error(errorMessage);
-        error.response = { data: errorData };
+export const updateProofDetails = async (proofId, details) => {
+    try {
+        const response = await fetch(`${API_URL}/proofs/${proofId}/details`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(details)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || `Erro HTTP: ${response.status}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Erro ao atualizar detalhes da prova:', error);
         throw error;
     }
-    
-    return response.json();
 };
 
 export const gradeProof = async (id) => {
@@ -115,4 +117,19 @@ export const getAIAnalysis = async (disciplinas, totais) => {
         return 'Ocorreu um erro ao conectar com o serviço de análise.';
     }
     
+};
+
+export const getBankConfigurations = async (bankName) => {
+    try {
+        const response = await fetch(`${API_URL}/bancas/${encodeURIComponent(bankName)}/configuracoes`);
+        
+        if (!response.ok) {
+            throw new Error(`Erro HTTP: ${response.status}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Erro ao buscar configurações da banca:', error);
+        throw error;
+    }
 };
