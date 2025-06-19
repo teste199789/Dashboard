@@ -283,6 +283,12 @@ Para configurar e executar o projeto em um ambiente de desenvolvimento local:
 ## 9. Log de Alterações (Changelog)
 Esta seção documenta as principais mudanças e melhorias implementadas no projeto ao longo do tempo.
 
+- **v1.6.0 (19/06/2025)**
+    - **Refatoração da Interface e Correção de Bugs Críticos**:
+        - **Melhoria Geral da UI/UX**: Realizada uma refatoração completa da navegação principal, extraindo-a para um componente modular e centralizando a configuração de links para facilitar a manutenção. Melhorada a consistência visual dos temas claro/escuro em diversos componentes (botões, cartões, inputs).
+        - **Otimização da Aba de Ranking**: A aba de simulação de ranking foi completamente reescrita para otimizar a performance, utilizando um hook customizado (`useDebouncedState`) para evitar recálculos excessivos e lentidão na interface.
+        - **Correção de Bug Crítico no Backend**: Resolvido um erro HTTP 500 persistente que ocorria ao salvar dados da aba de ranking. A causa raiz era uma dessincronização entre o schema do banco de dados e o cliente Prisma, que foi corrigida através da aplicação de uma migração manual e da implementação de funções mais robustas no servidor para tratar diferentes formatos numéricos.
+
 - **v1.5.1 (19/06/2025)**
     - **Correção Crítica de Conectividade Backend-Frontend**:
         - **Configuração CORS Aprimorada**: Corrigida a configuração do CORS no backend para aceitar especificamente as origens do frontend (`http://localhost:5173`, `http://localhost:3000`, `http://127.0.0.1:5173`), resolvendo erros HTTP 500 na busca de dados.

@@ -76,7 +76,7 @@ const InfoTab = ({ proof, refreshProof }) => {
                             placeholder="Nome da Matéria" 
                             value={subject.nome} 
                             onChange={e => handleSubjectChange(index, 'nome', e.target.value)}
-                            className="flex-grow p-2 border bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 rounded-md"
+                            className="flex-grow p-2 border bg-transparent border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
                         />
                         {/* Input para o número de questões */}
                         <input 
@@ -84,7 +84,7 @@ const InfoTab = ({ proof, refreshProof }) => {
                             placeholder="Nº Questões" 
                             value={subject.questoes} 
                             onChange={e => handleSubjectChange(index, 'questoes', e.target.value)}
-                            className="w-40 p-2 border bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 rounded-md"
+                            className="w-40 p-2 border bg-transparent border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
                         />
                         {/* Botão de remover */}
                         <button onClick={() => handleRemoveSubject(index)} className="p-2 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-full transition-colors">

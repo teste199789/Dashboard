@@ -30,7 +30,7 @@ const ContestCard = ({ proof }) => {
 
     return (
         <div 
-            className={`bg-white dark:bg-gray-800/50 rounded-xl shadow-lg w-full transition-all duration-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer ${cardBorderColor}`}
+            className={`bg-white dark:bg-gray-800 rounded-xl shadow-lg dark:shadow-lg-dark w-full transition-all duration-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer ${cardBorderColor}`}
             onClick={handleCardClick}
         >
             <div className="p-5 flex flex-col justify-between h-full">
