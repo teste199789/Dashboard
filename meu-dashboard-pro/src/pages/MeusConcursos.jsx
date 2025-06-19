@@ -44,9 +44,9 @@ const MeusConcursos = () => {
     return (
         <div className="space-y-8">
              <div className="flex justify-between items-center">
-                <div className="bg-gray-200 dark:bg-gray-700/50 p-1 rounded-lg flex max-w-sm mx-auto">
-                    <FilterButton filterValue="CONCURSO" label="Concursos" />
-                    <FilterButton filterValue="SIMULADO" label="Simulados" />
+            <div className="bg-gray-200 dark:bg-gray-700/50 p-1 rounded-lg flex max-w-sm mx-auto">
+                <FilterButton filterValue="CONCURSO" label="Concursos" />
+                <FilterButton filterValue="SIMULADO" label="Simulados" />
                 </div>
                 <button onClick={() => handleOpenForm(null)} className="bg-teal-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-teal-700 transition-colors">
                     + Novo

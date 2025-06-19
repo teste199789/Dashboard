@@ -10,7 +10,7 @@ const StatsRow = ({ item, isFooter = false }) => {
   
   const percentualBruta = totalQuestoes > 0 ? (item.acertos / totalQuestoes) * 100 : 0;
   const percentualLiquidos = totalQuestoes > 0 ? (acertosLiquidos / totalQuestoes) * 100 : 0;
-
+  
   return (
     <div className={`grid grid-cols-9 text-center items-center py-3 ${bgClass}`}>
       <p className={`col-span-1 text-left pl-4 ${textClass}`}>{item.disciplina}</p>

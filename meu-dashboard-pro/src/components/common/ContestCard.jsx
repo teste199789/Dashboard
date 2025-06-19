@@ -34,15 +34,15 @@ const ContestCard = ({ proof }) => {
             onClick={handleCardClick}
         >
             <div className="p-5 flex flex-col justify-between h-full">
-                <div>
+                            <div>
                     <div className="flex justify-between items-start mb-2">
-                        <p className="text-sm font-semibold text-gray-500 dark:text-gray-400">
+                                <p className="text-sm font-semibold text-gray-500 dark:text-gray-400">
                            {proof.banca?.toUpperCase()}
-                        </p>
-                        <p className="flex-shrink-0 text-xs font-mono text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700/50 px-2 py-1 rounded-md">
-                            {formatDate(proof.data)}
-                        </p>
-                    </div>
+                                </p>
+                            <p className="flex-shrink-0 text-xs font-mono text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700/50 px-2 py-1 rounded-md">
+                                {formatDate(proof.data)}
+                            </p>
+                        </div>
                     
                     <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 leading-tight">
                         {proof.orgao || proof.titulo}
