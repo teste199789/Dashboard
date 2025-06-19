@@ -254,9 +254,9 @@ Para configurar e executar o projeto em um ambiente de desenvolvimento local:
       npm install
       ```
     - Execute as migrações do banco de dados:
-      ```bash
+          ```bash
       npx prisma migrate dev
-      ```
+          ```
     - Inicie o servidor do backend:
       ```bash
       npm run dev
@@ -266,7 +266,7 @@ Para configurar e executar o projeto em um ambiente de desenvolvimento local:
 3.  **Configuração do Frontend**:
     - Em um novo terminal, navegue até a pasta do frontend:
       ```bash
-      cd meu-dashboard-pro
+      cd meu-dashboard-pro 
       ```
     - Instale as dependências:
       ```bash
@@ -282,6 +282,11 @@ Para configurar e executar o projeto em um ambiente de desenvolvimento local:
 
 ## 9. Log de Alterações (Changelog)
 Esta seção documenta as principais mudanças e melhorias implementadas no projeto ao longo do tempo.
+
+- **v1.5.0 (19/06/2025)**
+    - **Melhoria da Experiência do Usuário (UX) no Detalhe da Prova**:
+        - **Fluxo de Cadastro Guiado**: O sistema agora exige que o usuário cadastre as matérias de uma prova antes de habilitar as abas de "Gabaritos", "Resultado", "Simulação" e "Ranking". Isso previne erros de fluxo e garante que a estrutura da prova seja definida primeiro.
+        - **Feedback Visual Aprimorado**: As abas inativas agora são claramente marcadas como desabilitadas, exibindo um ícone de cadeado e um tooltip informativo, melhorando a clareza da interface e guiando o usuário sobre os próximos passos necessários.
 
 - **v1.4.0 (19/06/2025)**
     - **Melhoria da Experiência do Usuário (UX)**:

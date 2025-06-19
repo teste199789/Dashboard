@@ -14,11 +14,15 @@ import SimulateAnnulmentTab from './tabs/SimulateAnnulmentTab';
 import RankingTab from './tabs/RankingTab';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import PencilIcon from '../components/icons/PencilIcon';
+import LockIcon from '../components/icons/LockIcon';
 import ProofForm from '../components/ProofForm';
 
 const BANCAS_PREDEFINIDAS = ["Cespe/Cebraspe", "FGV", "FCC", "Outra"];
 
 const getSmartTab = (proof) => {
+    const hasSubjects = proof.subjects && proof.subjects.length > 0;
+    if (!hasSubjects) return 'info';
+    
     const hasUserAnswers = proof.userAnswers && proof.userAnswers.length > 0;
     const hasOfficialKey = (proof.gabaritoDefinitivo && proof.gabaritoDefinitivo.length > 0) || (proof.gabaritoPreliminar && proof.gabaritoPreliminar.length > 0);
     const isGraded = proof.results && proof.results.length > 0;
@@ -43,12 +47,14 @@ const ProofDetail = () => {
         try {
             const data = await api.getProofById(proofId);
             setProof(data);
+            
+            const hasSubjects = data.subjects && data.subjects.length > 0;
 
             // Lógica de aba inteligente
             const queryParams = new URLSearchParams(location.search);
             const urlTab = queryParams.get('tab');
 
-            if (urlTab) {
+            if (urlTab && (urlTab === 'info' || hasSubjects)) {
                 setActiveTab(urlTab);
             } else {
                 const smartTab = getSmartTab(data);
@@ -70,11 +76,25 @@ const ProofDetail = () => {
     if (isLoading) return <LoadingSpinner message="Carregando detalhes da prova..." />;
     if (!proof) return <div className="text-center p-10 font-bold text-red-500">Prova não encontrada.</div>;
 
-    const TabButton = ({ tabName, label }) => (
+    const hasSubjects = proof.subjects && proof.subjects.length > 0;
+    const disabledTooltip = "Primeiro, cadastre as matérias na aba 'Informações e Matérias'.";
+
+    const TabButton = ({ tabName, label, disabled = false }) => (
         <button
-            onClick={() => setActiveTab(tabName)}
-            className={`px-4 py-3 font-semibold border-b-4 transition-colors text-sm md:text-base whitespace-nowrap ${activeTab === tabName ? 'border-teal-500 text-teal-600 dark:text-teal-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-500'}`}
+            onClick={() => !disabled && setActiveTab(tabName)}
+            disabled={disabled}
+            title={disabled ? disabledTooltip : undefined}
+            className={`flex items-center gap-2 px-4 py-3 font-semibold border-b-4 transition-colors text-sm md:text-base whitespace-nowrap ${
+                activeTab === tabName 
+                    ? 'border-teal-500 text-teal-600 dark:text-teal-400' 
+                    : 'border-transparent text-gray-500 dark:text-gray-400'
+            } ${
+                disabled 
+                    ? 'cursor-not-allowed opacity-50' 
+                    : 'hover:border-gray-300 dark:hover:border-gray-500'
+            }`}
         >
+            {disabled && <LockIcon className="w-4 h-4" />}
             {label}
         </button>
     );
@@ -102,11 +122,11 @@ const ProofDetail = () => {
             <div className="bg-white dark:bg-gray-800/50 shadow-lg rounded-xl overflow-hidden">
                 <nav className="flex border-b dark:border-gray-700 overflow-x-auto">
                     <TabButton tabName="info" label="Informações e Matérias"/>
-                    <TabButton tabName="gabaritos" label="Gabaritos da Banca"/>
-                    <TabButton tabName="meuGabarito" label="Meu Gabarito"/>
-                    <TabButton tabName="resultado" label="Resultado Final"/>
-                    <TabButton tabName="simulacao" label="Simular Anulações"/>
-                    <TabButton tabName="ranking" label="Ranking Simulado"/>
+                    <TabButton tabName="gabaritos" label="Gabaritos da Banca" disabled={!hasSubjects} />
+                    <TabButton tabName="meuGabarito" label="Meu Gabarito" disabled={!hasSubjects} />
+                    <TabButton tabName="resultado" label="Resultado Final" disabled={!hasSubjects} />
+                    <TabButton tabName="simulacao" label="Simular Anulações" disabled={!hasSubjects} />
+                    <TabButton tabName="ranking" label="Ranking Simulado" disabled={!hasSubjects} />
                 </nav>
 
                 <div className="min-h-[300px]">
