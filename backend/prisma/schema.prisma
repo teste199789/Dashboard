@@ -45,6 +45,15 @@ model Proof {
   resultadoDiscursiva Json?    // Detalhes da prova discursiva
   resultadoFinal     Json?     // Resultado final consolidado
 
+  // NOVOS CAMPOS - Configurações Avançadas de Banca
+  regraAnulacao      String?   @default("PADRAO")  // PADRAO, CESPE_INTEGRAL, CESPE_MEIO, CESPE_CALCULADO
+  valorAnulacao      Float?    @default(1.0)       // Valor que uma anulada adiciona (1.0, 0.5, etc.)
+  formulaAnulacao    String?                       // Fórmula customizada para cálculo complexo
+  
+  // Configurações de Nota de Corte
+  tipoNotaCorte      String?   @default("DECIMAL")  // DECIMAL, INTEIRO
+  precisaoDecimal    Int?      @default(1)          // Casas decimais (0=inteiro, 1=uma casa, etc.)
+
   // Relacionamentos
   results   Result[]
   subjects  Subject[]

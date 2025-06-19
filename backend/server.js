@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const { PrismaClient } = require('@prisma/client');
 const { corrigirProva, calculateOverallPerformance } = require('./utils/correcao');
+const { gerarSugestoesBanca, obterConfiguracaoPadraoBanca } = require('./utils/regrasAnulacao');
 
 const app = express();
 const prisma = new PrismaClient();
@@ -141,11 +142,13 @@ app.put('/api/proofs/:id/details', async (req, res) => {
     try {
         const { id } = req.params;
         const {
-            gabaritoPreliminar, gabaritoDefinitivo, userAnswers,
-            subjects, totalQuestoes, titulo, banca, data, inscritos, simulacaoAnuladas, 
-            orgao, cargo, notaDiscursiva,
-            simulacaoNotaDeCorte, simulacaoMedia, simulacaoDesvioPadrao,
-            resultadoObjetiva, resultadoDiscursiva, resultadoFinal
+            subjects, totalQuestoes, titulo, banca, data, inscritos, simulacaoAnuladas,
+            gabaritoPreliminar, gabaritoDefinitivo, userAnswers, orgao, cargo, 
+            notaDiscursiva, resultadoObjetiva, resultadoDiscursiva, type,
+            simulacaoMedia, simulacaoDesvioPadrao, simulacaoNotaDeCorte,
+            // NOVOS CAMPOS - Configurações avançadas de banca
+            regraAnulacao, valorAnulacao, formulaAnulacao, tipoNotaCorte, precisaoDecimal,
+            tipoPontuacao
         } = req.body;
 
         // Buscar informações atuais da prova para validação
@@ -214,6 +217,14 @@ app.put('/api/proofs/:id/details', async (req, res) => {
         if (resultadoObjetiva !== undefined) dataToUpdate.resultadoObjetiva = resultadoObjetiva;
         if (resultadoDiscursiva !== undefined) dataToUpdate.resultadoDiscursiva = resultadoDiscursiva;
         if (resultadoFinal !== undefined) dataToUpdate.resultadoFinal = resultadoFinal;
+
+        // NOVOS CAMPOS - Configurações avançadas de banca
+        if (regraAnulacao !== undefined) dataToUpdate.regraAnulacao = regraAnulacao;
+        if (valorAnulacao !== undefined) dataToUpdate.valorAnulacao = parseFlexibleFloat(valorAnulacao);
+        if (formulaAnulacao !== undefined) dataToUpdate.formulaAnulacao = formulaAnulacao;
+        if (tipoNotaCorte !== undefined) dataToUpdate.tipoNotaCorte = tipoNotaCorte;
+        if (precisaoDecimal !== undefined) dataToUpdate.precisaoDecimal = parseInt(precisaoDecimal, 10);
+        if (tipoPontuacao !== undefined) dataToUpdate.tipoPontuacao = tipoPontuacao;
 
         // Atualizar matérias se fornecidas
         if (subjects) {
@@ -295,6 +306,26 @@ app.post('/api/proofs/:id/grade', async (req, res) => {
     } catch (error) {
         console.error(`Erro ao corrigir prova ${proofId}:`, error);
         res.status(500).json({ error: "Falha no processo de correção." });
+    }
+});
+
+// GET /api/bancas/:nome/configuracoes - Obtém configurações sugeridas para uma banca
+app.get('/api/bancas/:nome/configuracoes', async (req, res) => {
+    try {
+        const { nome } = req.params;
+        const nomeBanca = decodeURIComponent(nome);
+        
+        const configuracaoPadrao = obterConfiguracaoPadraoBanca(nomeBanca);
+        const sugestoes = gerarSugestoesBanca(nomeBanca);
+        
+        res.json({
+            banca: nomeBanca,
+            configuracaoPadrao,
+            sugestoes
+        });
+    } catch (error) {
+        console.error("Erro ao buscar configurações da banca:", error);
+        res.status(500).json({ error: "Não foi possível buscar as configurações da banca." });
     }
 });
 

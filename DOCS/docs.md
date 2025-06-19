@@ -609,7 +609,71 @@ O Recharts continuava gerando ticks duplicados ("0 0 1 1 2 2...") devido a confl
 - ✅ Valores apropriados para cada tamanho de prova
 - ✅ Renderização consistente e confiável
 
-### Estado Final do Sistema
+### Sistema Avançado de Regras de Anulação - Versão 1.8.0
+
+#### Problema de Negócio Identificado
+O sistema anterior tratava todas as bancas de forma igual, não contemplando as especificidades reais de cada organizadora, especialmente o Cespe/Cebraspe que possui regras únicas de anulação.
+
+#### Solução Implementada
+- **Sistema modular de regras**: 5 tipos diferentes de tratamento de anuladas
+- **Configurações por banca**: Cada organizadora com suas especificidades
+- **Interface inteligente**: Sugestões automáticas baseadas na banca selecionada
+- **Notas de corte adaptáveis**: Formato decimal vs inteiro conforme a banca
+
+#### Tipos de Regras de Anulação
+- **PADRAO**: Anulada = +1 ponto (sistema anterior)
+- **CESPE_INTEGRAL**: Anulada cancela 1 erro OU adiciona 1 ponto
+- **CESPE_MEIO**: Anulada vale 0.5 ponto
+- **CESPE_CALCULADO**: Valor dinâmico baseado no % de anuladas
+- **PERSONALIZADO**: Valor customizado pelo usuário
+
+#### Configurações Automáticas por Banca
+- **Cespe/Cebraspe**: Pontuação líquida, regra integral, notas decimais
+- **FGV**: Pontuação bruta, regra padrão, notas decimais
+- **FCC**: Pontuação bruta, regra padrão, notas inteiras
+- **Quadrix**: Pontuação bruta, regra padrão, notas decimais
+- **IBFC**: Pontuação bruta, regra padrão, notas inteiras
+
+#### Melhorias na Interface
+- **AdvancedBankConfig**: Componente para configurações avançadas
+- **Sugestões automáticas**: Templates por banca com 1 clique
+- **Preview das regras**: Visualização clara das configurações aplicadas
+- **Validação inteligente**: Impede configurações inválidas
+
+### Padronização Automática de Bancas - Versão 1.8.1
+
+#### Problema de UX Identificado
+Usuários precisavam configurar manualmente o tipo de pontuação (líquida vs bruta) mesmo sabendo que cada banca tem um padrão específico, causando confusão e erros de configuração.
+
+#### Solução Implementada
+- **SmartBankSelector**: Componente que detecta automaticamente o tipo de pontuação
+- **Configuração automática**: Sistema aplica configurações baseadas na banca selecionada
+- **Interface educativa**: Explicações claras sobre as diferenças entre os tipos
+- **Feedback visual**: Toast notifications informando sobre configurações automáticas
+
+#### Funcionalidades do SmartBankSelector
+- **Auto-detecção**: Seleciona automaticamente pontuação líquida para Cespe, bruta para outras
+- **Interface visual**: Cards com ícones e cores diferenciadas por tipo
+- **Detalhes expandíveis**: Informações técnicas sobre cada configuração
+- **Dicas educativas**: Explicações sobre quando usar cada tipo
+
+#### Mapeamento Automático
+- **Cespe/Cebraspe** → Pontuação Líquida (Certo/Errado)
+- **FGV, FCC, Quadrix, IBFC, Outras** → Pontuação Bruta (Múltipla Escolha)
+
+#### Melhorias na Experiência
+- **Redução de erros**: Configuração automática baseada em conhecimento real
+- **Onboarding melhorado**: Usuários aprendem as diferenças entre as bancas
+- **Eficiência**: Configuração correta com 1 clique
+- **Flexibilidade**: Usuário pode alterar se necessário
+
+#### Impacto Técnico
+- **Script de migração**: Atualiza provas existentes com configurações padrão
+- **Backward compatibility**: Provas antigas funcionam normalmente
+- **Validação robusta**: Sistema impede configurações inconsistentes
+- **Logs detalhados**: Auditoria completa das configurações aplicadas
+
+### Estado Final do Sistema - Versão 1.8.1
 - ✅ Valores decimais preservados corretamente (16.1 permanece 16.1)
 - ✅ Validação impede valores maiores que total de questões
 - ✅ Gráfico renderiza adequadamente com escala realista
@@ -621,3 +685,10 @@ O Recharts continuava gerando ticks duplicados ("0 0 1 1 2 2...") devido a confl
 - ✅ Interface responsiva e acessível
 - ✅ Tratamento robusto de erros
 - ✅ Configuração de gráfico otimizada e maintível
+- ✅ **Sistema avançado de regras de anulação por banca**
+- ✅ **Configuração automática baseada na banca selecionada**
+- ✅ **Tipos de pontuação inteligentes (líquida vs bruta)**
+- ✅ **Notas de corte adaptáveis (decimal vs inteiro)**
+- ✅ **Interface educativa com dicas por banca**
+- ✅ **Sugestões automáticas de configuração**
+- ✅ **Migração automática de dados existentes**

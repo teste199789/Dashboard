@@ -1,3 +1,5 @@
+const { aplicarRegraAnulacao } = require('./regrasAnulacao');
+
 /**
  * Converte uma string de gabarito (ex: "1:A,2:B,3:C") em um Map para fácil consulta
  * @param {string} gabaritoString - O gabarito em formato string
@@ -129,20 +131,19 @@ function calculateOverallPerformance(proof, calculatedResults) {
     }, { acertos: 0, erros: 0, brancos: 0, anuladas: 0 });
 
     const totalQuestoesParaCalculo = proof.totalQuestoes;
-    let pontuacaoFinal;
 
-    // Calcula pontuação baseada no tipo (líquida ou bruta)
-    if (proof.tipoPontuacao === 'liquida') {
-        pontuacaoFinal = (totals.acertos - totals.erros);
-    } else {
-        pontuacaoFinal = totals.acertos;
-    }
+    // NOVA LÓGICA: Usar sistema avançado de regras de anulação
+    const resultadoAnulacao = aplicarRegraAnulacao(proof, totals);
+    const pontuacaoFinal = resultadoAnulacao.pontuacao;
 
     const percentage = totalQuestoesParaCalculo > 0 
         ? (pontuacaoFinal / totalQuestoesParaCalculo) * 100 
         : 0;
 
-    return { percentage: Math.max(0, percentage) };
+    return { 
+        percentage: Math.max(0, percentage),
+        detalhesAnulacao: resultadoAnulacao.detalhes // Incluir detalhes para debug/log
+    };
 }
 
 module.exports = { corrigirProva, calculateOverallPerformance };
