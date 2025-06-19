@@ -45,7 +45,7 @@ const UserAnswersTab = ({ proof }) => {
             // Converte para string apenas no momento de salvar
             await api.updateProofDetails(proof.id, { userAnswers: mapToString(userAnswersMap) });
             alert('Seu gabarito foi salvo com sucesso!');
-        } catch (error) {
+        } catch {
             alert('Falha ao salvar seu gabarito.');
         } finally {
             setIsSaving(false);

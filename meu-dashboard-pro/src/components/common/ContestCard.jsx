@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { formatDate, formatPercent } from '../../utils/formatters';
+import { formatDate, formatPercentAlreadyScaled } from '../../utils/formatters';
 import { getPerformanceColor } from '../../utils/styleHelpers';
 
 const getProofStatus = (proof) => {
@@ -64,7 +64,7 @@ const ContestCard = ({ proof }) => {
 
                     {status.text === 'Finalizada' && typeof proof.aproveitamento === 'number' && (
                         <p className={`text-xl font-bold ${aproveitamentoColor}`}>
-                            {formatPercent(proof.aproveitamento)}
+                            {formatPercentAlreadyScaled(proof.aproveitamento)}
                         </p>
                     )}
                 </div>

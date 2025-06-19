@@ -64,7 +64,7 @@ const OfficialKeysTab = ({ proof, refreshProof }) => {
             // Passo 3: Atualiza os dados da prova dinamicamente, sem recarregar a página.
             await refreshProof();
 
-        } catch (error) {
+        } catch {
             toast.error('Falha ao salvar ou corrigir. Tente novamente.', { id: loadingToast });
         } finally {
             setIsSaving(false);

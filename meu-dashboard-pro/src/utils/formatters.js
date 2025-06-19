@@ -2,7 +2,15 @@ export const formatPercent = (value) => {
   if (typeof value !== 'number' || isNaN(value) || !isFinite(value)) {
     return '-';
   }
-  return `${(value).toFixed(2).replace('.', ',')}%`;
+  return `${(value * 100).toFixed(2).replace('.', ',')}%`;
+};
+
+// Função para formatar porcentagem quando o valor já está em escala de 0-100
+export const formatPercentAlreadyScaled = (value) => {
+  if (typeof value !== 'number' || isNaN(value) || !isFinite(value)) {
+    return '-';
+  }
+  return `${value.toFixed(2).replace('.', ',')}%`;
 };
 
 // Nova função para formatar a data
@@ -22,7 +30,7 @@ export const formatNumber = (value) => {
 };
 
 // Função para formatar posição/ranking
-export const formatPosition = (position, total) => {
+export const formatPosition = (position) => {
     if (!position || position <= 0) return '-';
     return `${formatNumber(position)}º`;
 };

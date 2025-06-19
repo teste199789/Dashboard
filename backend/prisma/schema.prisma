@@ -11,6 +11,8 @@ model Proof {
   id                 Int       @id @default(autoincrement())
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
+  
+  // Informações básicas da prova
   titulo             String
   banca              String
   data               DateTime
@@ -19,22 +21,31 @@ model Proof {
   aproveitamento     Float?   
   inscritos          Int? 
 
+  // Gabaritos e respostas
   gabaritoPreliminar String?
   gabaritoDefinitivo String?
   userAnswers        String?
   simulacaoAnuladas  String?
+  
+  // Tipo e configurações
   type               String    @default("CONCURSO")
+  
+  // Campos de simulação de ranking
   simulacaoMedia     Float?
   simulacaoDesvioPadrao Float?
   simulacaoNotaDeCorte Float?
 
+  // Informações do concurso
   orgao              String?   
   cargo              String?   
   notaDiscursiva     Float?    
-  resultadoObjetiva  String?   // CLASSIFICADO, ELIMINADO
-  resultadoDiscursiva Json?
-  resultadoFinal     Json?
+  
+  // Resultados estruturados
+  resultadoObjetiva  Json?     // Status: CLASSIFICADO, ELIMINADO, etc.
+  resultadoDiscursiva Json?    // Detalhes da prova discursiva
+  resultadoFinal     Json?     // Resultado final consolidado
 
+  // Relacionamentos
   results   Result[]
   subjects  Subject[]
 }
@@ -43,8 +54,8 @@ model Subject {
   id              Int    @id @default(autoincrement())
   nome            String
   questoes        Int
-  questaoInicio   Int    // <-- Campo necessário
-  questaoFim      Int    // <-- Campo necessário
+  questaoInicio   Int    // Questão inicial da matéria
+  questaoFim      Int    // Questão final da matéria
 
   proof   Proof @relation(fields: [proofId], references: [id], onDelete: Cascade)
   proofId Int

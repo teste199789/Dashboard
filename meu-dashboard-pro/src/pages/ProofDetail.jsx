@@ -3,7 +3,7 @@ import { useParams, useLocation } from 'react-router-dom';
 import * as api from '../api/apiService';
 import { formatDate } from '../utils/formatters';
 import { useProofs } from '../hooks/useProofs';
-import toast from 'react-hot-toast';
+// import toast from 'react-hot-toast'; // Não utilizado atualmente
 
 // Importação dos componentes de abas e ícones
 import InfoTab from './tabs/InfoTab';
@@ -41,7 +41,7 @@ const ProofDetail = () => {
     const [activeTab, setActiveTab] = useState('info');
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     
-    const { fetchProofs, handleGradeProof } = useProofs();
+    const { handleGradeProof } = useProofs();
 
     const fetchProof = useCallback(async () => {
         try {

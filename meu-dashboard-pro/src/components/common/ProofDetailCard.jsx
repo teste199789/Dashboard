@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProofs } from '../../hooks/useProofs';
 import StatCard from './StatCard';
-import { formatDate, formatPercent } from '../../utils/formatters';
+import { formatDate, formatPercentAlreadyScaled } from '../../utils/formatters';
 import PencilIcon from '../icons/PencilIcon';
 import TrashIcon from '../icons/TrashIcon';
 import ProofLogo from './ProofLogo';
@@ -76,7 +76,7 @@ const ProofDetailCard = ({ proof }) => {
             {hasResults ? (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-6">
                     <StatCard label="Pontos Líquidos" value={pontuacaoLiquida.toFixed(2).replace('.',',')} colorClass="text-blue-600 dark:text-blue-400"/>
-                    <StatCard label="Aproveitamento" value={formatPercent(proof.aproveitamento)} colorClass="text-green-600 dark:text-green-400"/>
+                    <StatCard label="Aproveitamento" value={formatPercentAlreadyScaled(proof.aproveitamento)} colorClass="text-green-600 dark:text-green-400"/>
                     <StatCard label="Acertos" value={totals.acertos} />
                     <StatCard label="Erros" value={totals.erros} />
                 </div>

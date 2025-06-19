@@ -1,190 +1,217 @@
-import React, { useMemo, useState } from 'react';
 import { useReactTable, getCoreRowModel, flexRender } from '@tanstack/react-table';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useProofs } from '../hooks/useProofs';
-import { formatDate, formatPercent } from '../utils/formatters';
-import { getPerformanceColor } from '../utils/styleHelpers';
-import StatsRow from '../components/common/StatsRow.jsx';
-import LoadingSpinner from '../components/common/LoadingSpinner.jsx';
-import { PencilIcon, TrashIcon } from '../components/icons';
+import { useNavigate } from 'react-router-dom';
+import StatsRow from '../components/common/StatsRow';
+import LoadingSpinner from '../components/common/LoadingSpinner';
 import ConfirmationModal from '../components/common/ConfirmationModal';
-import ProofForm from '../components/ProofForm';
 import ContestActions from '../components/common/ContestActions';
-import toast from 'react-hot-toast';
-
-const getResultBadge = (result) => {
-    if (!result) return <span className="text-gray-500">-</span>;
-
-    const baseClasses = "px-2.5 py-0.5 rounded-full text-xs font-semibold tracking-wide";
-    let colorClasses = "";
-
-    switch (result.toLowerCase()) {
-        case 'aprovado':
-        case 'classificado':
-            colorClasses = "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300";
-            break;
-        case 'reprovado':
-        case 'eliminado':
-            colorClasses = "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300";
-            break;
-        default:
-            return <span className="text-gray-500">-</span>;
-    }
-    return <span className={`${baseClasses} ${colorClasses}`}>{result}</span>;
-}
 
 const Dashboard = () => {
-    const { proofs, consolidatedData, isLoading, dashboardFilter, setDashboardFilter, openDeleteModal, handleGradeProof, fetchProofs } = useProofs();
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [modalConfig, setModalConfig] = useState({ contest: null, initialStep: 1 });
-    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [selectedId, setSelectedId] = useState(null);
+    const navigate = useNavigate();
+    const { proofs, consolidatedData, isLoading, dashboardFilter, setDashboardFilter, modalState, closeDeleteModal, handleDeleteProof, handleGradeProof } = useProofs();
+    const [isGrading, setIsGrading] = useState(false);
 
-    const openModal = (contest = null, initialStep = 1) => {
-        setModalConfig({ contest, initialStep });
-        setIsModalOpen(true);
-    };
+    const handleNavigateToProof = useCallback((proofId, initialTab = '') => {
+        const path = `/minhas-provas/${proofId}${initialTab ? `?tab=${initialTab}` : ''}`;
+        navigate(path);
+    }, [navigate]);
 
-    const closeModal = () => {
-        setIsModalOpen(false);
-        // Resetar para o padrão ao fechar
-        setModalConfig({ contest: null, initialStep: 1 });
-    }
-
-    const onGrade = async (proofId) => {
-        const toastId = toast.loading('Corrigindo prova...');
+    const onGrade = useCallback(async (proofId) => {
+        setIsGrading(true);
         try {
             await handleGradeProof(proofId);
-            await fetchProofs(); // Re-buscar para garantir que todos os dados (incluindo `results`) estão atualizados.
-            toast.success('Prova corrigida com sucesso!', { id: toastId });
-        } catch (err) {
-            console.error(err);
-            toast.error('Falha ao corrigir a prova.', { id: toastId });
+        } finally {
+            setIsGrading(false);
         }
-    };
+    }, [handleGradeProof]);
+
+    const openDeleteModal = useCallback((id) => {
+        // Esta função será definida via context se necessário
+        console.log('Delete modal for:', id);
+    }, []);
 
     const columns = useMemo(() => [
-        { accessorKey: 'titulo', header: 'Nome', cell: info => <span className="font-bold text-gray-800 dark:text-gray-100">{info.getValue()}</span> },
-        { accessorFn: row => formatDate(row.data), header: 'Data' },
-        { accessorKey: 'orgao', header: 'Órgão' },
-        { accessorKey: 'banca', header: 'Banca' },
-        { accessorKey: 'cargo', header: 'Cargo' },
+        {
+            accessorKey: 'titulo',
+            header: 'Título',
+            cell: ({ getValue }) => (
+                <div className="font-medium text-gray-900 dark:text-gray-100">
+                    {getValue()}
+                </div>
+            ),
+        },
+        {
+            accessorKey: 'data',
+            header: 'Data',
+            cell: ({ getValue }) => {
+                const date = new Date(getValue());
+                return (
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                        {date.toLocaleDateString('pt-BR')}
+                    </div>
+                );
+            },
+        },
+        {
+            accessorKey: 'banca',
+            header: 'Banca',
+            cell: ({ getValue }) => (
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                    {getValue()}
+                </div>
+            ),
+        },
         {
             accessorKey: 'aproveitamento',
-            header: 'Objetiva (%)',
-            cell: ({ row }) => {
-                const value = row.original.aproveitamento;
-                if (typeof value !== 'number') return '-';
-                return <span className={`font-bold ${getPerformanceColor(value)}`}>{`${(value).toFixed(2).replace('.', ',')}%`}</span>;
-            }
+            header: 'Aproveitamento',
+            cell: ({ getValue }) => {
+                const percentage = getValue();
+                if (percentage == null) return <span className="text-gray-400">-</span>;
+                return (
+                    <div className="text-sm font-medium">
+                        {percentage.toFixed(1)}%
+                    </div>
+                );
+            },
         },
-        { accessorKey: 'resultadoObjetiva', header: 'Resultado',
-            cell: ({ row }) => getResultBadge(row.original.resultadoObjetiva)
-        },
-        { accessorKey: 'notaDiscursiva', header: 'Discursiva', cell: info => typeof info.getValue() === 'number' ? <span className="font-bold">{info.getValue().toFixed(2).replace('.', ',')}</span> : '-' },
-        { accessorKey: 'resultadoDiscursiva', header: 'Resultado Discursiva',
-            cell: ({ row }) => getResultBadge(row.original.resultadoDiscursiva)
+        {
+            accessorKey: 'resultadoFinal',
+            header: 'Status',
+            cell: ({ getValue }) => {
+                const resultado = getValue();
+                if (!resultado) return <span className="text-gray-400">Pendente</span>;
+                
+                const getStatusColor = (status) => {
+                    if (!status) return 'bg-gray-100 text-gray-800';
+                    switch (status.toLowerCase()) {
+                        case 'aprovado':
+                        case 'classificado':
+                            return 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-200';
+                        case 'reprovado':
+                        case 'eliminado':
+                            return 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-200';
+                        default:
+                            return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
+                    }
+                };
+                
+                return (
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(resultado)}`}>
+                        {resultado}
+                    </span>
+                );
+            },
         },
         {
             id: 'actions',
             header: 'Ações',
             cell: ({ row }) => (
-                <ContestActions
-                    proof={row.original}
-                    onEdit={openModal}
-                    onDelete={openDeleteModal}
+                <ContestActions 
+                    proof={row.original} 
+                    onNavigateToProof={handleNavigateToProof}
                     onGrade={onGrade}
+                    onDelete={openDeleteModal}
+                    isGrading={isGrading}
                 />
-            )
-        }
-    ], []);
+            ),
+        },
+    ], [handleNavigateToProof, onGrade, openDeleteModal, isGrading]);
 
-    const tableData = useMemo(() => proofs.filter(p => (p.type || 'CONCURSO') === 'CONCURSO'), [proofs]);
-    const table = useReactTable({ data: tableData, columns, getCoreRowModel: getCoreRowModel() });
+    const table = useReactTable({
+        data: proofs,
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+    });
 
-    if (isLoading) return <LoadingSpinner message="Carregando dados consolidados..." />;
-
-    const { disciplinas, totais } = consolidatedData;
-
-    const handleDeleteProof = () => {
-        // Implemente a lógica para deletar o concurso com o ID selecionado
-        console.log('Deletando concurso com ID:', selectedId);
-        setIsDeleteModalOpen(false);
-    };
-
-    const FilterButton = ({ filterValue, label }) => (
-        <button
-            onClick={() => setDashboardFilter(filterValue)}
-            className={`flex-1 py-2 px-4 rounded-lg font-semibold transition-all duration-300 text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 dark:focus:ring-offset-gray-900 focus:ring-teal-500 ${
-                dashboardFilter === filterValue
-                ? 'bg-white dark:bg-gray-700 shadow-md text-teal-600 dark:text-teal-400'
-                : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-            }`}
-        >
-            {label}
-        </button>
-    );
+    if (isLoading) {
+        return <LoadingSpinner />;
+    }
 
     return (
         <div className="space-y-6">
-            <div className="flex justify-center p-1 bg-gray-200/70 dark:bg-gray-800/50 rounded-xl max-w-sm mx-auto">
-                <FilterButton filterValue="TODOS" label="Total" />
-                <FilterButton filterValue="CONCURSO" label="Concursos" />
-                <FilterButton filterValue="SIMULADO" label="Simulados" />
+            {/* Header */}
+            <div className="flex justify-between items-center">
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Dashboard</h1>
+                <select 
+                    value={dashboardFilter} 
+                    onChange={(e) => setDashboardFilter(e.target.value)}
+                    className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                >
+                    <option value="TODOS">Todos</option>
+                    <option value="CONCURSO">Concursos</option>
+                    <option value="SIMULADO">Simulados</option>
+                </select>
             </div>
 
-            <div className="bg-white dark:bg-gray-800/50 shadow-lg rounded-xl overflow-hidden">
-                <div className="bg-orange-400 dark:bg-orange-600 text-white flex justify-between items-center py-4 px-6">
-                    <h2 className="text-xl font-bold tracking-wider uppercase">Dados Consolidados</h2>
+            {/* Stats Section */}
+            <div className="rounded-lg shadow overflow-hidden">
+                {/* Header Title */}
+                <div className="bg-orange-400 px-6 py-4">
+                    <h2 className="text-xl font-bold text-white uppercase tracking-wide">Dados Consolidados</h2>
                 </div>
-                {disciplinas && disciplinas.length > 0 ? (
-                    <div className="text-sm text-gray-800 dark:text-gray-200">
-                        <div className="hidden md:grid grid-cols-9 text-center font-semibold bg-teal-200 dark:bg-teal-800/50 py-3 border-b-2 border-teal-300 dark:border-teal-700">
-                            <div className="col-span-1 text-left pl-4">Disciplinas</div>
-                            <div className="col-span-1">Acertos</div>
-                            <div className="col-span-1">Erros</div>
-                            <div className="col-span-1">Brancos</div>
-                            <div className="col-span-1">Anuladas</div>
-                            <div className="col-span-1">Questões</div>
-                            <div className="col-span-1">Líquidos</div>
-                            <div className="col-span-1">% Bruta</div>
-                            <div className="col-span-1">% Líquidos</div>
+                
+                <div className="overflow-x-auto">
+                    <div className="min-w-full">
+                        {/* Column Headers */}
+                        <div className="grid grid-cols-9 text-center items-center py-3 bg-teal-200 text-gray-800">
+                            <p className="col-span-1 text-left pl-4 font-semibold">Disciplinas</p>
+                            <p className="col-span-1 font-semibold">Acertos</p>
+                            <p className="col-span-1 font-semibold">Erros</p>
+                            <p className="col-span-1 font-semibold">Brancos</p>
+                            <p className="col-span-1 font-semibold">Anuladas</p>
+                            <p className="col-span-1 font-semibold">Questões</p>
+                            <p className="col-span-1 font-semibold">Líquidos</p>
+                            <p className="col-span-1 font-semibold">% Bruta</p>
+                            <p className="col-span-1 font-semibold">% Líquidos</p>
                         </div>
-                        <div className="divide-y divide-gray-200 dark:divide-gray-700">
-                            {disciplinas.map(item => <StatsRow key={item.id} item={item} />)}
+                        {/* Rows */}
+                        <div>
+                            {consolidatedData.disciplinas.map((disciplina, index) => (
+                                <StatsRow key={disciplina.id} disciplina={disciplina} index={index} />
+                            ))}
+                            {consolidatedData.disciplinas.length > 0 && (
+                                <StatsRow disciplina={consolidatedData.totais} isTotal={true} />
+                            )}
                         </div>
-                        <StatsRow item={totais} isFooter={true} />
                     </div>
-                ) : (
-                    <div className="text-center py-16 text-gray-500 dark:text-gray-400">
-                        <p className="font-semibold">Nenhum dado encontrado para a categoria "{dashboardFilter.toLowerCase()}".</p>
-                    </div>
-                )}
+                </div>
             </div>
 
-            {/* Tabela de Controle de Concursos */}
-            <div className="bg-white dark:bg-gray-800/50 shadow-lg rounded-xl overflow-hidden p-4 mt-8">
-                <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">Controle de Concursos</h2>
-                    <button onClick={() => openModal(null)} className="bg-teal-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-teal-700 transition-colors">
-                        + Novo Concurso
-                    </button>
+            {/* Table Section */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
+                <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Controle de Concursos</h2>
                 </div>
                 <div className="overflow-x-auto">
-                    <table className="min-w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                        <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                    <table className="w-full">
+                        <thead className="bg-gray-50 dark:bg-gray-700">
                             {table.getHeaderGroups().map(headerGroup => (
                                 <tr key={headerGroup.id}>
                                     {headerGroup.headers.map(header => (
-                                        <th key={header.id} scope="col" className="px-6 py-3">{flexRender(header.column.columnDef.header, header.getContext())}</th>
+                                        <th
+                                            key={header.id}
+                                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                                        >
+                                            {header.isPlaceholder
+                                                ? null
+                                                : flexRender(header.column.columnDef.header, header.getContext())
+                                            }
+                                        </th>
                                     ))}
                                 </tr>
                             ))}
                         </thead>
-                        <tbody>
+                        <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                             {table.getRowModel().rows.map(row => (
-                                <tr key={row.id} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                <tr key={row.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                                     {row.getVisibleCells().map(cell => (
-                                        <td key={cell.id} className="px-6 py-4">{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
+                                        <td
+                                            key={cell.id}
+                                            className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100"
+                                        >
+                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                        </td>
                                     ))}
                                 </tr>
                             ))}
@@ -193,19 +220,13 @@ const Dashboard = () => {
                 </div>
             </div>
 
+            {/* Confirmation Modal */}
             <ConfirmationModal
-                isOpen={isDeleteModalOpen}
-                onClose={() => setIsDeleteModalOpen(false)}
+                isOpen={modalState.isOpen}
+                onClose={closeDeleteModal}
                 onConfirm={handleDeleteProof}
-                title="Confirmar Exclusão"
-                message="Tem certeza de que deseja excluir este concurso? Esta ação não pode ser desfeita."
-            />
-            <ProofForm
-                isOpen={isModalOpen}
-                onClose={closeModal}
-                proofData={modalConfig.contest}
-                initialStep={modalConfig.initialStep}
-                type="CONCURSO"
+                title="Deletar Concurso"
+                message="Tem certeza de que deseja deletar este concurso? Esta ação não pode ser desfeita."
             />
         </div>
     );

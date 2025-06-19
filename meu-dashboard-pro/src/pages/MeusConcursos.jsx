@@ -27,12 +27,6 @@ const MeusConcursos = () => {
         setIsFormOpen(true);
     };
 
-    const handleDelete = async (id) => {
-        if (window.confirm('Tem certeza que deseja excluir este concurso?')) {
-            // ... Lógica de exclusão que já existe no useProofs
-        }
-    };
-
     if (loading) return <div className="flex justify-center items-center h-64"><LoadingSpinner /></div>;
     if (error) return <div className="text-center text-red-500 mt-8">{error}</div>;
 

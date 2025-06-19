@@ -1,3 +1,8 @@
+/**
+ * Converte uma string de gabarito (ex: "1:A,2:B,3:C") em um Map para fácil consulta
+ * @param {string} gabaritoString - O gabarito em formato string
+ * @returns {Map<string, string>} Map onde a chave é o número da questão e o valor é a alternativa
+ */
 function parseGabarito(gabaritoString) {
     if (!gabaritoString || gabaritoString.trim() === '') return new Map();
     return new Map(gabaritoString.split(',').map(pair => {
@@ -6,11 +11,22 @@ function parseGabarito(gabaritoString) {
     }));
 }
 
+/**
+ * Encontra a matéria correspondente a uma questão específica
+ * @param {number} questionNumber - Número da questão
+ * @param {Array} subjects - Array de matérias com intervalos de questões
+ * @returns {string} Nome da matéria ou 'Não encontrada'
+ */
 const findSubjectForQuestion = (questionNumber, subjects) => {
     const subject = subjects.find(s => questionNumber >= s.questaoInicio && questionNumber <= s.questaoFim);
     return subject ? subject.nome : 'Não encontrada';
 };
 
+/**
+ * Corrige uma prova comparando as respostas do usuário com o gabarito oficial
+ * @param {Object} proof - Dados da prova incluindo gabaritos, respostas e matérias
+ * @returns {Object} Objeto com resultados por matéria e log de operações
+ */
 function corrigirProva(proof) {
     const {
         userAnswers,
@@ -20,6 +36,7 @@ function corrigirProva(proof) {
         subjects
     } = proof;
 
+    // Usa gabarito definitivo se disponível, senão usa o preliminar
     const gabaritoFinal = gabaritoDefinitivo || gabaritoPreliminar;
 
     if (!userAnswers || !gabaritoFinal) {
@@ -40,6 +57,7 @@ function corrigirProva(proof) {
     const userAnswersMap = parseGabarito(userAnswers);
     const gabaritoFinalMap = parseGabarito(gabaritoFinal);
 
+    // Inicializa contadores para cada matéria
     const resultadoPorMateria = subjects.reduce((acc, subject) => {
         acc[subject.nome] = {
             disciplina: subject.nome,
@@ -51,6 +69,7 @@ function corrigirProva(proof) {
         return acc;
     }, {});
 
+    // Processa cada questão da prova
     for (let i = 1; i <= totalQuestoes; i++) {
         const qStr = String(i);
         const materiaDaQuestao = findSubjectForQuestion(i, subjects);
@@ -60,6 +79,7 @@ function corrigirProva(proof) {
         const respostaUser = userAnswersMap.get(qStr);
         const respostaFinal = gabaritoFinalMap.get(qStr);
 
+        // Verifica se a questão foi anulada
         const finalAnswerUpper = respostaFinal ? String(respostaFinal).trim().toUpperCase() : '';
         const isAnulada = finalAnswerUpper === 'X' || finalAnswerUpper === 'ANULADA' || finalAnswerUpper === 'N';
 
@@ -67,15 +87,11 @@ function corrigirProva(proof) {
         const userWasCorrect = userHadAnswered && respostaUser === respostaFinal;
 
         if (isAnulada) {
+            // Questão anulada conta como acerto para todos
             resultadoPorMateria[materiaDaQuestao].anuladas++;
             resultadoPorMateria[materiaDaQuestao].acertos++;
-            
-            // Se o usuário tinha respondido e errado, esse erro não deve ser contado.
-            // A lógica original não adicionava o erro, então não precisamos remover.
-            // Esta lógica é para garantir consistência se a ordem de verificação mudar.
-            // O principal é que, sendo anulada, não pode ser erro nem branco.
-
         } else {
+            // Questão normal - verifica se acertou, errou ou deixou em branco
             if (!userHadAnswered) {
                 resultadoPorMateria[materiaDaQuestao].brancos++;
             } else if (userWasCorrect) {
@@ -92,25 +108,40 @@ function corrigirProva(proof) {
     };
 }
 
+/**
+ * Calcula o desempenho geral da prova baseado nos resultados por matéria
+ * @param {Object} proof - Dados da prova incluindo tipo de pontuação
+ * @param {Array} calculatedResults - Resultados calculados por matéria
+ * @returns {Object} Objeto com o percentual de aproveitamento
+ */
 function calculateOverallPerformance(proof, calculatedResults) {
     if (!proof || !proof.totalQuestoes || !calculatedResults) {
         return { percentage: 0 };
     }
+
+    // Soma os totais de todas as matérias
     const totals = calculatedResults.reduce((acc, r) => {
         acc.acertos += r.acertos;
         acc.erros += r.erros;
+        acc.brancos += r.brancos;
         acc.anuladas += r.anuladas;
         return acc;
     }, { acertos: 0, erros: 0, brancos: 0, anuladas: 0 });
 
     const totalQuestoesParaCalculo = proof.totalQuestoes;
     let pontuacaoFinal;
+
+    // Calcula pontuação baseada no tipo (líquida ou bruta)
     if (proof.tipoPontuacao === 'liquida') {
         pontuacaoFinal = (totals.acertos - totals.erros);
     } else {
         pontuacaoFinal = totals.acertos;
     }
-    const percentage = totalQuestoesParaCalculo > 0 ? (pontuacaoFinal / totalQuestoesParaCalculo) * 100 : 0;
+
+    const percentage = totalQuestoesParaCalculo > 0 
+        ? (pontuacaoFinal / totalQuestoesParaCalculo) * 100 
+        : 0;
+
     return { percentage: Math.max(0, percentage) };
 }
 

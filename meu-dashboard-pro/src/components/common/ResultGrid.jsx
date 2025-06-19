@@ -1,13 +1,13 @@
 import React, { useMemo } from 'react';
 
 const ResultGrid = ({ proof }) => {
-    // Evita crashes se os dados não estiverem prontos
-    if (!proof || !proof.userAnswers || (!proof.gabaritoDefinitivo && !proof.gabaritoPreliminar)) {
-        return null;
-    }
-
     // Usamos useMemo para não recalcular a cada renderização
     const resultsMap = useMemo(() => {
+        // Evita crashes se os dados não estiverem prontos
+        if (!proof || !proof.userAnswers || (!proof.gabaritoDefinitivo && !proof.gabaritoPreliminar)) {
+            return new Map();
+        }
+
         const userMap = new Map(proof.userAnswers.split(',').filter(p => p).map(p => p.split(':')));
         const officialAnswers = proof.gabaritoDefinitivo || proof.gabaritoPreliminar;
         const officialMap = new Map(officialAnswers.split(',').filter(p => p).map(p => p.split(':')));
@@ -34,6 +34,11 @@ const ResultGrid = ({ proof }) => {
         }
         return results;
     }, [proof]);
+
+    // Se não há dados válidos, retorna null
+    if (!proof || !proof.userAnswers || (!proof.gabaritoDefinitivo && !proof.gabaritoPreliminar)) {
+        return null;
+    }
 
     const questions = Array.from({ length: proof.totalQuestoes || 0 }, (_, i) => i + 1);
 

@@ -108,7 +108,7 @@ const SimulateAnnulmentTab = ({ proof, refreshProof }) => {
             if (refreshProof) {
                 refreshProof();
             }
-        } catch (error) {
+        } catch {
             alert('Falha ao salvar a simulação.');
         } finally {
             setIsSaving(false);

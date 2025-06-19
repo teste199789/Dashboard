@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import * as api from '../../api/apiService';
-import { useProofs } from '../../hooks/useProofs';
+// import { useProofs } from '../../hooks/useProofs'; // Não utilizado
 import TrashIcon from '../../components/icons/TrashIcon';
 import toast from 'react-hot-toast';
 

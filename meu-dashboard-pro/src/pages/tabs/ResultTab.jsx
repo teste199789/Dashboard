@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useProofs } from '../../hooks/useProofs';
 import toast from 'react-hot-toast';
 import ResultGrid from '../../components/common/ResultGrid';
-import { formatPercent } from '../../utils/formatters';
+import { formatPercentAlreadyScaled } from '../../utils/formatters';
 
 const ResultTab = ({ proof, refreshProof }) => {
     const [isGrading, setIsGrading] = useState(false);
@@ -15,7 +15,7 @@ const ResultTab = ({ proof, refreshProof }) => {
         try {
             await handleGradeProof(proof.id);
             await refreshProof();
-        } catch (err) {
+        } catch {
             setError("Falha ao corrigir a prova. Verifique se todos os gabaritos e matérias foram preenchidos corretamente.");
             toast.error("Falha ao corrigir a prova.");
         } finally {
@@ -127,8 +127,8 @@ const ResultTab = ({ proof, refreshProof }) => {
                                             <td className="px-6 py-4 text-center">{item.anuladas}</td>
                                             <td className="px-6 py-4 text-center">{item.questoes}</td>
                                             <td className="px-6 py-4 text-center font-bold">{item.liquidos}</td>
-                                            <td className="px-6 py-4 text-center">{formatPercent(item.percentualBruta)}</td>
-                                            <td className="px-6 py-4 text-center">{formatPercent(item.percentualLiquidos)}</td>
+                                            <td className="px-6 py-4 text-center">{formatPercentAlreadyScaled(item.percentualBruta)}</td>
+                                            <td className="px-6 py-4 text-center">{formatPercentAlreadyScaled(item.percentualLiquidos)}</td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -141,8 +141,8 @@ const ResultTab = ({ proof, refreshProof }) => {
                                         <td className="px-6 py-3 text-center">{performanceData.totals.anuladas}</td>
                                         <td className="px-6 py-3 text-center">{performanceData.totals.questoes}</td>
                                         <td className="px-6 py-3 text-center text-lg">{performanceData.totals.liquidos}</td>
-                                        <td className="px-6 py-3 text-center">{formatPercent(performanceData.totals.percentualBruta)}</td>
-                                        <td className="px-6 py-3 text-center">{formatPercent(performanceData.totals.percentualLiquidos)}</td>
+                                        <td className="px-6 py-3 text-center">{formatPercentAlreadyScaled(performanceData.totals.percentualBruta)}</td>
+                                        <td className="px-6 py-3 text-center">{formatPercentAlreadyScaled(performanceData.totals.percentualLiquidos)}</td>
                                     </tr>
                                 </tfoot>
                             </table>

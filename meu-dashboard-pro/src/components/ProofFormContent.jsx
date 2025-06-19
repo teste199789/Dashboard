@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { useProofs } from '../hooks/useProofs';
 import * as api from '../api/apiService';
@@ -11,7 +11,7 @@ const ProofFormContent = ({ proofData, type = 'CONCURSO', onSave, initialStep = 
     const [isSaving, setIsSaving] = useState(false);
     const [currentStep, setCurrentStep] = useState(initialStep);
 
-    const getInitialFormData = () => ({
+    const getInitialFormData = useCallback(() => ({
         titulo: '',
         banca: 'Cespe/Cebraspe',
         data: new Date().toISOString().split('T')[0],
@@ -22,7 +22,7 @@ const ProofFormContent = ({ proofData, type = 'CONCURSO', onSave, initialStep = 
         notaDiscursiva: null,
         resultadoObjetiva: null,
         resultadoDiscursiva: null,
-    });
+    }), [type]);
 
     const [formData, setFormData] = useState(getInitialFormData());
 
@@ -44,7 +44,7 @@ const ProofFormContent = ({ proofData, type = 'CONCURSO', onSave, initialStep = 
         } else {
             setFormData(getInitialFormData());
         }
-    }, [proofData, type, initialStep]);
+    }, [proofData, type, initialStep, getInitialFormData]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -71,7 +71,7 @@ const ProofFormContent = ({ proofData, type = 'CONCURSO', onSave, initialStep = 
             if (onSave) {
                 onSave();
             }
-        } catch (error) {
+        } catch {
             toast.error(`Falha ao salvar ${type === 'CONCURSO' ? 'concurso' : 'simulado'}.`, { id: toastId });
         } finally {
             setIsSaving(false);

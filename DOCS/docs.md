@@ -283,6 +283,14 @@ Para configurar e executar o projeto em um ambiente de desenvolvimento local:
 ## 9. Log de Alterações (Changelog)
 Esta seção documenta as principais mudanças e melhorias implementadas no projeto ao longo do tempo.
 
+- **v1.7.0 (06/01/2025)**
+    - **Análise Completa e Limpeza do Projeto**:
+        - **Limpeza de Código Backend**: Removida pasta `services/` vazia, estrutura duplicada `prisma/backend/prisma/`, dependência não utilizada `random-js`. Corrigido `package.json` (script `dev`, `main` field, descrição). Melhorados logs excessivos no `server.js` e adicionado tratamento de erros. Campo `resultadoObjetiva` corrigido de `String?` para `Json?` no schema. Documentação JSDoc completa adicionada ao `utils/correcao.js`.
+        - **Limpeza de Código Frontend**: Removidos arquivos não utilizados (`App.css`, `assets/react.svg`). Downgrade do React Router v7→v6 para compatibilidade. Configuração Vite otimizada com chunks separados. Corrigidos 21 problemas de linting incluindo hook condicional crítico, variáveis não utilizadas, imports não utilizados.
+        - **Correção de Cálculos de Porcentagem**: Corrigido problema de dupla multiplicação por 100 nas porcentagens. Criada função `formatPercentAlreadyScaled` para valores já em escala 0-100. Aplicada correção em `Dashboard`, `ResultTab`, `ProofDetailCard`, `ContestCard`. Porcentagens agora exibem valores corretos (85,00% em vez de 0,85% ou 8500,00%).
+        - **Novo Design Visual**: Dashboard redesenhado com estilo moderno: cabeçalho laranja (`bg-orange-400`), colunas em verde-azulado (`bg-teal-200`), linhas alternadas, layout de 9 colunas incluindo campo "Anuladas". Mantida funcionalidade completa com visual aprimorado.
+        - **Correções React Router**: Adicionadas flags de future (`v7_startTransition`, `v7_relativeSplatPath`) para eliminar warnings de compatibilidade.
+
 - **v1.6.0 (19/06/2025)**
     - **Refatoração da Interface e Correção de Bugs Críticos**:
         - **Melhoria Geral da UI/UX**: Realizada uma refatoração completa da navegação principal, extraindo-a para um componente modular e centralizando a configuração de links para facilitar a manutenção. Melhorada a consistência visual dos temas claro/escuro em diversos componentes (botões, cartões, inputs).

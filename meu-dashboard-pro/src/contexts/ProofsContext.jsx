@@ -1,11 +1,11 @@
-import React, { createContext, useState, useEffect, useMemo, useCallback, useContext } from 'react'; // <-- useContext adicionado aqui
+import React, { createContext, useState, useEffect, useMemo, useCallback, useContext } from 'react';
 import * as api from '../api/apiService';
 import toast from 'react-hot-toast';
 
 export const ProofsContext = createContext();
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useProofs = () => {
-    // Agora o useContext está definido e esta função funcionará
     return useContext(ProofsContext);
 };
 
@@ -35,29 +35,20 @@ export const ProofsProvider = ({ children }) => {
     }, [fetchProofs]);
 
     const handleAddProof = async (newProofData) => {
-        try {
-            const newProof = await api.addProof(newProofData);
-            await fetchProofs();
-            return newProof;
-        } catch (error) {
-            setError("Falha ao criar prova/simulado.");
-            throw error;
-        }
+        const newProof = await api.addProof(newProofData);
+        await fetchProofs();
+        return newProof;
     };
 
     const handleGradeProof = async (proofId) => {
-        try {
-            await api.gradeProof(proofId);
-            const updatedProof = await api.getProofById(proofId);
-            setProofs(currentList => 
-                currentList.map(p => 
-                    p.id === proofId ? updatedProof : p
-                )
-            );
-            return true;
-        } catch(err) {
-            throw err;
-        }
+        await api.gradeProof(proofId);
+        const updatedProof = await api.getProofById(proofId);
+        setProofs(currentList => 
+            currentList.map(p => 
+                p.id === proofId ? updatedProof : p
+            )
+        );
+        return true;
     };
 
     const openDeleteModal = (id) => setModalState({ isOpen: true, proofId: id });
@@ -71,7 +62,7 @@ export const ProofsProvider = ({ children }) => {
             toast.success("Item deletado com sucesso!");
             closeDeleteModal();
             fetchProofs();
-        } catch (error) {
+        } catch {
             toast.error("Falha ao deletar o item.");
             setError("Falha ao deletar o item.");
             closeDeleteModal();
