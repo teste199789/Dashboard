@@ -6,6 +6,21 @@ const { corrigirProva, calculateOverallPerformance } = require('./utils/correcao
 const app = express();
 const prisma = new PrismaClient();
 
+// FIX: Funções robustas para parse de números
+const parseFlexibleFloat = (value) => {
+    if (value === null || value === undefined || value === '') return null;
+    const cleanStr = String(value).replace(/\./g, '').replace(',', '.');
+    const num = parseFloat(cleanStr);
+    return isNaN(num) ? null : num;
+};
+
+const parseFlexibleInt = (value) => {
+    if (value === null || value === undefined || value === '') return null;
+    const cleanStr = String(value).replace(/\./g, '').split(',')[0];
+    const num = parseInt(cleanStr, 10);
+    return isNaN(num) ? null : num;
+};
+
 // Configuração mais específica do CORS
 app.use(cors({
     origin: ['http://localhost:5173', 'http://localhost:3000', 'http://127.0.0.1:5173'],
@@ -126,17 +141,17 @@ app.put('/api/proofs/:id/details', async (req, res) => {
         if (gabaritoPreliminar !== undefined) dataToUpdate.gabaritoPreliminar = gabaritoPreliminar;
         if (gabaritoDefinitivo !== undefined) dataToUpdate.gabaritoDefinitivo = gabaritoDefinitivo;
         if (userAnswers !== undefined) dataToUpdate.userAnswers = userAnswers;
-        if (totalQuestoes !== undefined) dataToUpdate.totalQuestoes = parseInt(totalQuestoes);
-        if (inscritos !== undefined) dataToUpdate.inscritos = parseInt(inscritos);
+        if (totalQuestoes !== undefined) dataToUpdate.totalQuestoes = parseFlexibleInt(totalQuestoes);
+        if (inscritos !== undefined) dataToUpdate.inscritos = parseFlexibleInt(inscritos);
         if (simulacaoAnuladas !== undefined) dataToUpdate.simulacaoAnuladas = simulacaoAnuladas;
         if (orgao !== undefined) dataToUpdate.orgao = orgao;
         if (cargo !== undefined) dataToUpdate.cargo = cargo;
-        if (notaDiscursiva !== undefined) dataToUpdate.notaDiscursiva = notaDiscursiva ? parseFloat(notaDiscursiva) : null;
+        if (notaDiscursiva !== undefined) dataToUpdate.notaDiscursiva = parseFlexibleFloat(notaDiscursiva);
         
         // CAMPOS DE SIMULAÇÃO
-        if (simulacaoNotaDeCorte !== undefined) dataToUpdate.simulacaoNotaDeCorte = simulacaoNotaDeCorte !== null ? parseFloat(simulacaoNotaDeCorte) : null;
-        if (simulacaoMedia !== undefined) dataToUpdate.simulacaoMedia = simulacaoMedia !== null ? parseFloat(simulacaoMedia) : null;
-        if (simulacaoDesvioPadrao !== undefined) dataToUpdate.simulacaoDesvioPadrao = simulacaoDesvioPadrao !== null ? parseFloat(simulacaoDesvioPadrao) : null;
+        if (simulacaoNotaDeCorte !== undefined) dataToUpdate.simulacaoNotaDeCorte = parseFlexibleFloat(simulacaoNotaDeCorte);
+        if (simulacaoMedia !== undefined) dataToUpdate.simulacaoMedia = parseFlexibleFloat(simulacaoMedia);
+        if (simulacaoDesvioPadrao !== undefined) dataToUpdate.simulacaoDesvioPadrao = parseFlexibleFloat(simulacaoDesvioPadrao);
 
         // NOVOS CAMPOS
         if (resultadoObjetiva !== undefined) dataToUpdate.resultadoObjetiva = resultadoObjetiva;
