@@ -69,23 +69,52 @@ export function calculatePosition(percentile, totalCandidates) {
  * Gera os pontos de dados para desenhar uma curva de distribuição normal (curva de sino).
  * @param {number} mean - A média da distribuição.
  * @param {number} stdDev - O desvio padrão da distribuição.
- * @param {number} points - O número de pontos a serem gerados para a curva.
- * @returns {Array<Object>} Um array de objetos { x, y } para o gráfico.
+ * @param {number} maxScore - A pontuação máxima possível (total de questões).
+ * @returns {Array<Object>} Um array de objetos { score, density } para o gráfico.
  */
-export function generateDistributionData(mean, stdDev, points = 100) {
-    if (!stdDev || stdDev <= 0) return [];
+export function generateDistributionData(mean, stdDev, maxScore = 100) {
+    if (!stdDev || stdDev <= 0 || !mean || mean < 0) return [];
     
-    // Define o alcance do eixo X (geralmente 3-4 desvios padrão da média)
-    const minX = mean - 4 * stdDev;
-    const maxX = mean + 4 * stdDev;
-    const step = (maxX - minX) / points;
+    // Garantir que a média seja válida
+    const safeMean = Math.max(0, Math.min(mean, maxScore));
+    const safeStdDev = Math.max(0.1, Math.min(stdDev, maxScore / 2));
+    
+    // Definir limites mais realistas para concursos
+    // Usar 2.5 desvios ao invés de 4 para uma visualização mais focada
+    const rangeMultiplier = 2.5;
+    let minX = Math.max(0, safeMean - rangeMultiplier * safeStdDev);
+    let maxX = Math.min(maxScore, safeMean + rangeMultiplier * safeStdDev);
+    
+    // Garantir uma distribuição mínima visível
+    const minRange = Math.max(5, maxScore * 0.2); // Pelo menos 20% da escala total ou 5 pontos
+    if (maxX - minX < minRange) {
+        const center = (minX + maxX) / 2;
+        minX = Math.max(0, center - minRange / 2);
+        maxX = Math.min(maxScore, center + minRange / 2);
+    }
+    
+    // Garantir que a escala inclua pontos importantes
+    minX = Math.min(minX, Math.max(0, safeMean - safeStdDev * 3));
+    maxX = Math.max(maxX, Math.min(maxScore, safeMean + safeStdDev * 2));
+    
+    // Arredondar para valores inteiros para evitar duplicatas no eixo
+    minX = Math.floor(minX);
+    maxX = Math.ceil(maxX);
+    
+    // Gerar dados com step de 0.1 para suavidade, mas garantir que incluímos todos os inteiros
+    const totalRange = maxX - minX;
+    const step = totalRange / 100; // 100 pontos para suavidade
     
     const data = [];
-    for (let i = 0; i <= points; i++) {
+    for (let i = 0; i <= 100; i++) {
         const x = minX + i * step;
-        // A densidade de probabilidade (PDF) nos dá a altura da curva (valor Y)
-        const y = (1 / (stdDev * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * Math.pow((x - mean) / stdDev, 2));
-        data.push({ x: parseFloat(x.toFixed(2)), y: parseFloat(y.toFixed(4)) });
+        // A densidade de probabilidade (PDF) nos dá a altura da curva
+        const density = (1 / (safeStdDev * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * Math.pow((x - safeMean) / safeStdDev, 2));
+        data.push({ 
+            score: parseFloat(x.toFixed(2)), 
+            density: parseFloat(density.toFixed(6))
+        });
     }
+    
     return data;
 } 

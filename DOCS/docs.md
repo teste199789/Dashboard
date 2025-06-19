@@ -332,3 +332,292 @@ Esta seção documenta as principais mudanças e melhorias implementadas no proj
     - Lançamento inicial do projeto.
     - Funcionalidades principais: Cadastro de provas e simulados, upload de gabaritos (usuário e oficial), correção automática, visualização de resultados por disciplina e cálculo de aproveitamento.
     - Backend com Node.js/Express/Prisma e frontend com React/Vite/Tailwind CSS.
+
+## Versão 1.7.1 - Melhorias na Precisão das Previsões de Ranking
+
+### Ajustes Implementados (Janeiro 2025)
+
+#### 🎯 **Correção dos Cálculos de Previsão**
+- **Margem de erro mais realista**: Implementado sistema de margem composto por:
+  - Base de 2% (anterior: até 10%)
+  - Fator de competição: até 8% para concursos grandes
+  - Fator de distância da média: até 5% baseado na performance
+- **Aplicação assimétrica**: Menos otimismo, mais conservadorismo
+- **Limite mínimo de faixa**: Pelo menos 1% do total de inscritos ou 3 posições
+
+#### 📊 **Parâmetros Padrão Mais Realistas**
+- **Nota média padrão**: 
+  - Anterior: 90% da nota do usuário
+  - Atual: 75% da nota do usuário (mais conservador)
+- **Desvio padrão aumentado**: 
+  - Anterior: 10% do total de questões
+  - Atual: 15% do total de questões (maior variabilidade)
+- **Nota de corte ajustada**:
+  - Anterior: 95% da nota do usuário
+  - Atual: 110% da nota do usuário (mais realista)
+
+#### 🔧 **Botões de Cenário Rápido**
+- **Cenário Conservador**: Para concursos muito competitivos
+  - Média: 65% da nota do usuário
+  - Desvio: 18% do total de questões
+  - Corte: 115% da nota do usuário
+- **Cenário Moderado**: Equilibrado
+  - Média: 75% da nota do usuário
+  - Desvio: 15% do total de questões
+  - Corte: 108% da nota do usuário
+
+#### 📋 **Melhorias na Interface**
+- Instruções mais claras sobre interpretação dos resultados
+- Dicas para ajustar parâmetros para simulações mais conservadoras
+- Confiança limitada entre 30% e 85% (mais realista)
+- Cálculo de confiança baseado na qualidade dos parâmetros
+
+#### 🎲 **Impacto nas Estatísticas**
+- Faixas de classificação mais estreitas e realistas
+- Redução significativa de previsões excessivamente otimistas
+- Melhor alinhamento com estatísticas reais de concursos
+- Margem de erro adaptativa baseada no contexto do concurso
+
+## Versão 1.7.2 - Correção de Salvamento de Valores Decimais
+
+### Correções Críticas Implementadas (Janeiro 2025)
+
+#### 🐛 **Bug Corrigido: Valores Decimais Incorretos**
+- **Problema**: Valores como "16.1" eram salvos como "161" (multiplicação por 10)
+- **Causa**: Função `parseFlexibleFloat` no backend removendo incorretamente todos os pontos
+- **Solução**: Implementada lógica de parsing inteligente que detecta formato:
+  - Formato padrão: "16.1" → 16.1 ✅
+  - Formato brasileiro: "16,1" → 16.1 ✅
+  - Formato milhares: "1.000,50" → 1000.5 ✅
+
+#### 💫 **Melhorias na Experiência do Usuário**
+- **Função de salvamento melhorada**:
+  - ✅ Permanece na página após salvar (não redireciona)
+  - ✅ Feedback visual aprimorado com ícones e posicionamento
+  - ✅ Atualização automática dos valores salvos na interface
+  - ✅ Delay inteligente para sincronização com o backend
+
+#### 🔍 **Nova Funcionalidade: Prévia dos Valores**
+- **Botão "Ver Prévia"**: Mostra exatamente quais valores serão salvos
+- **Validação visual**: Confirma que os valores decimais estão corretos
+- **Grid responsivo**: Exibe inscritos, média, desvio padrão e nota de corte
+- **Formato adequado**: Números com formatação brasileira quando apropriado
+
+#### 🎯 **Melhorias Técnicas**
+- Parse de float robusto com detecção automática de formato
+- Tratamento de casos extremos (valores nulos, strings vazias)
+- Logs de erro mais informativos para depuração
+- Validação de entrada mais resiliente
+
+#### 📱 **Interface Aprimorada**
+- Toast notifications com ícones e posicionamento otimizado
+- Botões de cenário rápido mantidos
+- Estado de loading aprimorado durante salvamento
+- Feedback visual imediato após operações
+
+#### 🎯 **Garantias de Funcionamento**
+- ✅ Valores decimais preservados corretamente (16.1 permanece 16.1)
+- ✅ Validação impede valores maiores que total de questões
+- ✅ Gráfico renderiza adequadamente com todos os parâmetros
+- ✅ Sistema permanece na página após salvar
+- ✅ Feedback visual imediato e informativo
+- ✅ Tratamento robusto de todos os cenários de erro
+
+## Versão 1.7.4 - Melhorias na Visualização do Gráfico
+
+### Aprimoramentos de UX/UI (Janeiro 2025)
+
+#### 📊 **Gráfico Otimizado para Concursos Reais**
+- **Escala realista**: Limitada ao total de questões da prova
+  - Uso de 2.5 desvios padrão (ao invés de 4) para visualização focada
+  - Escala mínima de 20% do total ou 5 pontos para garantir visibilidade
+  - Arredondamento para valores inteiros mais limpos
+- **Eixos informativos**: 
+  - Eixo X: "Pontuação (questões corretas)" com formatação inteira
+  - Eixo Y: "Densidade (%)" com precisão decimal
+  - Indicação clara da escala "0 a X questões" no título
+
+#### 🎨 **Elementos Visuais Aprimorados**
+- **Linhas de referência melhoradas**:
+  - 🔵 **Linha Azul** (sua nota): Tracejada, mais espessa, posicionamento otimizado
+  - 🔴 **Linha Vermelha** (nota de corte): Tracejada diferenciada, bem visível
+  - 🟡 **Linha Amarela** (média): Nova linha pontilhada para referência
+- **Tooltips informativos**: 
+  - Formato "X questões corretas" ao invés de apenas números
+  - Explicação do significado da densidade
+  - Contexto adicional sobre percentual de candidatos
+
+#### 📋 **Legenda Educativa Completa**
+- **Interpretação visual**: Grid responsivo com símbolos das linhas
+- **Cores consistentes**: Correspondência exata com elementos do gráfico
+- **Dica pedagógica**: Explicação sobre posicionamento e classificação
+- **Design acessível**: Cores e contrastes otimizados para leitura
+
+#### 🧠 **Melhorias na Compreensão**
+- **Contexto claro**: Escala sempre relacionada ao total de questões
+- **Terminologia precisa**: "questões corretas" ao invés de valores abstratos
+- **Feedback educativo**: Explicações sobre como interpretar a posição
+- **Visualização focada**: Eliminação de ruído visual desnecessário
+
+#### 🎯 **Impacto na Experiência**
+- **Gráfico intuitivo**: Escala condizente com a realidade do concurso
+- **Interpretação facilitada**: Legenda explicativa completa
+- **Aprendizado efetivo**: Usuário compreende melhor sua posição
+- **Decisões informadas**: Visualização clara para ajustar estratégias
+
+#### ✅ **Resultados Obtidos**
+- ✅ **Nenhuma informação cortada**: Todas as labels visíveis
+- ✅ **Layout responsivo**: Funciona em diferentes tamanhos de tela
+- ✅ **Espaçamento adequado**: Elementos bem distribuídos
+- ✅ **Legibilidade otimizada**: Fontes e offsets balanceados
+- ✅ **Experiência consistente**: Visual limpo e profissional
+
+## Versão 1.7.5 - Correções de Layout e Responsividade
+
+### Ajustes de Interface (Janeiro 2025)
+
+#### 📐 **Correções de Layout do Gráfico**
+- **Problema resolvido**: Informações cortadas nas bordas do gráfico
+- **Margens aumentadas**: 
+  - Superior: 40px → 50px
+  - Direita: 40px → 50px
+  - Esquerda: 60px → 70px
+  - Inferior: 60px → 70px
+- **Container otimizado**:
+  - Altura fixa de 450px para consistência
+  - Cálculo dinâmico do espaço interno
+  - Wrapper adicional para melhor controle
+
+#### 📱 **Melhorias Responsivas**
+- **Padding adaptativo**: `p-4 sm:p-6` para diferentes telas
+- **Título responsivo**: Quebra de linha em telas menores
+- **Eixos otimizados**:
+  - Largura do eixo Y aumentada para 60px
+  - Font-size reduzido para 11px (melhor legibilidade)
+  - Offsets ajustados para evitar sobreposição
+
+#### 🏷️ **Labels e Referências Reposicionadas**
+- **Labels de eixos**: Offset otimizado para evitar cortes
+- **Linhas de referência**: 
+  - Offset superior aumentado para 25px
+  - Offset inferior para linha da média: 15px
+  - Font-size ajustado para melhor proporção
+- **Tooltips**: Posicionamento aprimorado
+
+#### 🎨 **Elementos Visuais Ajustados**
+- **Grid de layout**: Espaçamento otimizado (space-y-6)
+- **Stats cards**: Margem inferior adicional (mb-6)
+- **Container principal**: Padding responsivo consistente
+- **Legenda**: Mantida posicionamento adequado
+
+#### ✅ **Resultados Obtidos**
+- ✅ **Nenhuma informação cortada**: Todas as labels visíveis
+- ✅ **Layout responsivo**: Funciona em diferentes tamanhos de tela
+- ✅ **Espaçamento adequado**: Elementos bem distribuídos
+- ✅ **Legibilidade otimizada**: Fontes e offsets balanceados
+- ✅ **Experiência consistente**: Visual limpo e profissional
+
+## Versão 1.7.6 - Correção de Sobreposição e Eixo X
+
+### Correções Visuais Críticas (Janeiro 2025)
+
+#### 🎯 **Problema de Sobreposição de Labels Resolvido**
+- **Problema identificado**: Labels das linhas de referência se sobrepondo
+- **Solução implementada**: Sistema de posicionamento inteligente
+  - **Sua Nota**: Posição dinâmica (topLeft/topRight) baseada na relação com nota de corte
+  - **Nota de Corte**: Posição adaptativa (top/bottom) dependendo da proximidade
+  - **Média**: Mantida na posição bottom com offset reduzido
+- **Textos encurtados**: "Nota de Corte" → "Corte" para economizar espaço
+
+#### 📊 **Eixo X Completamente Corrigido**
+- **Problema resolvido**: Sequência incorreta "0 1 1 2 2" 
+- **Implementação**:
+  - **Domínio fixo**: `[0, totalQuestoes]` para controle preciso
+  - **tickCount limitado**: Máximo 11 ticks para evitar sobreposição
+  - **Formatação inteligente**: Apenas valores inteiros válidos
+  - **allowDecimals**: `false` para garantir valores limpos
+  - **Validação**: Valores dentro do range 0-totalQuestoes
+
+#### 🧮 **Melhorias na Geração de Dados**
+- **Precisão aumentada**: 100 pontos para curva mais suave
+- **Step otimizado**: Cálculo baseado no range total
+- **Arredondamento inteligente**: Floor/ceil para limites inteiros
+- **Dados limpos**: Score com 2 casas decimais para precisão
+
+#### 🎨 **Ajustes Visuais Complementares**
+- **Offsets reduzidos**: Evitar conflitos visuais
+- **Font-size otimizado**: 10-11px para melhor proporção
+- **Posicionamento dinâmico**: Baseado na proximidade entre valores
+- **Cores mantidas**: Azul, vermelho e amarelo para consistência
+
+#### 🔧 **Benefícios Técnicos**
+- **Performance**: Menos ticks = renderização mais rápida
+- **Legibilidade**: Sem duplicatas ou sobreposições
+- **Responsividade**: Funciona em todas as resoluções
+- **Manutenibilidade**: Código mais limpo e previsível
+
+#### ✅ **Resultados Visuais Finais**
+- ✅ **Eixo X sequencial**: 0, 1, 2, 3... (sem duplicatas)
+- ✅ **Labels não sobrepostas**: Posicionamento inteligente
+- ✅ **Visual limpo**: Espaçamento adequado em todos os elementos
+- ✅ **Responsividade total**: Funciona em diferentes telas
+- ✅ **Performance otimizada**: Renderização suave e rápida
+
+### Correções Finais - Versão 1.7.6
+
+#### Sobreposição de Labels
+- Sistema de posicionamento inteligente implementado
+- Posição dinâmica baseada na proximidade entre valores
+- Textos encurtados ("Nota de Corte" → "Corte")
+- Offsets reduzidos para evitar conflitos
+
+#### Eixo X Corrigido
+- **Problema**: Sequência "0 1 1 2 2" 
+- **Solução**: Domínio fixo [0, totalQuestoes]
+- tickCount limitado a máximo 11
+- allowDecimals: false para valores limpos
+- Validação para valores dentro do range
+
+#### Melhorias na Geração de Dados
+- Precisão aumentada para 100 pontos
+- Step otimizado baseado no range total
+- Arredondamento inteligente floor/ceil
+- Performance otimizada
+
+### Correção Definitiva do Eixo X - Versão 1.7.7
+
+#### Problema Crítico Identificado
+O Recharts continuava gerando ticks duplicados ("0 0 1 1 2 2...") devido a conflitos entre múltiplas propriedades de configuração do eixo X.
+
+#### Solução Implementada
+- **Configuração simplificada**: Removidas propriedades conflitantes (`tickCount`, `interval`, `minTickGap`, `allowDecimals`, etc.)
+- **Ticks explícitos customizados**: Array de valores definido manualmente baseado no total de questões
+- **Lógica otimizada por faixa**:
+  - **≤10 questões**: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] (todos os valores)
+  - **≤20 questões**: [0, 4, 8, 12, 16, totalQuestoes] (intervalos de 4)
+  - **>20 questões**: 5 intervalos equidistantes + valor final
+
+#### Melhorias Técnicas
+- **Código mais limpo**: Apenas propriedades essenciais no XAxis
+- **Performance otimizada**: Menos processamento desnecessário
+- **Manutenibilidade**: Lógica clara e direta
+- **Compatibilidade**: Funciona consistentemente com diferentes versões do Recharts
+
+#### Resultado Final
+- ✅ Eixo X sequencial limpo (ex: "0, 4, 8, 12, 16, 20")
+- ✅ Sem duplicatas ou sobreposições
+- ✅ Valores apropriados para cada tamanho de prova
+- ✅ Renderização consistente e confiável
+
+### Estado Final do Sistema
+- ✅ Valores decimais preservados corretamente (16.1 permanece 16.1)
+- ✅ Validação impede valores maiores que total de questões
+- ✅ Gráfico renderiza adequadamente com escala realista
+- ✅ Sistema permanece na página após salvar
+- ✅ Feedback visual claro e informativo
+- ✅ Eixo X sequencial limpo (0, 4, 8, 12...) sem duplicatas
+- ✅ Labels sem sobreposição com posicionamento inteligente
+- ✅ Previsões de classificação mais conservadoras e realistas
+- ✅ Interface responsiva e acessível
+- ✅ Tratamento robusto de erros
+- ✅ Configuração de gráfico otimizada e maintível

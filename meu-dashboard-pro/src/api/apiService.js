@@ -61,9 +61,15 @@ export const updateProofDetails = async (id, details) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(details),
     });
+    
     if (!response.ok) {
-        throw new Error(`Erro de HTTP! Status: ${response.status}`);
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.error || `Erro de HTTP! Status: ${response.status}`;
+        const error = new Error(errorMessage);
+        error.response = { data: errorData };
+        throw error;
     }
+    
     return response.json();
 };
 

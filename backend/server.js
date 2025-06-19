@@ -9,8 +9,30 @@ const prisma = new PrismaClient();
 // Funções utilitárias para parse de números
 const parseFlexibleFloat = (value) => {
     if (value === null || value === undefined || value === '') return null;
-    const cleanStr = String(value).replace(/\./g, '').replace(',', '.');
-    const num = parseFloat(cleanStr);
+    
+    const str = String(value).trim();
+    
+    // Se já está em formato padrão (ponto como decimal), usa diretamente
+    if (/^\d+(\.\d+)?$/.test(str)) {
+        const num = parseFloat(str);
+        return isNaN(num) ? null : num;
+    }
+    
+    // Se está em formato brasileiro (vírgula como decimal)
+    if (/^\d+,\d+$/.test(str)) {
+        const num = parseFloat(str.replace(',', '.'));
+        return isNaN(num) ? null : num;
+    }
+    
+    // Se tem pontos como separadores de milhares e vírgula como decimal (ex: 1.000,50)
+    if (/^\d{1,3}(\.\d{3})*,\d+$/.test(str)) {
+        const cleanStr = str.replace(/\./g, '').replace(',', '.');
+        const num = parseFloat(cleanStr);
+        return isNaN(num) ? null : num;
+    }
+    
+    // Caso padrão: tentar parse direto
+    const num = parseFloat(str);
     return isNaN(num) ? null : num;
 };
 
@@ -126,6 +148,17 @@ app.put('/api/proofs/:id/details', async (req, res) => {
             resultadoObjetiva, resultadoDiscursiva, resultadoFinal
         } = req.body;
 
+        // Buscar informações atuais da prova para validação
+        const currentProof = await prisma.proof.findUnique({
+            where: { id: parseInt(id) }
+        });
+
+        if (!currentProof) {
+            return res.status(404).json({ error: "Prova não encontrada." });
+        }
+
+        const maxQuestoes = totalQuestoes || currentProof.totalQuestoes;
+
         const dataToUpdate = {};
 
         // Campos básicos
@@ -146,10 +179,36 @@ app.put('/api/proofs/:id/details', async (req, res) => {
         if (inscritos !== undefined) dataToUpdate.inscritos = parseFlexibleInt(inscritos);
         if (notaDiscursiva !== undefined) dataToUpdate.notaDiscursiva = parseFlexibleFloat(notaDiscursiva);
         
-        // Simulação de ranking
-        if (simulacaoNotaDeCorte !== undefined) dataToUpdate.simulacaoNotaDeCorte = parseFlexibleFloat(simulacaoNotaDeCorte);
-        if (simulacaoMedia !== undefined) dataToUpdate.simulacaoMedia = parseFlexibleFloat(simulacaoMedia);
-        if (simulacaoDesvioPadrao !== undefined) dataToUpdate.simulacaoDesvioPadrao = parseFlexibleFloat(simulacaoDesvioPadrao);
+        // Simulação de ranking com validação
+        if (simulacaoNotaDeCorte !== undefined) {
+            const corteValue = parseFlexibleFloat(simulacaoNotaDeCorte);
+            if (corteValue !== null && corteValue > maxQuestoes) {
+                return res.status(400).json({ 
+                    error: `Nota de corte (${corteValue}) não pode ser maior que o total de questões (${maxQuestoes})` 
+                });
+            }
+            dataToUpdate.simulacaoNotaDeCorte = corteValue;
+        }
+        
+        if (simulacaoMedia !== undefined) {
+            const mediaValue = parseFlexibleFloat(simulacaoMedia);
+            if (mediaValue !== null && mediaValue > maxQuestoes) {
+                return res.status(400).json({ 
+                    error: `Nota média (${mediaValue}) não pode ser maior que o total de questões (${maxQuestoes})` 
+                });
+            }
+            dataToUpdate.simulacaoMedia = mediaValue;
+        }
+        
+        if (simulacaoDesvioPadrao !== undefined) {
+            const desvioValue = parseFlexibleFloat(simulacaoDesvioPadrao);
+            if (desvioValue !== null && desvioValue > maxQuestoes) {
+                return res.status(400).json({ 
+                    error: `Desvio padrão (${desvioValue}) não pode ser maior que o total de questões (${maxQuestoes})` 
+                });
+            }
+            dataToUpdate.simulacaoDesvioPadrao = desvioValue;
+        }
 
         // Resultados
         if (resultadoObjetiva !== undefined) dataToUpdate.resultadoObjetiva = resultadoObjetiva;
@@ -178,6 +237,12 @@ app.put('/api/proofs/:id/details', async (req, res) => {
         const updatedProof = await prisma.proof.update({ 
             where: { id: parseInt(id) }, 
             data: dataToUpdate 
+        });
+        
+        console.log(`[BACKEND] Prova ${id} atualizada com sucesso:`, {
+            simulacaoMedia: updatedProof.simulacaoMedia,
+            simulacaoNotaDeCorte: updatedProof.simulacaoNotaDeCorte,
+            simulacaoDesvioPadrao: updatedProof.simulacaoDesvioPadrao
         });
         
         res.json(updatedProof);
