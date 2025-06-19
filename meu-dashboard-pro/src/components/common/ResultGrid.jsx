@@ -38,6 +38,11 @@ const ResultGrid = ({ proof }) => {
     const questions = Array.from({ length: proof.totalQuestoes || 0 }, (_, i) => i + 1);
 
     const getColorForStatus = (status) => {
+        // Se o gabarito definitivo existir, questões anuladas (que contam como acerto) devem ser verdes.
+        if (proof.gabaritoDefinitivo && status === 'annulled') {
+            return 'bg-green-200 border-green-400 text-green-800 dark:bg-green-800/50 dark:border-green-600 dark:text-green-200';
+        }
+
         switch (status) {
             case 'correct':
                 return 'bg-green-200 border-green-400 text-green-800 dark:bg-green-800/50 dark:border-green-600 dark:text-green-200';

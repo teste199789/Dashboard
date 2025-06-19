@@ -60,18 +60,25 @@ function corrigirProva(proof) {
         const respostaUser = userAnswersMap.get(qStr);
         const respostaFinal = gabaritoFinalMap.get(qStr);
 
-        // A questão é considerada anulada se a resposta no gabarito final for 'X', 'N' ou 'ANULADA' (ignorando espaços e maiúsculas/minúsculas).
-        const finalAnswerUpper = respostaFinal ? respostaFinal.trim().toUpperCase() : '';
+        const finalAnswerUpper = respostaFinal ? String(respostaFinal).trim().toUpperCase() : '';
         const isAnulada = finalAnswerUpper === 'X' || finalAnswerUpper === 'ANULADA' || finalAnswerUpper === 'N';
 
+        const userHadAnswered = respostaUser && respostaUser.trim() !== '';
+        const userWasCorrect = userHadAnswered && respostaUser === respostaFinal;
+
         if (isAnulada) {
-            // REGRA: Questão anulada sempre conta como acerto, mesmo que o usuário tenha deixado em branco.
             resultadoPorMateria[materiaDaQuestao].anuladas++;
             resultadoPorMateria[materiaDaQuestao].acertos++;
+            
+            // Se o usuário tinha respondido e errado, esse erro não deve ser contado.
+            // A lógica original não adicionava o erro, então não precisamos remover.
+            // Esta lógica é para garantir consistência se a ordem de verificação mudar.
+            // O principal é que, sendo anulada, não pode ser erro nem branco.
+
         } else {
-            if (!respostaUser || respostaUser.trim() === '') {
+            if (!userHadAnswered) {
                 resultadoPorMateria[materiaDaQuestao].brancos++;
-            } else if (respostaUser === respostaFinal) {
+            } else if (userWasCorrect) {
                 resultadoPorMateria[materiaDaQuestao].acertos++;
             } else {
                 resultadoPorMateria[materiaDaQuestao].erros++;

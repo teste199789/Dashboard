@@ -29,7 +29,7 @@ const calculateOriginalPerformance = (proof) => {
     };
 };
 
-const SimulateAnnulmentTab = ({ proof }) => {
+const SimulateAnnulmentTab = ({ proof, refreshProof }) => {
     // Carrega a simulação salva do banco de dados na primeira vez
     const initialSimulatedSet = useMemo(() => new Set(proof.simulacaoAnuladas?.split(',').filter(Boolean) || []), [proof.simulacaoAnuladas]);
     const [selectedAnnulments, setSelectedAnnulments] = useState(initialSimulatedSet);
@@ -57,16 +57,19 @@ const SimulateAnnulmentTab = ({ proof }) => {
         let simulatedAcertos = original.acertos;
         let simulatedErros = original.erros;
 
+        const officialAnnulmentValues = ['X', 'N', 'ANULADA'];
+
         selectedAnnulments.forEach(qStr => {
             const userAnswer = userMap.get(qStr);
             const officialAnswer = officialMap.get(qStr);
+            const officialAnswerUpper = officialAnswer ? String(officialAnswer).trim().toUpperCase() : '';
+            const isOfficiallyAnnulled = officialAnnulmentValues.includes(officialAnswerUpper);
 
-            // A questão é considerada anulada para o simulador.
-            // O ponto só é adicionado se o usuário não tinha acertado originalmente.
-            if (userAnswer !== officialAnswer) {
+            // O ponto da anulação só é computado se a questão não foi acertada pelo usuário
+            // E se ela já não era uma questão anulada oficialmente.
+            if (userAnswer !== officialAnswer && !isOfficiallyAnnulled) {
                 // Se o usuário tinha errado (deu uma resposta), o erro é removido.
-                // Isso é crucial para a pontuação líquida.
-                if (userAnswer && userAnswer !== '') { // Verifica se houve uma resposta (não foi em branco)
+                if (userAnswer && userAnswer.trim() !== '') { 
                     simulatedErros--;
                 }
                 // Em ambos os casos (erro ou branco), ele ganha o ponto do acerto.
@@ -102,6 +105,9 @@ const SimulateAnnulmentTab = ({ proof }) => {
             const simulacaoString = Array.from(selectedAnnulments).join(',');
             await api.updateProofDetails(proof.id, { simulacaoAnuladas: simulacaoString });
             alert('Simulação salva com sucesso!');
+            if (refreshProof) {
+                refreshProof();
+            }
         } catch (error) {
             alert('Falha ao salvar a simulação.');
         } finally {
@@ -166,13 +172,20 @@ const SimulateAnnulmentTab = ({ proof }) => {
                             const qStr = String(qNumber);
                             const userAnswer = userAnswersMap.get(qStr);
                             const officialAnswer = officialAnswersMap.get(qStr);
-                            let questionColor = 'bg-gray-100 border-gray-300 text-gray-600';
+                            const officialAnswerUpper = officialAnswer ? String(officialAnswer).trim().toUpperCase() : '';
+                            const isOfficiallyAnnulled = ['X', 'N', 'ANULADA'].includes(officialAnswerUpper);
 
-                            if (userAnswer && officialAnswer && officialAnswer !== 'N') {
+                            let questionColor = 'bg-gray-100 border-gray-300 text-gray-600'; // Cor padrão para em branco
+
+                            if (isOfficiallyAnnulled) {
+                                // Questões anuladas oficialmente contam como acerto e ficam verdes
+                                questionColor = 'bg-green-200 border-green-400 text-green-800';
+                            } else if (userAnswer && officialAnswer) {
+                                // Se não for anulada, verifica acerto/erro
                                 if (userAnswer === officialAnswer) {
-                                    questionColor = 'bg-green-200 border-green-400 text-green-800';
+                                    questionColor = 'bg-green-200 border-green-400 text-green-800'; // Acerto
                                 } else {
-                                    questionColor = 'bg-red-200 border-red-400 text-red-800';
+                                    questionColor = 'bg-red-200 border-red-400 text-red-800'; // Erro
                                 }
                             }
                             

@@ -159,25 +159,17 @@ O arquivo `correcao.js` contém a lógica principal para processar e avaliar as 
 
 ### `corrigirProva(proof)`
 - **Propósito**: Compara as respostas do usuário com o gabarito oficial (definitivo ou, na ausência deste, o preliminar) e calcula o número de acertos, erros, brancos e anuladas por matéria.
-- **Entrada**: `proof` (Object) - Objeto contendo os dados da prova, incluindo:
-    - `totalQuestoes` (Int)
-    - `userAnswers` (String) - Gabarito do usuário.
-    - `gabaritoDefinitivo` (String) - Gabarito definitivo da banca.
-    - `gabaritoPreliminar` (String) - Gabarito preliminar da banca.
-    - `subjects` (Array) - Array de objetos, cada um representando uma matéria com `nome`, `questaoInicio`, `questaoFim`.
 - **Lógica Principal**:
     1. Parseia os gabaritos (`userAnswers`, `gabaritoDefinitivo`, `gabaritoPreliminar`) usando `parseGabarito`.
     2. Inicializa um objeto `resultadoPorMateria` para acumular os resultados de cada disciplina.
     3. Itera por cada questão de `1` a `totalQuestoes`:
         a. Identifica a matéria da questão com base nos intervalos `questaoInicio` e `questaoFim` definidos em `subjects`.
-        b. **Regra de Anulação**: Uma questão é considerada anulada se o `gabaritoDefinitivo` e o `gabaritoPreliminar` existirem e a resposta para a questão for diferente entre eles. Se anulada, conta como `anulada` e também como `acerto` para o usuário naquela matéria.
+        b. **Regra de Anulação**: Uma questão é considerada anulada se sua resposta no gabarito oficial for 'X', 'N' ou 'ANULADA'. Se anulada, conta como `anulada` e também como `acerto`. Um erro que o usuário possa ter cometido nessa questão não é contabilizado.
         c. Se não for anulada:
             i. Se o usuário não respondeu (`!respostaUser`), conta como `branco`.
-            ii. Se `respostaUser` === `respostaDefin` (ou `respostaPrelim`), conta como `acerto`.
+            ii. Se `respostaUser` === `respostaFinal`, conta como `acerto`.
             iii. Caso contrário, conta como `erro`.
 - **Saída**: Objeto `{ resultados: Array, log: Array }`.
-    - `resultados`: Um array de objetos, cada um representando o resultado de uma matéria (ex: `{ disciplina: "Português", acertos: 8, erros: 1, brancos: 1, anuladas: 0 }`).
-    - `log`: Um array para logs de depuração (atualmente retornado vazio).
 
 ### `calculateOverallPerformance(proof, calculatedResults)`
 - **Propósito**: Calcula a pontuação percentual geral da prova.
@@ -201,32 +193,42 @@ O código-fonte do frontend está organizado da seguinte maneira para promover m
     - `apiService.js`: Contém funções para realizar chamadas HTTP para o backend (ex: buscar provas, criar prova, corrigir prova).
 - **`assets/`**: Arquivos estáticos como imagens e SVGs.
 - **`components/`**: Componentes React reutilizáveis usados em várias partes da aplicação.
-    - `common/`: Subdiretório para componentes genéricos e utilitários (ex: `Modal.jsx`, `LoadingSpinner.jsx`, `ThemeToggle.jsx`, `ResultGrid.jsx`).
-    - `icons/`: Componentes de ícones SVG.
-- **`contexts/`**:
-    - `ProofsContext.jsx`: Gerencia o estado global relacionado às provas (lista de provas, carregamento, funções de CRUD e correção).
-    - `ThemeContext.jsx`: Gerencia o tema da aplicação (claro/escuro) e sua persistência.
-- **`hooks/`**:
-    - `useProofs.js`: Hook customizado que consome o `ProofsContext` para facilitar o acesso aos dados e funções das provas nos componentes.
+    - **`common/`**: Componentes genéricos de UI (ex: `Modal`, `Button`, `Card`).
+        - `ResultGrid.jsx`: Renderiza o "Gabarito Visual" nas abas de resultado. Questões anuladas oficialmente são exibidas em verde se o `gabaritoDefinitivo` estiver presente, indicando um acerto consolidado.
+    - **`icons/`**: Ícones usados na aplicação.
+    - `ProofForm.jsx`: Formulário em wizard para criar e editar concursos e simulados.
+- **`contexts/`**: Provedores de contexto para gerenciamento de estado global (`ProofsContext`, `ThemeContext`).
+- **`hooks/`**: Hooks customizados, como `useProofs`, que encapsula a lógica de manipulação de dados de provas.
 - **`layouts/`**: Componentes que definem a estrutura visual das páginas.
     - `MainLayout.jsx`: Layout principal com barra de navegação lateral e cabeçalho.
     - `FocusedLayout.jsx`: Layout simplificado, geralmente usado para formulários ou páginas de edição, sem a navegação principal.
-- **`pages/`**: Componentes que representam as diferentes páginas/rotas da aplicação.
-    - `Dashboard.jsx`: Página inicial com resumo do desempenho.
-    - `AddProof.jsx`, `AddSimulado.jsx`: Formulários para adicionar novas provas e simulados.
-    - `ProofDetail.jsx`: Página para visualizar e gerenciar os detalhes de uma prova específica, contendo abas.
-    - `Controle.jsx`: Página com a tabela de controle de concursos.
-    - `MeusConcursos.jsx`: Página que exibe a evolução do desempenho através de um gráfico de linha e uma visão geral dos concursos e simulados em formato de cards. Esta página contém abas para alternar entre as visualizações.
-    - `tabs/`: Contém os componentes que funcionam como "abas" em diferentes partes da aplicação.
-        - Dentro de `ProofDetail.jsx`: `InfoTab.jsx`, `OfficialKeysTab.jsx`, `ResultTab.jsx`, etc., para gerenciar uma prova específica.
-        - Dentro de `MeusConcursos.jsx`: `DesempenhoTab.jsx` (exibe o gráfico de evolução) e `VisaoGeralTab.jsx` (exibe os cards de concursos/simulados).
-- **`utils/`**: Funções utilitárias diversas.
-    - `calculators.js`: Funções para cálculos específicos do frontend.
-    - `formatters.js`: Funções para formatação de dados (ex: datas, percentuais).
-    - `styleHelpers.js`: Funções auxiliares de estilização, como `getPerformanceColor`, que padroniza as cores de feedback visual (vermelho, amarelo, verde) com base no desempenho.
+- **`pages/`**: Componentes que representam páginas ou seções principais da aplicação.
+    - `Dashboard.jsx`: A página inicial.
+    - `ProofDetail.jsx`: Página de detalhes de uma prova, que gerencia as abas de conteúdo.
+    - **`tabs/`**: Componentes para cada uma das abas da página `ProofDetail`.
+        - `SimulateAnnulmentTab.jsx`: Permite ao usuário selecionar questões para simular o impacto de anulações. A seleção é salva no banco de dados e persistida entre as sessões. A grade visual indica em verde as questões já anuladas oficialmente, e a lógica de cálculo previne que a pontuação simulada ultrapasse o máximo da prova.
+- **`utils/`**: Funções utilitárias, como formatação de datas e cálculos.
 - **`App.css`, `index.css`**: Arquivos CSS globais e de configuração do Tailwind CSS.
 
-## 7. Guia de Instalação e Execução
+## 7. Fluxos de Trabalho do Usuário
+
+### Cadastro e Correção de uma Prova
+1.  **Criação**: O usuário clica em "Adicionar Concurso" ou "Adicionar Simulado".
+2.  **Preenchimento do Formulário**: O formulário `ProofForm` é exibido, e o usuário preenche os dados em etapas (wizard).
+3.  **Detalhamento (Página `ProofDetail`)**: Após a criação, o usuário é direcionado para a página de detalhes, onde pode:
+    - Cadastrar as matérias (`InfoTab`).
+    - Inserir os gabaritos da banca (`OfficialKeysTab`).
+    - Inserir suas próprias respostas (`UserAnswersTab`).
+4.  **Correção**: Na aba `ResultTab`, o usuário clica em "Corrigir".
+5.  **Visualização do Resultado**: A página é atualizada para exibir o desempenho detalhado e o `ResultGrid` com o gabarito visual colorido.
+
+### Simulação de Anulações
+1.  **Acesso**: Na página de detalhes, o usuário navega para a aba `SimulateAnnulmentTab`.
+2.  **Seleção**: O usuário clica nos números das questões que deseja simular como anuladas.
+3.  **Cálculo em Tempo Real**: O card "Pontuação Simulada" é atualizado instantaneamente.
+4.  **Persistência**: O usuário clica em "Salvar Simulação". A seleção é enviada para o backend. Ao retornar a esta tela, as seleções salvas são recarregadas.
+
+## 8. Guia de Instalação e Execução
 Para configurar e executar o projeto em um ambiente de desenvolvimento local:
 
 **Pré-requisitos**:
@@ -278,7 +280,7 @@ Para configurar e executar o projeto em um ambiente de desenvolvimento local:
 
 **Observação**: Certifique-se de que ambos os servidores (frontend e backend) estejam em execução simultaneamente para que a aplicação funcione corretamente.
 
-## 8. Log de Alterações (Changelog)
+## 9. Log de Alterações (Changelog)
 Esta seção documenta as principais mudanças e melhorias implementadas no projeto ao longo do tempo.
 
 - **v1.4.0 (19/06/2025)**
