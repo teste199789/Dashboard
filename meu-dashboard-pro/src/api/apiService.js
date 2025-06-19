@@ -4,11 +4,25 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 // --- Funções para a API de Provas ---
 
 export const getProofs = async () => {
-    const response = await fetch(`${API_URL}/proofs`);
-    if (!response.ok) {
-        throw new Error(`Erro de HTTP! Status: ${response.status}`);
+    console.log(`[Frontend] Fazendo requisição para: ${API_URL}/proofs`);
+    try {
+        const response = await fetch(`${API_URL}/proofs`);
+        console.log(`[Frontend] Response status: ${response.status}`);
+        console.log(`[Frontend] Response ok: ${response.ok}`);
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`[Frontend] Erro na resposta: ${errorText}`);
+            throw new Error(`Erro de HTTP! Status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log(`[Frontend] Dados recebidos:`, data);
+        return data;
+    } catch (error) {
+        console.error(`[Frontend] Erro na função getProofs:`, error);
+        throw error;
     }
-    return response.json();
 };
 
 export const addProof = async (newProof) => {

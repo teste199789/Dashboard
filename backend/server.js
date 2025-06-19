@@ -6,8 +6,21 @@ const { corrigirProva, calculateOverallPerformance } = require('./utils/correcao
 const app = express();
 const prisma = new PrismaClient();
 
-app.use(cors());
+// Configuração mais específica do CORS
+app.use(cors({
+    origin: ['http://localhost:5173', 'http://localhost:3000', 'http://127.0.0.1:5173'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true
+}));
+
 app.use(express.json());
+
+// Middleware de log para debug
+app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+    console.log('Headers:', req.headers);
+    next();
+});
 
 const PORT = process.env.PORT || 3001;
 
@@ -48,13 +61,17 @@ app.post('/api/proofs', async (req, res) => {
 
 // GET /api/proofs (Busca todas as provas e simulados)
 app.get('/api/proofs', async (req, res) => {
+    console.log('[API] Iniciando busca de provas...');
     try {
+        console.log('[API] Executando query no banco de dados...');
         const proofs = await prisma.proof.findMany({
             include: { results: true, subjects: true },
             orderBy: { data: 'desc' },
         });
+        console.log(`[API] Encontradas ${proofs.length} provas`);
         res.json(proofs);
     } catch (error) {
+        console.error('[API] Erro ao buscar provas:', error);
         res.status(500).json({ error: "Não foi possível buscar as provas." });
     }
 });
@@ -95,6 +112,8 @@ app.put('/api/proofs/:id/details', async (req, res) => {
         const {
             gabaritoPreliminar, gabaritoDefinitivo, userAnswers,
             subjects, totalQuestoes, titulo, banca, data, inscritos, simulacaoAnuladas, orgao, cargo, notaDiscursiva,
+            // CAMPOS DE SIMULAÇÃO
+            simulacaoNotaDeCorte, simulacaoMedia, simulacaoDesvioPadrao,
             // NOVOS CAMPOS
             resultadoObjetiva, resultadoDiscursiva, resultadoFinal
         } = req.body;
@@ -113,11 +132,16 @@ app.put('/api/proofs/:id/details', async (req, res) => {
         if (orgao !== undefined) dataToUpdate.orgao = orgao;
         if (cargo !== undefined) dataToUpdate.cargo = cargo;
         if (notaDiscursiva !== undefined) dataToUpdate.notaDiscursiva = notaDiscursiva ? parseFloat(notaDiscursiva) : null;
+        
+        // CAMPOS DE SIMULAÇÃO
+        if (simulacaoNotaDeCorte !== undefined) dataToUpdate.simulacaoNotaDeCorte = simulacaoNotaDeCorte !== null ? parseFloat(simulacaoNotaDeCorte) : null;
+        if (simulacaoMedia !== undefined) dataToUpdate.simulacaoMedia = simulacaoMedia !== null ? parseFloat(simulacaoMedia) : null;
+        if (simulacaoDesvioPadrao !== undefined) dataToUpdate.simulacaoDesvioPadrao = simulacaoDesvioPadrao !== null ? parseFloat(simulacaoDesvioPadrao) : null;
+
         // NOVOS CAMPOS
         if (resultadoObjetiva !== undefined) dataToUpdate.resultadoObjetiva = resultadoObjetiva;
         if (resultadoDiscursiva !== undefined) dataToUpdate.resultadoDiscursiva = resultadoDiscursiva;
         if (resultadoFinal !== undefined) dataToUpdate.resultadoFinal = resultadoFinal;
-
 
         if (subjects) {
             let currentQuestion = 1;

@@ -283,6 +283,13 @@ Para configurar e executar o projeto em um ambiente de desenvolvimento local:
 ## 9. Log de Alterações (Changelog)
 Esta seção documenta as principais mudanças e melhorias implementadas no projeto ao longo do tempo.
 
+- **v1.5.1 (19/06/2025)**
+    - **Correção Crítica de Conectividade Backend-Frontend**:
+        - **Configuração CORS Aprimorada**: Corrigida a configuração do CORS no backend para aceitar especificamente as origens do frontend (`http://localhost:5173`, `http://localhost:3000`, `http://127.0.0.1:5173`), resolvendo erros HTTP 500 na busca de dados.
+        - **Logs de Debug Estruturados**: Implementados logs detalhados tanto no backend quanto no frontend para facilitar identificação de problemas de conectividade. Adicionado middleware no backend para registrar todas as requisições com timestamp e headers.
+        - **Configuração de Ambiente Frontend**: Criado arquivo `.env` no frontend com `VITE_API_URL=http://localhost:3001/api` para garantir conexão correta com a API.
+        - **Tratamento de Erros Robusto**: Melhorado o tratamento de erros na função `getProofs` do `apiService.js` com logs detalhados para facilitar debug.
+
 - **v1.5.0 (19/06/2025)**
     - **Melhoria da Experiência do Usuário (UX) no Detalhe da Prova**:
         - **Fluxo de Cadastro Guiado**: O sistema agora exige que o usuário cadastre as matérias de uma prova antes de habilitar as abas de "Gabaritos", "Resultado", "Simulação" e "Ranking". Isso previne erros de fluxo e garante que a estrutura da prova seja definida primeiro.

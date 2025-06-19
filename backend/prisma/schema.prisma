@@ -23,6 +23,9 @@ model Proof {
   userAnswers        String?
   simulacaoAnuladas  String?
   type               String    @default("CONCURSO")
+  simulacaoMedia     Float?
+  simulacaoDesvioPadrao Float?
+  simulacaoNotaDeCorte Float?
 
   orgao              String?   
   cargo              String?   
