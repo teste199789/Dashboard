@@ -34,21 +34,24 @@ const DesempenhoTab = ({ concursos }) => {
     const chartData = {
         labels: sortedConcursos.map(c => {
             const year = c.data ? new Date(c.data).getFullYear() : 'N/A';
-            return [`${c.titulo}`, `${year}`];
+            // Alterado para usar 'orgao' e 'ano', conforme solicitado.
+            return [`${c.orgao || c.titulo}`, `${year}`];
         }),
         datasets: [
             {
                 label: 'Aproveitamento (%)',
                 data: sortedConcursos.map(c => c.aproveitamento),
                 fill: true,
-                backgroundColor: 'rgba(0, 191, 255, 0.2)',
-                borderColor: 'rgb(0, 191, 255)',
+                // Cor de preenchimento ciano, como na imagem
+                backgroundColor: 'rgba(56, 189, 248, 0.15)', 
+                // Cor da linha ciano
+                borderColor: 'rgba(56, 189, 248, 1)', 
                 tension: 0.4,
-                pointRadius: 6,
-                pointBackgroundColor: 'rgb(0, 191, 255)',
+                pointRadius: 5,
+                pointBackgroundColor: 'rgba(56, 189, 248, 1)',
                 pointBorderColor: '#fff',
                 pointBorderWidth: 2,
-                pointHoverRadius: 8,
+                pointHoverRadius: 7,
             }
         ]
     };
@@ -64,18 +67,29 @@ const DesempenhoTab = ({ concursos }) => {
                 display: true,
                 text: 'Desempenho nos concursos',
                 padding: {
-                    bottom: 30
+                    bottom: 20
                 },
                 font: {
-                    size: 18,
-                    weight: 'normal'
+                    size: 16,
+                    weight: 'bold'
                 },
-                color: '#007bff'
+                // Cor do título mais neutra
+                color: '#0ea5e9' 
             },
             tooltip: {
                 callbacks: {
                     title: function(context) {
                         return context[0].label.replace(',', ' ');
+                    },
+                    label: function(context) {
+                        let label = context.dataset.label || '';
+                        if (label) {
+                            label += ': ';
+                        }
+                        if (context.parsed.y !== null) {
+                            label += `${context.parsed.y.toFixed(2)}%`;
+                        }
+                        return label;
                     }
                 }
             }
@@ -89,7 +103,8 @@ const DesempenhoTab = ({ concursos }) => {
                     text: '% aproveitamento'
                 },
                 grid: {
-                    color: 'rgba(0, 0, 0, 0.1)',
+                    // Linhas do grid mais sutis
+                    color: 'rgba(200, 200, 200, 0.1)',
                 }
             },
             x: {
@@ -101,11 +116,15 @@ const DesempenhoTab = ({ concursos }) => {
     };
 
     return (
-        <div className="p-4 md:p-6 lg:p-8">
-             <div className="text-center mb-2">
-                <h2 className="text-3xl font-bold">{concursos.length} concursos</h2>
+        <div className="bg-white dark:bg-gray-800/50 p-4 sm:p-6 rounded-2xl shadow-sm">
+            {/* Título principal movido para cá, seguindo a imagem */}
+            <div className="text-center mb-1">
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100">
+                    {concursos.length} {concursos.length === 1 ? 'concurso' : 'concursos'}
+                </h2>
             </div>
-            <div className="relative h-[350px]">
+            {/* O título do gráfico agora funciona como subtítulo */}
+            <div className="relative h-[300px] sm:h-[400px]">
                 <Line data={chartData} options={chartOptions} />
             </div>
         </div>

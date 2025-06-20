@@ -692,3 +692,47 @@ Usuários precisavam configurar manualmente o tipo de pontuação (líquida vs b
 - ✅ **Interface educativa com dicas por banca**
 - ✅ **Sugestões automáticas de configuração**
 - ✅ **Migração automática de dados existentes**
+
+### Correção de Conectividade e Salvamento de Dados - Versão 1.8.2
+
+#### Correções Críticas Implementadas (Janeiro 2025)
+
+##### 🐛 **Correção de Conectividade (CORS)**
+- **Problema**: O frontend não conseguia se comunicar com o backend devido a erros de CORS (`NetworkError`), mesmo com uma configuração básica existente.
+- **Solução**:
+  - Implementada uma **configuração de CORS mais robusta** no `server.js` usando uma função de validação de origem (`origin function`) e uma `whitelist` de domínios permitidos.
+  - Adicionado um **middleware de log** para registrar todas as requisições recebidas, facilitando a depuração e confirmando que as requisições do frontend estavam (ou não) chegando ao servidor.
+
+##### 💾 **Correção no Salvamento de Detalhes da Prova**
+- **Problema**: Após resolver o CORS, salvar as matérias de uma prova falhava com um erro genérico no frontend e um `ReferenceError: resultadoFinal is not defined` no backend.
+- **Solução**:
+  - **Lógica de Atualização Atômica**: A rota `PUT /api/proofs/:id/details` foi refatorada para usar `prisma.$transaction`. Isso garante que a atualização dos dados da prova e a recriação de suas matérias associadas ocorram de forma atômica, prevenindo estados de dados inconsistentes.
+  - **Correção do `ReferenceError`**: A variável `resultadoFinal` foi adicionada à desestruturação do corpo da requisição (`req.body`), resolvendo o erro que impedia a execução da lógica de salvamento.
+  - **Melhora nas Mensagens de Erro**: As mensagens de erro no backend foram aprimoradas para fornecer mais detalhes no console em caso de falhas futuras.
+
+##### ✅ **Resultados Obtidos**
+- ✅ **Conectividade Restaurada**: Frontend e backend se comunicam sem erros de CORS.
+- ✅ **Salvamento Confiável**: Os detalhes da prova e as matérias são salvos de forma segura e consistente.
+- ✅ **Maior Robustez**: O backend está mais resiliente a erros durante as atualizações de dados.
+- ✅ **Depuração Facilitada**: Logs aprimorados agilizam a identificação de futuros problemas.
+
+### Melhoria Visual do Gráfico de Desempenho - Versão 1.8.3
+
+#### Aprimoramentos de UX/UI (Janeiro 2025)
+
+##### 📊 **Gráfico de Desempenho Redesenhado**
+- **Problema**: O gráfico de desempenho padrão era funcional, mas visualmente básico e não estava alinhado com uma estética mais moderna.
+- **Solução**:
+  - **Estilo Visual Moderno**: O gráfico foi completamente redesenhado para corresponder a um design de referência, utilizando a biblioteca `react-chartjs-2`.
+  - **Linha Suavizada e Preenchimento**: A linha de desempenho agora é uma curva suave (`tension: 0.4`) e possui uma área de preenchimento com um gradiente ciano (`backgroundColor: 'rgba(56, 189, 248, 0.15)'`), tornando o visual mais agradável.
+  - **Cores e Pontos Ajustados**: As cores da linha, dos pontos e do preenchimento foram padronizadas para um tom de azul ciano, e os pontos de dados foram estilizados para melhor visibilidade.
+
+##### 📋 **Clareza da Informação Aprimorada**
+- **Hierarquia Visual**: O título com a contagem total de concursos foi movido para uma posição de maior destaque acima do gráfico, enquanto o título do gráfico ("Desempenho nos concursos") agora funciona como um subtítulo, melhorando a estrutura da informação.
+- **Rótulos do Eixo X Contextualizados**: Os rótulos do eixo X foram alterados para exibir o **órgão** do concurso e o **ano**, fornecendo informações mais diretas e relevantes sobre cada ponto de dados, em vez do título completo ou da banca.
+- **Grid Sutil**: As linhas de grade do eixo Y foram tornadas mais sutis para reduzir o ruído visual e focar a atenção nos dados.
+
+##### ✅ **Resultados Obtidos**
+- ✅ **Visual Profissional**: O gráfico agora possui uma aparência moderna e limpa.
+- ✅ **Leitura Facilitada**: As informações são apresentadas de forma mais clara e hierárquica.
+- ✅ **Contexto Imediato**: Os rótulos do gráfico fornecem informações mais relevantes, melhorando a experiência do usuário.

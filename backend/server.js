@@ -44,12 +44,29 @@ const parseFlexibleInt = (value) => {
     return isNaN(num) ? null : num;
 };
 
-// Configuração do CORS
-app.use(cors({
-    origin: ['http://localhost:5173', 'http://localhost:3000', 'http://127.0.0.1:5173'],
+// Middleware para logar todas as requisições
+app.use((req, res, next) => {
+    const origin = req.headers.origin;
+    console.log(`[Backend] Recebida requisição: ${req.method} ${req.url} de ${origin}`);
+    next();
+});
+
+// Configuração do CORS mais robusta
+const whitelist = ['http://localhost:5173', 'http://localhost:3000', 'http://127.0.0.1:5173'];
+const corsOptions = {
+    origin: function (origin, callback) {
+        if (whitelist.indexOf(origin) !== -1 || !origin) {
+            callback(null, true);
+        } else {
+            console.error(`[Backend] CORS: Origem ${origin} não permitida.`);
+            callback(new Error('Origem não permitida pelo CORS'));
+        }
+    },
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true
-}));
+};
+
+app.use(cors(corsOptions));
 
 app.use(express.json());
 
@@ -144,7 +161,7 @@ app.put('/api/proofs/:id/details', async (req, res) => {
         const {
             subjects, totalQuestoes, titulo, banca, data, inscritos, simulacaoAnuladas,
             gabaritoPreliminar, gabaritoDefinitivo, userAnswers, orgao, cargo, 
-            notaDiscursiva, resultadoObjetiva, resultadoDiscursiva, type,
+            notaDiscursiva, resultadoObjetiva, resultadoDiscursiva, resultadoFinal, type,
             simulacaoMedia, simulacaoDesvioPadrao, simulacaoNotaDeCorte,
             // NOVOS CAMPOS - Configurações avançadas de banca
             regraAnulacao, valorAnulacao, formulaAnulacao, tipoNotaCorte, precisaoDecimal,
@@ -226,8 +243,19 @@ app.put('/api/proofs/:id/details', async (req, res) => {
         if (precisaoDecimal !== undefined) dataToUpdate.precisaoDecimal = parseInt(precisaoDecimal, 10);
         if (tipoPontuacao !== undefined) dataToUpdate.tipoPontuacao = tipoPontuacao;
 
-        // Atualizar matérias se fornecidas
-        if (subjects) {
+        // A lógica de atualização foi encapsulada em uma transação para garantir a atomicidade.
+        const transactionSteps = [];
+
+        // 1. Atualiza a prova com os dados simples
+        transactionSteps.push(
+            prisma.proof.update({
+                where: { id: parseInt(id) },
+                data: dataToUpdate,
+            })
+        );
+        
+        // 2. Se houver matérias, deleta as antigas e cria as novas
+        if (subjects && Array.isArray(subjects)) {
             let currentQuestion = 1;
             const subjectsWithRanges = subjects.map(s => {
                 const start = currentQuestion;
@@ -237,29 +265,29 @@ app.put('/api/proofs/:id/details', async (req, res) => {
                     nome: s.nome,
                     questoes: parseInt(s.questoes) || 0,
                     questaoInicio: start,
-                    questaoFim: end
+                    questaoFim: end,
+                    proofId: parseInt(id) // Garante a associação correta
                 };
             });
             
-            await prisma.subject.deleteMany({ where: { proofId: parseInt(id) } });
-            dataToUpdate.subjects = { create: subjectsWithRanges };
+            // Adiciona os passos da transação
+            transactionSteps.push(prisma.subject.deleteMany({ where: { proofId: parseInt(id) } }));
+            transactionSteps.push(prisma.subject.createMany({ data: subjectsWithRanges }));
         }
 
-        const updatedProof = await prisma.proof.update({ 
-            where: { id: parseInt(id) }, 
-            data: dataToUpdate 
-        });
-        
-        console.log(`[BACKEND] Prova ${id} atualizada com sucesso:`, {
-            simulacaoMedia: updatedProof.simulacaoMedia,
-            simulacaoNotaDeCorte: updatedProof.simulacaoNotaDeCorte,
-            simulacaoDesvioPadrao: updatedProof.simulacaoDesvioPadrao
+        // Executa a transação
+        await prisma.$transaction(transactionSteps);
+
+        // Busca a prova atualizada para retornar ao frontend
+        const updatedProof = await prisma.proof.findUnique({
+            where: { id: parseInt(id) },
+            include: { subjects: true, results: true },
         });
         
         res.json(updatedProof);
     } catch (error) {
-        console.error("Erro ao salvar detalhes:", error);
-        res.status(500).json({ error: "Não foi possível salvar os detalhes da prova." });
+        console.error(`[Backend] Erro ao atualizar detalhes da prova ${req.params.id}:`, error);
+        res.status(500).json({ error: "Não foi possível salvar os detalhes da prova. Verifique os dados e tente novamente." });
     }
 });
 
