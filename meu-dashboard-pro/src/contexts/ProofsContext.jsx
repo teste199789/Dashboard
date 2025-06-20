@@ -40,6 +40,14 @@ export const ProofsProvider = ({ children }) => {
         return newProof;
     };
 
+    const handleUpdateProof = async (proofId, updatedData) => {
+        const updatedProof = await api.updateProof(proofId, updatedData);
+        setProofs(currentProofs => 
+            currentProofs.map(p => (p.id === proofId ? updatedProof : p))
+        );
+        return updatedProof;
+    };
+
     const handleGradeProof = async (proofId) => {
         await api.gradeProof(proofId);
         const updatedProof = await api.getProofById(proofId);
@@ -142,6 +150,7 @@ export const ProofsProvider = ({ children }) => {
         setDashboardFilter,
         fetchProofs,
         handleAddProof,
+        handleUpdateProof,
         openDeleteModal,
         closeDeleteModal,
         handleDeleteProof,

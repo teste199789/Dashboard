@@ -85,6 +85,22 @@ export const gradeProof = async (id) => {
     return response.json();
 };
 
+export const updateProof = async (id, proofData) => {
+    const response = await fetch(`${API_URL}/proofs/${id}/details`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(proofData),
+    });
+    if (!response.ok) {
+        const errorBody = await response.text();
+        console.error("Erro ao atualizar prova:", errorBody);
+        throw new Error('Falha ao atualizar prova.');
+    }
+    return await response.json();
+};
+
 // --- Função para a API da Gemini ---
 
 export const getAIAnalysis = async (disciplinas, totais) => {

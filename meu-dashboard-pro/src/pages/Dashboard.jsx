@@ -8,6 +8,7 @@ import ConfirmationModal from '../components/common/ConfirmationModal';
 import ContestActions from '../components/common/ContestActions';
 import StatusBadge, { getStatus } from '../components/common/StatusBadge';
 import ProgressBar from '../components/common/ProgressBar';
+import ProofForm from '../components/ProofForm';
 
 const SortIcon = ({ isSorted }) => {
     if (!isSorted) return <span className="w-4 h-4 ml-1"></span>; // Placeholder for alignment
@@ -19,11 +20,36 @@ const SortIcon = ({ isSorted }) => {
 
 const Dashboard = () => {
     const navigate = useNavigate();
-    const { proofs, consolidatedData, isLoading, dashboardFilter, setDashboardFilter, modalState, closeDeleteModal, handleDeleteProof, handleGradeProof } = useProofs();
+    const { 
+        proofs, 
+        consolidatedData, 
+        isLoading, 
+        dashboardFilter, 
+        setDashboardFilter, 
+        modalState, 
+        openDeleteModal,
+        closeDeleteModal, 
+        handleDeleteProof, 
+        handleGradeProof 
+    } = useProofs();
     const [isGrading, setIsGrading] = useState(false);
     const [sorting, setSorting] = useState([]);
     const [globalFilter, setGlobalFilter] = useState('');
     const [columnFilters, setColumnFilters] = useState([]);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedProof, setSelectedProof] = useState(null);
+    const [initialStep, setInitialStep] = useState(0);
+
+    const handleOpenModal = useCallback((proof, step = 0) => {
+        setSelectedProof(proof);
+        setInitialStep(step);
+        setIsModalOpen(true);
+    }, []);
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+        setSelectedProof(null);
+    };
 
     const handleNavigateToProof = useCallback((proofId, initialTab = '') => {
         const path = `/minhas-provas/${proofId}${initialTab ? `?tab=${initialTab}` : ''}`;
@@ -38,11 +64,6 @@ const Dashboard = () => {
             setIsGrading(false);
         }
     }, [handleGradeProof]);
-
-    const openDeleteModal = useCallback((id) => {
-        // Esta função será definida via context se necessário
-        console.log('Delete modal for:', id);
-    }, []);
 
     const columns = useMemo(() => [
         {
@@ -97,25 +118,19 @@ const Dashboard = () => {
             },
         },
         {
-            id: 'nextAction',
-            accessorFn: (row) => getStatus(row).text,
-            header: 'Próxima Ação',
-            cell: ({ row }) => <StatusBadge proof={row.original} />,
-        },
-        {
             id: 'actions',
             header: 'Ações',
             cell: ({ row }) => (
                 <ContestActions 
                     proof={row.original} 
-                    onNavigateToProof={handleNavigateToProof}
+                    onEdit={handleOpenModal}
                     onGrade={onGrade}
                     onDelete={openDeleteModal}
                     isGrading={isGrading}
                 />
             ),
         },
-    ], [handleNavigateToProof, onGrade, openDeleteModal, isGrading]);
+    ], [handleNavigateToProof, onGrade, openDeleteModal, isGrading, handleOpenModal]);
 
     const table = useReactTable({
         data: proofs,
@@ -138,15 +153,6 @@ const Dashboard = () => {
         const bancas = new Set(proofs.map(p => p.banca).filter(Boolean));
         return ['Todas', ...Array.from(bancas)];
     }, [proofs]);
-
-    const filterableStatus = [
-        'Todos',
-        'Finalizado', 
-        'Lançar Resultado', 
-        'Pronto para Corrigir', 
-        'Pendente Gabarito Oficial', 
-        'Pendente Meu Gabarito'
-    ];
 
     if (isLoading) {
         return <LoadingSpinner />;
@@ -220,30 +226,21 @@ const Dashboard = () => {
                         <select
                             value={table.getColumn('banca')?.getFilterValue() || 'Todas'}
                             onChange={e => table.getColumn('banca')?.setFilterValue(e.target.value === 'Todas' ? null : e.target.value)}
-                             className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm"
-                        >
-                            {filterableBancas.map(banca => <option key={banca} value={banca}>{banca}</option>)}
-                        </select>
-
-                        {/* Filtro por Status */}
-                         <select
-                            value={table.getColumn('nextAction')?.getFilterValue() || 'Todos'}
-                            onChange={e => table.getColumn('nextAction')?.setFilterValue(e.target.value === 'Todos' ? null : e.target.value)}
                             className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm"
                         >
-                            {filterableStatus.map(status => <option key={status} value={status}>{status}</option>)}
+                            {filterableBancas.map(banca => <option key={banca} value={banca}>{banca}</option>)}
                         </select>
                     </div>
                 </div>
                 <div className="overflow-x-auto">
                     <table className="w-full">
-                        <thead className="bg-gray-50 dark:bg-gray-700">
+                        <thead className="bg-teal-200">
                             {table.getHeaderGroups().map(headerGroup => (
                                 <tr key={headerGroup.id}>
                                     {headerGroup.headers.map(header => (
                                         <th
                                             key={header.id}
-                                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                                            className="px-6 py-3 text-left text-sm font-semibold text-gray-800"
                                             onClick={header.column.getToggleSortingHandler()}
                                             style={{ cursor: header.column.getCanSort() ? 'pointer' : 'default' }}
                                         >
@@ -259,13 +256,13 @@ const Dashboard = () => {
                                 </tr>
                             ))}
                         </thead>
-                        <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                        <tbody className="bg-white dark:bg-gray-800">
                             {table.getRowModel().rows.map(row => (
-                                <tr key={row.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                <tr key={row.id} className="even:bg-gray-100 dark:even:bg-gray-900/50 hover:bg-teal-50 dark:hover:bg-teal-900/50">
                                     {row.getVisibleCells().map(cell => (
                                         <td
                                             key={cell.id}
-                                            className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100"
+                                            className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200"
                                         >
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </td>
@@ -301,6 +298,16 @@ const Dashboard = () => {
                     </div>
                 </div>
             </div>
+
+            {isModalOpen && (
+                <ProofForm
+                    isOpen={isModalOpen}
+                    onClose={handleCloseModal}
+                    proofData={selectedProof}
+                    type={selectedProof?.type}
+                    initialStep={initialStep}
+                />
+            )}
 
             {/* Confirmation Modal */}
             <ConfirmationModal

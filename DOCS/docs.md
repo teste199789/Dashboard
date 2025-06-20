@@ -298,6 +298,7 @@ Esta seção documenta as principais mudanças e melhorias implementadas no proj
         - **Status Inteligente de Próxima Ação**: Foi introduzida a coluna "Próxima Ação", que utiliza badges coloridos para indicar o estado de cada concurso (ex: "Pendente Meu Gabarito", "Pronto para Corrigir", "Finalizado"), guiando o usuário no seu fluxo de trabalho.
         - **Filtros Avançados e Busca**: A tabela agora conta com um campo de busca global e filtros específicos por "Banca" e "Próxima Ação", permitindo uma análise de dados muito mais granular e poderosa.
         - **Ordenação por Colunas**: Todas as colunas agora são ordenáveis, facilitando a análise de tendências ao longo do tempo.
+        - **Unificação Visual**: O estilo da tabela foi alinhado ao da seção "Dados Consolidados", com cabeçalho verde-azulado e linhas zebradas para maior consistência visual.
 
 - **v1.6.0 (19/06/2025)**
     - **Refatoração da Interface e Correção de Bugs Críticos**:
@@ -385,6 +386,13 @@ Esta seção documenta as principais mudanças e melhorias implementadas no proj
 - Redução significativa de previsões excessivamente otimistas
 - Melhor alinhamento com estatísticas reais de concursos
 - Margem de erro adaptativa baseada no contexto do concurso
+
+#### ✅ **Resultados Obtidos**
+- ✅ **Nenhuma informação cortada**: Todas as labels visíveis
+- ✅ **Layout responsivo**: Funciona em diferentes tamanhos de tela
+- ✅ **Espaçamento adequado**: Elementos bem distribuídos
+- ✅ **Legibilidade otimizada**: Fontes e offsets balanceados
+- ✅ **Experiência consistente**: Visual limpo e profissional
 
 ## Versão 1.7.2 - Correção de Salvamento de Valores Decimais
 

@@ -8,7 +8,7 @@ const BANCAS_PREDEFINIDAS = ["Cespe/Cebraspe", "FGV", "FCC", "Quadrix", "IBFC", 
 const RESULTADOS_POSSIVEIS = ["Aprovado", "Classificado", "Reprovado", "Eliminado"];
 
 const ProofFormContent = ({ proofData, type = 'CONCURSO', onSave, initialStep = 1 }) => {
-    const { handleAddProof, fetchProofs } = useProofs();
+    const { handleAddProof, handleUpdateProof } = useProofs();
     const [isSaving, setIsSaving] = useState(false);
     const [currentStep, setCurrentStep] = useState(initialStep);
 
@@ -67,18 +67,21 @@ const ProofFormContent = ({ proofData, type = 'CONCURSO', onSave, initialStep = 
                 notaDiscursiva: formData.notaDiscursiva ? parseFloat(formData.notaDiscursiva) : null,
                 type 
             };
+            
+            let savedProof;
             if (proofData?.id) {
-                await api.updateProofDetails(proofData.id, dataToSave);
+                savedProof = await handleUpdateProof(proofData.id, dataToSave);
                 toast.success("Dados atualizados com sucesso!", { id: toastId });
             } else {
-                await handleAddProof(dataToSave);
+                savedProof = await handleAddProof(dataToSave);
                 toast.success(`${type === 'CONCURSO' ? 'Concurso' : 'Simulado'} criado com sucesso!`, { id: toastId });
             }
-            await fetchProofs();
+
             if (onSave) {
-                onSave();
+                onSave(savedProof);
             }
-        } catch {
+        } catch(e) {
+            console.error(e);
             toast.error(`Falha ao salvar ${type === 'CONCURSO' ? 'concurso' : 'simulado'}.`, { id: toastId });
         } finally {
             setIsSaving(false);
