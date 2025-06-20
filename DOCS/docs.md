@@ -774,3 +774,12 @@ Usuários precisavam configurar manualmente o tipo de pontuação (líquida vs b
 - ✅ **Interface Mais Limpa**: Menos opções na tela de configuração, tornando a escolha do usuário mais direta.
 - ✅ **Código Simplificado**: O backend ficou mais enxuto e fácil de manter com a remoção de uma lógica complexa.
 - ✅ **Experiência Focada**: O usuário é guiado para as configurações mais relevantes e utilizadas.
+
+## 9. Histórico de Alterações Recentes
+
+### Melhorias no Card de Resumo de Desempenho (`ResultTab`)
+Para fornecer uma visão mais clara e imediata do resultado, o card de resumo de desempenho na aba "Resultado Final" foi reestruturado significativamente.
+
+1.  **Destaque para a Pontuação Final**: A pontuação líquida total foi movida para o topo do card, recebendo o maior destaque visual. Ela agora é o primeiro item que o usuário vê, com uma fonte grande e uma linha divisória que a separa dos demais detalhes.
+2.  **Reorganização Hierárquica**: O layout foi alterado para seguir a hierarquia: Pontuação Final > Barra de Progresso > Detalhes das Seções. As seções "Total", "Conhecimentos Básicos" e "Conhecimentos Específicos" foram mantidas, mas agora são apresentadas de forma mais limpa e consistente, abaixo da pontuação principal.
+3.  **Simplificação do Componente**: A lógica interna do componente `PerformanceSummaryCard` foi refatorada. O componente filho `Section` foi simplificado para ser puramente de apresentação, removendo a lógica condicional que tratava a seção "Total" de forma diferente. Isso torna o código mais limpo, reutilizável e fácil de manter. A responsabilidade de destacar a pontuação final agora reside inteiramente no componente pai, `PerformanceSummaryCard`.

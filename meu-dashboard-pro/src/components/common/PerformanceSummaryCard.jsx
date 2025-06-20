@@ -9,11 +9,14 @@ const StatDetail = ({ icon, value, label, color }) => (
     </div>
 );
 
-const Section = ({ title, stats, colorClass }) => (
-    <div className="flex-1 p-4">
-        <h4 className={`font-bold text-lg ${colorClass}`}>{title}</h4>
-        <p className="text-gray-500 dark:text-gray-400 text-sm mb-3">{stats.questoes} Questões</p>
-        
+const Section = ({ title, stats, colorClass }) => {
+    const getAproveitamentoColor = (percentage) => {
+        if (percentage >= 80) return 'text-green-500';
+        if (percentage >= 60) return 'text-yellow-500';
+        return 'text-red-500';
+    };
+
+    const details = (
         <div className="space-y-2">
             <StatDetail 
                 icon={<CheckIcon className="w-5 h-5 text-green-500" />}
@@ -31,13 +34,24 @@ const Section = ({ title, stats, colorClass }) => (
                 label="Brancos"
             />
             <StatDetail 
-                icon={<ChartBarIcon className="w-5 h-5 text-gray-500" />}
+                icon={<ChartBarIcon className="w-5 h-5" />}
                 value={`${stats.aproveitamento.toFixed(1)}%`}
                 label="Aproveitamento"
+                color={getAproveitamentoColor(stats.aproveitamento)}
             />
         </div>
-    </div>
-);
+    );
+
+    return (
+        <div className="flex-1 p-4">
+            <h4 className={`font-bold text-lg ${colorClass}`}>{title}</h4>
+            <p className="text-gray-500 dark:text-gray-400 text-sm mb-3">{stats.questoes} Questões</p>
+            <div className="mt-4">
+                {details}
+            </div>
+        </div>
+    );
+};
 
 const PerformanceSummaryCard = ({ summary }) => {
     if (!summary) return null;
@@ -48,7 +62,14 @@ const PerformanceSummaryCard = ({ summary }) => {
     const specificPercent = (specific.questoes / totalQuestoes) * 100;
 
     return (
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+             {total.liquidos !== undefined && (
+                <div className="text-center mb-6 pb-4 border-b border-gray-200 dark:border-gray-700">
+                    <p className="text-base font-medium text-gray-500 dark:text-gray-400">Pontuação Final</p>
+                    <p className="text-6xl font-extrabold text-gray-800 dark:text-gray-100">{total.liquidos}</p>
+                </div>
+            )}
+
             <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 mb-4 flex overflow-hidden" title={`Composição da Prova: ${basic.questoes} (Básicas) + ${specific.questoes} (Específicas) = ${total.questoes} (Total)`}>
                 <div 
                     className="h-4 bg-blue-500"
