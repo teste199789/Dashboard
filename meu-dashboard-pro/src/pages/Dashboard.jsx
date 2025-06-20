@@ -115,7 +115,7 @@ const Dashboard = () => {
             cell: ({ getValue }) => {
                 const date = new Date(getValue());
                 return (
-                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                    <div className="text-center text-gray-700 dark:text-gray-300 font-bold">
                         {date.toLocaleDateString('pt-BR')}
                     </div>
                 );
@@ -125,7 +125,7 @@ const Dashboard = () => {
             accessorKey: 'banca',
             header: () => <div className="text-center">Banca</div>,
             cell: ({ getValue }) => (
-                <div className="text-sm text-gray-600 dark:text-gray-400">
+                <div className="text-center text-gray-700 dark:text-gray-300 font-bold">
                     {getValue()}
                 </div>
             ),
@@ -134,7 +134,7 @@ const Dashboard = () => {
             accessorKey: 'orgao',
             header: () => <div className="text-center">Órgão</div>,
             cell: ({ getValue }) => (
-                <div className="text-sm text-gray-600 dark:text-gray-400">
+                <div className="text-center text-gray-700 dark:text-gray-300 font-bold">
                     {getValue() || '-'}
                 </div>
             ),
@@ -168,8 +168,8 @@ const Dashboard = () => {
             header: () => <div className="text-center">% Nota</div>,
             cell: ({ getValue }) => {
                 const percentage = getValue();
-                if (percentage == null) return <span className="text-gray-400">-</span>;
-                return <ProgressBar value={percentage} />;
+                if (percentage == null) return <div className="text-center"><span className="text-gray-400">-</span></div>;
+                return <div className="flex justify-center"><ProgressBar value={percentage} /></div>;
             },
         },
         {
@@ -184,13 +184,15 @@ const Dashboard = () => {
             id: 'actions',
             header: () => <div className="text-center">Ações</div>,
             cell: ({ row }) => (
-                <ContestActions 
-                    proof={row.original} 
-                    onEdit={handleOpenModal}
-                    onGrade={onGrade}
-                    onDelete={openDeleteModal}
-                    isGrading={isGrading}
-                />
+                <div className="flex justify-center">
+                    <ContestActions 
+                        proof={row.original} 
+                        onEdit={handleOpenModal}
+                        onGrade={onGrade}
+                        onDelete={openDeleteModal}
+                        isGrading={isGrading}
+                    />
+                </div>
             ),
         },
     ], [handleNavigateToProof, onGrade, openDeleteModal, isGrading, handleOpenModal]);
@@ -325,7 +327,7 @@ const Dashboard = () => {
                             {table.getRowModel().rows.map(row => (
                                 <tr key={row.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                                     {row.getVisibleCells().map(cell => (
-                                        <td key={cell.id} className="px-6 py-4 whitespace-nowrap">
+                                        <td key={cell.id} className="px-6 py-4">
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </td>
                                     ))}

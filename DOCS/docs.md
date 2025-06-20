@@ -307,6 +307,11 @@ Para garantir a qualidade e a estabilidade do código, o projeto conta com uma s
 ## 9. Log de Alterações (Changelog)
 Esta seção documenta as principais mudanças e melhorias implementadas no projeto ao longo do tempo.
 
+- **v1.9.6 (DATA_ATUAL)**
+    - **Melhoria na Hierarquia de Informação da UI**:
+        - **Card de Concurso**: Ajustado o `ContestCard` para dar mais destaque ao `cargo`, movendo-o para a posição principal do título e tratando o `órgão` como informação secundária.
+        - **Cabeçalho de Detalhes da Prova**: Redesenhado o cabeçalho da página de detalhes da prova (`ProofDetail.jsx`) para um layout mais limpo, unindo `data`, `banca` e `órgão` em uma única linha informativa e destacando o `cargo` como título principal.
+
 - **v1.9.5 (DATA_ATUAL)**
     - **Ajustes de UI para o Modo Escuro**:
         - **Consistência Visual**: Realizada uma auditoria completa na interface para garantir que todos os componentes se adaptem corretamente ao modo escuro.

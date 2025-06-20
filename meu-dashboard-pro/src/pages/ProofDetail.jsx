@@ -107,12 +107,11 @@ const ProofDetail = () => {
                 <div className="flex justify-between items-start gap-4">
                     <div>
                         <p className="font-bold text-blue-600 dark:text-blue-400">
-                            {formatDate(proof.data)} • {proof.banca.toUpperCase()}
+                            {formatDate(proof.data)} • {proof.banca.toUpperCase()} {proof.orgao && `• ${proof.orgao}`}
                         </p>
-                        <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1">{proof.titulo}</h2>
-                        {proof.orgao && proof.cargo && (
-                             <p className="text-gray-500 dark:text-gray-400">{proof.orgao} • {proof.cargo}</p>
-                        )}
+                        <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1">
+                            {proof.cargo || proof.titulo}
+                        </h2>
                     </div>
                     <div className="flex-shrink-0 flex items-center gap-2">
                         <button onClick={() => setIsEditModalOpen(true)} className="flex items-center gap-2 py-2 px-4 bg-white dark:bg-gray-700 border dark:border-gray-600 rounded-md shadow-sm hover:bg-gray-100 dark:hover:bg-gray-600 font-semibold text-sm transition-colors">

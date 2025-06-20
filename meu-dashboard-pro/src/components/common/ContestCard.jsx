@@ -46,9 +46,9 @@ const ContestCard = ({ proof }) => {
                         </div>
                         
                         <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 leading-tight">
-                            {proof.orgao || proof.titulo}
+                            {proof.cargo || proof.titulo}
                         </h3>
-                        <p className="text-gray-600 dark:text-gray-300 text-sm">{proof.cargo}</p>
+                        <p className="text-gray-600 dark:text-gray-300 text-sm">{proof.orgao}</p>
                     </div>
                     
                     <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
