@@ -17,6 +17,41 @@ const SortIcon = ({ isSorted }) => {
     return <svg className="w-4 h-4 ml-1 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>;
 };
 
+const getDisplayStatus = (proof) => {
+    const hasUserAnswers = proof.userAnswers && proof.userAnswers.length > 0;
+    const hasOfficialKey = (proof.gabaritoDefinitivo && proof.gabaritoDefinitivo.length > 0) || (proof.gabaritoPreliminar && proof.gabaritoPreliminar.length > 0);
+    const isGraded = typeof proof.aproveitamento === 'number';
+    const hasFinalStatus = proof.resultadoFinal?.status;
+
+    // Se já existe um status final (Aprovado, Reprovado), ele tem prioridade.
+    if (hasFinalStatus) {
+        return hasFinalStatus;
+    }
+    
+    // Se a prova foi corrigida (tem aproveitamento), mas não tem status final,
+    // o fluxo de trabalho dela está "Finalizado".
+    if (isGraded) {
+        return 'Finalizado';
+    }
+
+    // A partir daqui, são status de fluxo de trabalho pendentes.
+    if (!hasUserAnswers) {
+        return 'Pendente Meu Gabarito';
+    }
+
+    if (!hasOfficialKey) {
+        return 'Pendente Gabarito Oficial';
+    }
+
+    // Se tem ambos os gabaritos mas ainda não foi corrigida.
+    if (hasUserAnswers && hasOfficialKey && !isGraded) {
+        return 'Pronto para Corrigir';
+    }
+
+    // Fallback para outros casos.
+    return 'Pendente';
+};
+
 const Dashboard = () => {
     const navigate = useNavigate();
     const { 
@@ -37,7 +72,7 @@ const Dashboard = () => {
     const [initialStep, setInitialStep] = useState(0);
 
     const handleOpenModal = useCallback((proof, step = 0) => {
-        setSelectedProof(proof);
+        setSelectedProof(JSON.parse(JSON.stringify(proof)));
         setInitialStep(step);
         setIsModalOpen(true);
     }, []);
@@ -64,7 +99,7 @@ const Dashboard = () => {
     const columns = useMemo(() => [
         {
             accessorKey: 'titulo',
-            header: 'Título',
+            header: () => <div className="text-center">Título</div>,
             cell: ({ getValue, row }) => (
                 <div 
                     className="font-bold text-gray-900 dark:text-gray-100 cursor-pointer hover:text-teal-600"
@@ -76,7 +111,7 @@ const Dashboard = () => {
         },
         {
             accessorKey: 'data',
-            header: 'Data',
+            header: () => <div className="text-center">Data</div>,
             cell: ({ getValue }) => {
                 const date = new Date(getValue());
                 return (
@@ -88,7 +123,7 @@ const Dashboard = () => {
         },
         {
             accessorKey: 'banca',
-            header: 'Banca',
+            header: () => <div className="text-center">Banca</div>,
             cell: ({ getValue }) => (
                 <div className="text-sm text-gray-600 dark:text-gray-400">
                     {getValue()}
@@ -97,7 +132,7 @@ const Dashboard = () => {
         },
         {
             accessorKey: 'orgao',
-            header: 'Órgão',
+            header: () => <div className="text-center">Órgão</div>,
             cell: ({ getValue }) => (
                 <div className="text-sm text-gray-600 dark:text-gray-400">
                     {getValue() || '-'}
@@ -105,8 +140,32 @@ const Dashboard = () => {
             ),
         },
         {
+            id: 'resultadoObjetiva',
+            header: () => <div className="text-center">Objetiva</div>,
+            cell: ({ row }) => {
+                const status = row.original.resultadoObjetiva?.status;
+                return <div className="text-center">{status ? <StatusBadge status={status} /> : <span className="text-gray-400">-</span>}</div>;
+            }
+        },
+        {
+            id: 'resultadoDiscursiva',
+            header: () => <div className="text-center">Discursiva</div>,
+            cell: ({ row }) => {
+                const status = row.original.resultadoDiscursiva?.status;
+                return <div className="text-center">{status ? <StatusBadge status={status} /> : <span className="text-gray-400">-</span>}</div>;
+            }
+        },
+        {
+            id: 'resultadoFinalStatus',
+            header: () => <div className="text-center">Final</div>,
+            cell: ({ row }) => {
+                const status = row.original.resultadoFinal?.status;
+                return <div className="text-center">{status ? <StatusBadge status={status} /> : <span className="text-gray-400">-</span>}</div>;
+            }
+        },
+        {
             accessorKey: 'aproveitamento',
-            header: 'Aproveitamento',
+            header: () => <div className="text-center">% Nota</div>,
             cell: ({ getValue }) => {
                 const percentage = getValue();
                 if (percentage == null) return <span className="text-gray-400">-</span>;
@@ -114,8 +173,16 @@ const Dashboard = () => {
             },
         },
         {
+            id: 'status',
+            header: () => <div className="text-center">Status</div>,
+            cell: ({ row }) => {
+                const status = getDisplayStatus(row.original);
+                return <div className="text-center"><StatusBadge status={status} /></div>;
+            }
+        },
+        {
             id: 'actions',
-            header: 'Ações',
+            header: () => <div className="text-center">Ações</div>,
             cell: ({ row }) => (
                 <ContestActions 
                     proof={row.original} 

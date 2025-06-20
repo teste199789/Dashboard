@@ -168,7 +168,13 @@ function formatarNotaCorte(nota, proof) {
  * @returns {Object} Configuração padrão
  */
 function obterConfiguracaoPadraoBanca(nomeBanca) {
-    return CONFIGURACOES_BANCA[nomeBanca] || CONFIGURACOES_BANCA['FGV']; // FGV como fallback
+    // Lógica robusta para garantir que uma configuração válida seja sempre retornada.
+    // Verifica se o nome da banca existe e é uma chave válida no objeto de configurações.
+    if (nomeBanca && Object.prototype.hasOwnProperty.call(CONFIGURACOES_BANCA, nomeBanca)) {
+        return CONFIGURACOES_BANCA[nomeBanca];
+    }
+    // Usa a configuração 'Outra' como um fallback seguro e semântico.
+    return CONFIGURACOES_BANCA['Outra'];
 }
 
 /**

@@ -307,6 +307,13 @@ Para garantir a qualidade e a estabilidade do código, o projeto conta com uma s
 ## 9. Log de Alterações (Changelog)
 Esta seção documenta as principais mudanças e melhorias implementadas no projeto ao longo do tempo.
 
+- **v1.9.4 (DATA_ATUAL)**
+    - **Melhoria na Exibição de Resultados no Dashboard**:
+        - **Novas Colunas de Resultado**: Adicionadas colunas dedicadas ("Objetiva", "Discursiva", "Final") à tabela principal para exibir o status de cada fase do concurso (ex: "Aprovado", "Eliminado"), oferecendo uma visão geral mais completa.
+        - **Ajuste de Layout**: Os cabeçalhos da tabela foram encurtados e centralizados para melhor legibilidade e para acomodar as novas colunas sem quebrar o layout.
+        - **Correção de Fluxo de Dados**: Corrigido um bug no backend que não enviava os dados de resultado para o frontend. Também foi ajustado o formulário de edição para garantir que os status sejam salvos no formato JSON correto (`{ "status": "..." }`), garantindo a comunicação correta entre o frontend e o backend.
+        - **Coluna "Status"**: A antiga coluna "Próxima Ação" foi renomeada para "Status", tornando seu propósito mais claro ao exibir tanto o andamento quanto o resultado final de um concurso.
+
 - **v1.9.3 (DATA_ATUAL)**
     - **Correção de Bug Crítico e Melhoria de UX na Exclusão**:
         - **Correção do Bug de Exclusão**: Resolvido um bug crítico que impedia a exclusão de concursos. O erro ocorria porque o frontend enviava o objeto de prova inteiro (`[object Object]`) para a API de exclusão em vez de apenas o ID numérico, causando uma falha no backend. A lógica no `ProofsContext` foi corrigida para garantir que apenas o ID seja enviado.

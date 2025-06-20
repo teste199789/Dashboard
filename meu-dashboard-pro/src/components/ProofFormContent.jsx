@@ -22,6 +22,7 @@ const ProofFormContent = ({ proofData, type = 'CONCURSO', onSave, initialStep = 
         notaDiscursiva: null,
         resultadoObjetiva: null,
         resultadoDiscursiva: null,
+        resultadoFinal: null,
         regraAnulacao: null,
         valorAnulacao: null,
         tipoNotaCorte: null,
@@ -43,6 +44,7 @@ const ProofFormContent = ({ proofData, type = 'CONCURSO', onSave, initialStep = 
                 notaDiscursiva: proofData.notaDiscursiva,
                 resultadoObjetiva: proofData.resultadoObjetiva,
                 resultadoDiscursiva: proofData.resultadoDiscursiva,
+                resultadoFinal: proofData.resultadoFinal,
                 regraAnulacao: proofData.regraAnulacao,
                 valorAnulacao: proofData.valorAnulacao,
                 tipoNotaCorte: proofData.tipoNotaCorte,
@@ -55,7 +57,12 @@ const ProofFormContent = ({ proofData, type = 'CONCURSO', onSave, initialStep = 
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value === "" ? null : value }));
+
+        if (name === 'resultadoObjetiva' || name === 'resultadoDiscursiva' || name === 'resultadoFinal') {
+            setFormData(prev => ({ ...prev, [name]: value ? { status: value } : null }));
+        } else {
+            setFormData(prev => ({ ...prev, [name]: value === "" ? null : value }));
+        }
     };
 
     const handleSubmit = async () => {
@@ -150,13 +157,18 @@ const ProofFormContent = ({ proofData, type = 'CONCURSO', onSave, initialStep = 
                         <h3 className="text-lg font-semibold">Resultados</h3>
                         <input type="number" step="0.01" name="notaDiscursiva" placeholder="Nota da Discursiva (opcional)" value={formData.notaDiscursiva || ''} onChange={handleChange} className="w-full p-2 border bg-white dark:bg-gray-700 rounded-md"/>
                         
-                        <select name="resultadoObjetiva" value={formData.resultadoObjetiva || ''} onChange={handleChange} className="w-full p-2 border bg-white dark:bg-gray-700 rounded-md">
+                        <select name="resultadoObjetiva" value={formData.resultadoObjetiva?.status || ''} onChange={handleChange} className="w-full p-2 border bg-white dark:bg-gray-700 rounded-md">
                             <option value="">-- Resultado da Objetiva --</option>
                             {RESULTADOS_POSSIVEIS.map(r => <option key={r} value={r}>{r}</option>)}
                         </select>
 
-                        <select name="resultadoDiscursiva" value={formData.resultadoDiscursiva || ''} onChange={handleChange} className="w-full p-2 border bg-white dark:bg-gray-700 rounded-md">
+                        <select name="resultadoDiscursiva" value={formData.resultadoDiscursiva?.status || ''} onChange={handleChange} className="w-full p-2 border bg-white dark:bg-gray-700 rounded-md">
                              <option value="">-- Resultado da Discursiva --</option>
+                            {RESULTADOS_POSSIVEIS.map(r => <option key={r} value={r}>{r}</option>)}
+                        </select>
+                        
+                        <select name="resultadoFinal" value={formData.resultadoFinal?.status || ''} onChange={handleChange} className="w-full p-2 border bg-white dark:bg-gray-700 rounded-md">
+                             <option value="">-- Resultado Final --</option>
                             {RESULTADOS_POSSIVEIS.map(r => <option key={r} value={r}>{r}</option>)}
                         </select>
                     </>
