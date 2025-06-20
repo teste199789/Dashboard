@@ -669,7 +669,7 @@ O Recharts continuava gerando ticks duplicados ("0 0 1 1 2 2...") devido a confl
 - **Compatibilidade**: Funciona consistentemente com diferentes versões do Recharts
 
 #### Resultado Final
-- ✅ Eixo X sequencial limpo (ex: "0, 4, 8, 12, 16, 20")
+- ✅ Eixo X sequencial limpo (ex: "0, 4, 8, 12")
 - ✅ Sem duplicatas ou sobreposições
 - ✅ Valores apropriados para cada tamanho de prova
 - ✅ Renderização consistente e confiável
@@ -826,3 +826,79 @@ Para fornecer uma visão mais clara e imediata do resultado, o card de resumo de
 1.  **Destaque para a Pontuação Final**: A pontuação líquida total foi movida para o topo do card, recebendo o maior destaque visual. Ela agora é o primeiro item que o usuário vê, com uma fonte grande e uma linha divisória que a separa dos demais detalhes.
 2.  **Reorganização Hierárquica**: O layout foi alterado para seguir a hierarquia: Pontuação Final > Barra de Progresso > Detalhes das Seções. As seções "Total", "Conhecimentos Básicos" e "Conhecimentos Específicos" foram mantidas, mas agora são apresentadas de forma mais limpa e consistente, abaixo da pontuação principal.
 3.  **Simplificação do Componente**: A lógica interna do componente `PerformanceSummaryCard` foi refatorada. O componente filho `Section` foi simplificado para ser puramente de apresentação, removendo a lógica condicional que tratava a seção "Total" de forma diferente. Isso torna o código mais limpo, reutilizável e fácil de manter. A responsabilidade de destacar a pontuação final agora reside inteiramente no componente pai, `PerformanceSummaryCard`.
+
+### Sistema de Exclusão de Provas
+
+#### Problema Identificado e Corrigido (Janeiro 2025)
+
+**Problema:** O botão "Excluir" na página de detalhes da prova não estava funcionando corretamente:
+- Modal de confirmação não aparecia quando clicado
+- Botão "Cancelar" redirecionava incorretamente para página 404
+
+**Causa Raiz:** 
+- A página `ProofDetail` usa o `FocusedLayout`, mas o modal de confirmação estava sendo renderizado apenas no `MainLayout`
+- Havia lógica de redirecionamento duplicada e conflitante
+
+**Soluções Implementadas:**
+
+1. **Adicionado Modal no FocusedLayout** (`src/layouts/FocusedLayout.jsx`):
+   ```jsx
+   // Importações adicionadas
+   import ConfirmationModal from '../components/common/ConfirmationModal';
+   import { useProofs } from '../hooks/useProofs';
+
+   // Estado do contexto
+   const { modalState, closeDeleteModal, handleDeleteProof } = useProofs();
+
+   // Modal renderizado
+   <ConfirmationModal
+       isOpen={modalState.isOpen}
+       onCancel={closeDeleteModal}
+       onConfirm={handleDeleteProof}
+       title="Confirmar Exclusão"
+       message="Você tem certeza que deseja deletar este item? Esta ação não pode ser desfeita."
+   />
+   ```
+
+2. **Corrigido Redirecionamento Duplicado** (`src/pages/ProofDetail.jsx`):
+   - Removido `useEffect` que causava redirecionamento indevido ao cancelar
+   - Mantida apenas a lógica de redirecionamento no contexto após exclusão confirmada
+
+3. **Corrigido Propriedade do Modal** (`src/layouts/MainLayout.jsx`):
+   - Alterado `onClose` para `onCancel` para compatibilidade com o componente
+
+#### Funcionalidade Atual
+
+**Dashboard (MainLayout):**
+- ✅ Menu de três pontos com opções "Editar" e "Excluir"
+- ✅ Modal de confirmação funcionando
+- ✅ Botões "Cancelar" e "Confirmar" funcionais
+
+**Página de Detalhes (FocusedLayout):**
+- ✅ Botão "Editar Dados Gerais"
+- ✅ Botão "Excluir"
+- ✅ Modal de confirmação funcionando
+- ✅ Botão "Cancelar" mantém usuário na página
+- ✅ Botão "Confirmar" exclui prova e redireciona para dashboard
+
+#### Fluxo de Exclusão
+
+1. **Usuário clica em "Excluir"** → `openDeleteModal(proof)` é chamado
+2. **Modal de confirmação aparece** → `modalState.isOpen = true`
+3. **Usuário pode:**
+   - **Cancelar:** `closeDeleteModal()` → Modal fecha, permanece na página
+   - **Confirmar:** `handleDeleteProof()` → API de exclusão + redirecionamento automático
+4. **Após exclusão bem-sucedida:** Usuário é redirecionado para `/dashboard`
+
+#### Arquivos Modificados
+
+- `src/layouts/FocusedLayout.jsx` - Adicionado modal de confirmação
+- `src/pages/ProofDetail.jsx` - Removido redirecionamento duplicado
+- `src/layouts/MainLayout.jsx` - Corrigido propriedade do modal
+
+#### Testes Realizados
+
+- ✅ Teste unitário do contexto `ProofsContext`
+- ✅ Teste unitário do componente `ContestActions`
+- ✅ Teste manual da funcionalidade completa
+- ✅ Verificação de ambos os layouts (Main e Focused)

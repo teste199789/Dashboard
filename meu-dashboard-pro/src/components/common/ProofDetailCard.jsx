@@ -1,96 +1,48 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useProofs } from '../../hooks/useProofs';
-import StatCard from './StatCard';
-import { formatDate, formatPercentAlreadyScaled } from '../../utils/formatters';
-import PencilIcon from '../icons/PencilIcon';
-import TrashIcon from '../icons/TrashIcon';
-import ProofLogo from './ProofLogo';
+import StatusBadge from './StatusBadge';
+import { DotsVerticalIcon } from '../icons';
+import { formatDate } from '../../utils/formatters';
 
 const ProofDetailCard = ({ proof }) => {
     const navigate = useNavigate();
-    const { openDeleteModal } = useProofs();
 
-    const handleActionClick = (e, action) => {
-        e.stopPropagation();
-        if (action === 'edit') {
-            navigate(`/minhas-provas/${proof.id}`);
-        } else if (action === 'delete') {
-            openDeleteModal(proof.id);
-        }
+    const handleNavigation = () => {
+        navigate(`/proof/${proof.id}`);
     };
 
-    const hasResults = proof.results && proof.results.length > 0;
-
-    const totals = useMemo(() => {
-        if (!hasResults) return { acertos: 0, erros: 0 };
-        return proof.results.reduce((acc, r) => {
-            acc.acertos += r.acertos;
-            acc.erros += r.erros;
-            return acc;
-        }, { acertos: 0, erros: 0 });
-    }, [proof.results, hasResults]);
-
-    const pontuacaoLiquida = useMemo(() => {
-        if (!hasResults) return 0;
-        return proof.tipoPontuacao === 'liquida' ? (totals.acertos - totals.erros) : totals.acertos;
-    }, [proof.tipoPontuacao, totals, hasResults]);
-
+    const handleMenuClick = (e) => {
+        e.stopPropagation();
+        // Lógica para abrir o menu de opções (ex: excluir) será adicionada aqui.
+        console.log("Menu clicked for proof:", proof.id);
+    };
 
     return (
-        <div 
-            className="bg-white dark:bg-gray-800/50 rounded-xl shadow-lg w-full transition-all duration-300 hover:shadow-2xl"
+        <div
+            className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-4 flex items-center space-x-4 border-l-4 border-teal-500 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150"
+            onClick={handleNavigation}
         >
-            <div 
-                className="p-6 border-b dark:border-gray-700 cursor-pointer"
-                onClick={() => navigate(`/minhas-provas/${proof.id}`)}
-            >
-                <div className="grid grid-cols-12 gap-5 items-center">
-                    <div className="col-span-3 sm:col-span-2 flex justify-center">
-                        <ProofLogo titulo={proof.titulo} />
-                    </div>
-                    <div className="col-span-9 sm:col-span-10">
-                         {/* --- CORREÇÃO DE ALINHAMENTO AQUI: items-start foi trocado por items-center --- */}
-                         <div className="flex justify-between items-center gap-4">
-                            <div>
-                                <p className="font-semibold text-blue-600 dark:text-blue-400">
-                                    {formatDate(proof.data)} • {proof.banca.toUpperCase()}
-                                </p>
-                                <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mt-1">
-                                    {proof.titulo}
-                                </h3>
-                            </div>
-                            <div className="flex-shrink-0 flex items-center gap-2">
-                                <button onClick={(e) => handleActionClick(e, 'edit')} className="p-2 text-gray-500 hover:text-blue-600 rounded-full" title="Gerenciar Prova">
-                                    <PencilIcon className="w-5 h-5"/>
-                                </button>
-                                <button onClick={(e) => handleActionClick(e, 'delete')} className="p-2 text-gray-500 hover:text-red-600 rounded-full" title="Deletar Prova">
-                                    <TrashIcon className="w-5 h-5"/>
-                                </button>
-                            </div>
-                        </div>
+            <div className="flex-1">
+                <div className="flex justify-between items-center">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{proof.banca}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{formatDate(proof.data_prova)}</p>
+                </div>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white mt-1">{proof.cargo}</h3>
+                <div className="mt-4 border-t border-gray-200 dark:border-gray-700 pt-4">
+                    <div className="flex justify-between items-center">
+                        <StatusBadge status={proof.status} />
+                        <p className="text-green-600 dark:text-green-400 font-semibold">{proof.aproveitamento?.toFixed(2).replace('.', ',')}%</p>
                     </div>
                 </div>
             </div>
-
-            {hasResults ? (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-6">
-                    <StatCard label="Pontos Líquidos" value={pontuacaoLiquida.toFixed(2).replace('.',',')} colorClass="text-blue-600 dark:text-blue-400"/>
-                    <StatCard label="Aproveitamento" value={formatPercentAlreadyScaled(proof.aproveitamento)} colorClass="text-green-600 dark:text-green-400"/>
-                    <StatCard label="Acertos" value={totals.acertos} />
-                    <StatCard label="Erros" value={totals.erros} />
-                </div>
-            ) : (
-                <div 
-                    className="text-center py-8 px-6 cursor-pointer"
-                    onClick={() => navigate(`/minhas-provas/${proof.id}`)}
+            <div className="flex-shrink-0">
+                <button
+                    onClick={handleMenuClick}
+                    className="p-1 rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 >
-                    <p className="font-semibold text-gray-500 dark:text-gray-400">Prova ainda não corrigida</p>
-                    <p className="text-sm text-teal-600 hover:underline dark:text-teal-400 mt-2">
-                        Clique para gerenciar e corrigir
-                    </p>
-                </div>
-            )}
+                    <DotsVerticalIcon className="h-5 w-5" />
+                </button>
+            </div>
         </div>
     );
 };

@@ -43,8 +43,7 @@ const ProofDetail = () => {
     const [activeTab, setActiveTab] = useState('info');
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     
-    const { handleGradeProof, openDeleteModal, modalState } = useProofs();
-    const prevModalState = React.useRef(modalState.isOpen);
+    const { handleGradeProof, openDeleteModal } = useProofs();
 
     const fetchProof = useCallback(async () => {
         try {
@@ -75,19 +74,6 @@ const ProofDetail = () => {
     useEffect(() => {
         fetchProof();
     }, [fetchProof]);
-
-    useEffect(() => {
-        // Se o modal foi fechado e antes estava aberto (o que acontece após a confirmação)
-        // e não estamos mais na página da prova (porque ela foi deletada)
-        if (prevModalState.current && !modalState.isOpen) {
-             // A prova foi deletada, então o fetch vai falhar.
-             // Podemos redirecionar o usuário.
-             if (!proof) { // Se o estado da prova já é nulo
-                navigate('/dashboard');
-             }
-        }
-        prevModalState.current = modalState.isOpen;
-    }, [modalState.isOpen, navigate, proof]);
 
     if (isLoading) return <LoadingSpinner message="Carregando detalhes da prova..." />;
     if (!proof) return <div className="text-center p-10 font-bold text-red-500">Prova não encontrada. Redirecionando...</div>;

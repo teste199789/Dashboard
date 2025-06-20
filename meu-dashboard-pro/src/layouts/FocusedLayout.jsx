@@ -2,6 +2,8 @@ import React from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import ThemeToggle from '../components/common/ThemeToggle';
 import ChartBarIcon from '../components/icons/ChartBarIcon';
+import ConfirmationModal from '../components/common/ConfirmationModal';
+import { useProofs } from '../hooks/useProofs';
 
 // Ícone para o botão "Voltar"
 const ArrowLeftIcon = ({ className }) => (
@@ -13,6 +15,7 @@ const ArrowLeftIcon = ({ className }) => (
 
 const FocusedLayout = () => {
     const navigate = useNavigate();
+    const { modalState, closeDeleteModal, handleDeleteProof } = useProofs();
 
     return (
         <div className="bg-gray-100 dark:bg-gray-900 min-h-screen font-sans text-gray-800 dark:text-gray-200">
@@ -42,6 +45,15 @@ const FocusedLayout = () => {
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                 <Outlet />
             </main>
+
+            {/* Modal de Confirmação de Exclusão */}
+            <ConfirmationModal
+                isOpen={modalState.isOpen}
+                onCancel={closeDeleteModal}
+                onConfirm={handleDeleteProof}
+                title="Confirmar Exclusão"
+                message="Você tem certeza que deseja deletar este item? Esta ação não pode ser desfeita."
+            />
         </div>
     );
 };

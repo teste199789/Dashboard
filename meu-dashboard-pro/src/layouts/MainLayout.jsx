@@ -11,7 +11,7 @@ const MainLayout = () => {
         <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900 font-sans text-gray-900 dark:text-gray-100">
             <ConfirmationModal
                 isOpen={modalState.isOpen}
-                onClose={closeDeleteModal}
+                onCancel={closeDeleteModal}
                 onConfirm={handleDeleteProof}
                 title="Confirmar Exclusão"
                 message="Você tem certeza que deseja deletar este item? Esta ação não pode ser desfeita."

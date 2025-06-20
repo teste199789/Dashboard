@@ -69,7 +69,14 @@ export const ProofsProvider = ({ children }) => {
             await api.deleteProof(proofIdToDelete);
             toast.success("Item deletado com sucesso!");
             closeDeleteModal();
-            fetchProofs();
+            
+            // Se estivermos na página de detalhes da prova que foi excluída, redirecionar
+            const currentPath = window.location.pathname;
+            if (currentPath.includes(`/minhas-provas/${proofIdToDelete}`)) {
+                window.location.href = '/dashboard';
+            } else {
+                fetchProofs();
+            }
         } catch (error) {
             toast.error("Falha ao deletar o item.");
             setError("Falha ao deletar o item.");
