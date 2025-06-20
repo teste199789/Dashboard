@@ -31,12 +31,12 @@ const AnswerGrid = ({ totalQuestoes, answersMap, onAnswerChange, readOnly = fals
                 const isChangedOrAnnulled = (prelimAnswer && definAnswer && prelimAnswer !== definAnswer) || definAnswer === 'N';
 
                 const inputClass = isChangedOrAnnulled
-                    ? "text-blue-600 font-bold border-blue-500" // Estilo para alteradas/anuladas
-                    : "border-gray-300 focus:border-teal-500";
+                    ? "text-blue-600 dark:text-blue-400 font-bold border-blue-500 dark:border-blue-400" // Estilo para alteradas/anuladas
+                    : "border-gray-300 dark:border-gray-600 focus:border-teal-500";
 
                 return (
                     <div key={qNumber} className="text-center">
-                        <label className="font-bold text-gray-700">{qNumber}</label>
+                        <label className="font-bold text-gray-700 dark:text-gray-200">{qNumber}</label>
                         <input
                             type="text"
                             maxLength="1"

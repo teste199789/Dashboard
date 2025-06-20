@@ -247,16 +247,16 @@ const Dashboard = () => {
                 <div className="overflow-x-auto">
                     <div className="min-w-full">
                         {/* Column Headers */}
-                        <div className="grid grid-cols-9 text-center items-center py-3 bg-teal-200 text-gray-800">
-                            <p className="col-span-1 text-left pl-4 font-semibold">Disciplinas</p>
-                            <p className="col-span-1 font-semibold">Acertos</p>
-                            <p className="col-span-1 font-semibold">Erros</p>
-                            <p className="col-span-1 font-semibold">Brancos</p>
-                            <p className="col-span-1 font-semibold">Anuladas</p>
-                            <p className="col-span-1 font-semibold">Questões</p>
-                            <p className="col-span-1 font-semibold">Líquidos</p>
-                            <p className="col-span-1 font-semibold">% Bruta</p>
-                            <p className="col-span-1 font-semibold">% Líquidos</p>
+                        <div className="grid grid-cols-9 text-center items-center py-3 bg-teal-200 dark:bg-teal-800 text-gray-800 dark:text-gray-100">
+                            <div className="font-semibold text-sm">Disciplinas</div>
+                            <div className="font-semibold text-sm">Acertos</div>
+                            <div className="font-semibold text-sm">Erros</div>
+                            <div className="font-semibold text-sm">Brancos</div>
+                            <div className="font-semibold text-sm">Anuladas</div>
+                            <div className="font-semibold text-sm">Questões</div>
+                            <div className="font-semibold text-sm">Líquidos</div>
+                            <div className="font-semibold text-sm">% Bruta</div>
+                            <div className="font-semibold text-sm">% Líquidos</div>
                         </div>
                         {/* Rows */}
                         <div>
@@ -272,7 +272,7 @@ const Dashboard = () => {
             </div>
 
             {/* Table Section */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
+            <div className="bg-white dark:bg-gray-900/50 rounded-lg shadow">
                 <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Controle de Concursos</h2>
@@ -297,13 +297,13 @@ const Dashboard = () => {
                 </div>
                 <div className="overflow-x-auto">
                     <table className="w-full">
-                        <thead className="bg-teal-200">
+                        <thead className="bg-teal-200 dark:bg-teal-800">
                             {table.getHeaderGroups().map(headerGroup => (
                                 <tr key={headerGroup.id}>
                                     {headerGroup.headers.map(header => (
                                         <th
                                             key={header.id}
-                                            className="px-6 py-3 text-left text-sm font-semibold text-gray-800"
+                                            className="px-6 py-3 text-left text-sm font-semibold text-gray-800 dark:text-gray-100"
                                             onClick={header.column.getToggleSortingHandler()}
                                             style={{ cursor: header.column.getCanSort() ? 'pointer' : 'default' }}
                                         >
@@ -321,7 +321,7 @@ const Dashboard = () => {
                                 </tr>
                             ))}
                         </thead>
-                        <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                        <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700 text-gray-700 dark:text-gray-300">
                             {table.getRowModel().rows.map(row => (
                                 <tr key={row.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                                     {row.getVisibleCells().map(cell => (
@@ -346,14 +346,14 @@ const Dashboard = () => {
                         <button
                             onClick={() => table.previousPage()}
                             disabled={!table.getCanPreviousPage()}
-                            className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             Anterior
                         </button>
                         <button
                             onClick={() => table.nextPage()}
                             disabled={!table.getCanNextPage()}
-                            className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             Próximo
                         </button>

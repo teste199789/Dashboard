@@ -307,6 +307,15 @@ Para garantir a qualidade e a estabilidade do código, o projeto conta com uma s
 ## 9. Log de Alterações (Changelog)
 Esta seção documenta as principais mudanças e melhorias implementadas no projeto ao longo do tempo.
 
+- **v1.9.5 (DATA_ATUAL)**
+    - **Ajustes de UI para o Modo Escuro**:
+        - **Consistência Visual**: Realizada uma auditoria completa na interface para garantir que todos os componentes se adaptem corretamente ao modo escuro.
+        - **Modal de Gabarito**: Corrigido o fundo, textos e bordas do modal de inserção de gabaritos (`OfficialKeysTab`) para que sejam exibidos corretamente no tema escuro.
+        - **Tabela de Dados Consolidados**: Ajustadas as cores de fundo do cabeçalho e das linhas (incluindo a de total) na seção "Dados Consolidados" do Dashboard para o modo escuro.
+        - **Simulador de Anulações**: Adaptados os cards de pontuação, o seletor de questões e os botões da aba "Simular Anulações" para o modo escuro.
+        - **Tabela de Resultados**: Corrigida a tabela de "Desempenho Detalhado por Matéria" e o "Gabarito Visual" na aba "Resultado Final" para terem a aparência correta no modo escuro.
+        - **Controle de Concursos**: Ajustados o container, a tabela e os controles de paginação da seção "Controle de Concursos" no Dashboard para uma visualização consistente no modo escuro.
+
 - **v1.9.4 (DATA_ATUAL)**
     - **Melhoria na Exibição de Resultados no Dashboard**:
         - **Novas Colunas de Resultado**: Adicionadas colunas dedicadas ("Objetiva", "Discursiva", "Final") à tabela principal para exibir o status de cada fase do concurso (ex: "Aprovado", "Eliminado"), oferecendo uma visão geral mais completa.

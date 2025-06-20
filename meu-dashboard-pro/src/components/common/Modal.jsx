@@ -24,15 +24,15 @@ const Modal = ({ isOpen, onClose, title, children }) => {
     >
       {/* Caixa de conteúdo do modal */}
       <div 
-        className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col"
+        className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col"
         onClick={e => e.stopPropagation()} // Impede que o clique dentro da caixa feche o modal
       >
         {/* Cabeçalho do Modal */}
-        <div className="flex justify-between items-center p-4 border-b">
-          <h2 className="text-xl font-bold text-gray-800">{title}</h2>
+        <div className="flex justify-between items-center p-4 border-b dark:border-gray-700">
+          <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">{title}</h2>
           <button 
             onClick={onClose} 
-            className="text-gray-400 hover:text-gray-700 text-3xl leading-none"
+            className="text-gray-400 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-3xl leading-none"
             aria-label="Fechar"
           >
             &times;

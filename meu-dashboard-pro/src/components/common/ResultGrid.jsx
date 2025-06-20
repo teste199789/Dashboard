@@ -64,7 +64,7 @@ const ResultGrid = ({ proof }) => {
     return (
         <div>
             <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">Gabarito Visual</h3>
-            <div className="p-4 border rounded-lg">
+            <div className="p-4 border dark:border-gray-700 rounded-lg">
                  <div className="grid grid-cols-5 sm:grid-cols-10 gap-2">
                     {questions.map((qNumber) => {
                         const qStr = String(qNumber);

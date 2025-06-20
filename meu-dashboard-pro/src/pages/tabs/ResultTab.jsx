@@ -113,20 +113,20 @@ const ResultTab = ({ proof, refreshProof }) => {
                         <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">Desempenho Detalhado por Matéria</h3>
                         <div className="overflow-x-auto rounded-lg shadow">
                             <table className="min-w-full">
-                                <thead className="bg-teal-200">
+                                <thead className="bg-teal-200 dark:bg-teal-800">
                                     <tr>
-                                        <th scope="col" className="px-6 py-3 text-left text-sm font-semibold text-gray-800">Disciplinas</th>
-                                        <th scope="col" className="px-6 py-3 text-center text-sm font-semibold text-gray-800">Acertos</th>
-                                        <th scope="col" className="px-6 py-3 text-center text-sm font-semibold text-gray-800">Erros</th>
-                                        <th scope="col" className="px-6 py-3 text-center text-sm font-semibold text-gray-800">Brancos</th>
-                                        <th scope="col" className="px-6 py-3 text-center text-sm font-semibold text-gray-800">Anuladas</th>
-                                        <th scope="col" className="px-6 py-3 text-center text-sm font-semibold text-gray-800">Questões</th>
-                                        <th scope="col" className="px-6 py-3 text-center text-sm font-semibold text-gray-800">Líquidos</th>
-                                        <th scope="col" className="px-6 py-3 text-center text-sm font-semibold text-gray-800">% Bruta</th>
-                                        <th scope="col" className="px-6 py-3 text-center text-sm font-semibold text-gray-800">% Líquidos</th>
+                                        <th scope="col" className="px-6 py-3 text-left text-sm font-semibold text-gray-800 dark:text-gray-100">Disciplinas</th>
+                                        <th scope="col" className="px-6 py-3 text-center text-sm font-semibold text-gray-800 dark:text-gray-100">Acertos</th>
+                                        <th scope="col" className="px-6 py-3 text-center text-sm font-semibold text-gray-800 dark:text-gray-100">Erros</th>
+                                        <th scope="col" className="px-6 py-3 text-center text-sm font-semibold text-gray-800 dark:text-gray-100">Brancos</th>
+                                        <th scope="col" className="px-6 py-3 text-center text-sm font-semibold text-gray-800 dark:text-gray-100">Anuladas</th>
+                                        <th scope="col" className="px-6 py-3 text-center text-sm font-semibold text-gray-800 dark:text-gray-100">Questões</th>
+                                        <th scope="col" className="px-6 py-3 text-center text-sm font-semibold text-gray-800 dark:text-gray-100">Líquidos</th>
+                                        <th scope="col" className="px-6 py-3 text-center text-sm font-semibold text-gray-800 dark:text-gray-100">% Bruta</th>
+                                        <th scope="col" className="px-6 py-3 text-center text-sm font-semibold text-gray-800 dark:text-gray-100">% Líquidos</th>
                                     </tr>
                                 </thead>
-                                <tbody className="bg-white dark:bg-gray-900">
+                                <tbody className="bg-white text-gray-700 dark:bg-gray-900 dark:text-gray-300">
                                     {performanceData.detailedResults.map((item, index) => (
                                         <tr key={index} className="even:bg-gray-100 dark:even:bg-gray-800">
                                             <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">{item.disciplina}</th>
@@ -141,7 +141,7 @@ const ResultTab = ({ proof, refreshProof }) => {
                                         </tr>
                                     ))}
                                     {/* Total Row */}
-                                    <tr className="bg-teal-200 text-gray-800 font-bold">
+                                    <tr className="bg-teal-200 dark:bg-teal-700 text-gray-800 dark:text-white font-bold">
                                         <th scope="row" className="px-6 py-3 text-left text-sm">Total</th>
                                         <td className="px-6 py-3 text-center">{performanceData.totals.acertos}</td>
                                         <td className="px-6 py-3 text-center">{performanceData.totals.erros}</td>

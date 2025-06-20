@@ -11,12 +11,12 @@ const StatsRow = ({ disciplina, isTotal = false, index = 0 }) => {
   // Cores alternadas para as linhas e total destacado
   let bgClass;
   if (isTotal) {
-    bgClass = 'bg-teal-300';
+    bgClass = 'bg-teal-300 dark:bg-teal-700';
   } else {
-    bgClass = index % 2 === 0 ? 'bg-gray-100' : 'bg-white';
+    bgClass = index % 2 === 0 ? 'bg-gray-100 dark:bg-gray-800' : 'bg-white dark:bg-gray-700';
   }
 
-  const textClass = isTotal ? 'font-bold text-gray-800' : 'text-gray-700';
+  const textClass = isTotal ? 'font-bold text-gray-800 dark:text-white' : 'text-gray-700 dark:text-gray-200';
 
   // Usar os valores já calculados que vêm do consolidatedData
   const totalQuestoes = disciplina.questoes || 0;

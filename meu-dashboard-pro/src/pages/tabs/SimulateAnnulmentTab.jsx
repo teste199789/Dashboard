@@ -128,42 +128,42 @@ const SimulateAnnulmentTab = ({ proof, refreshProof }) => {
         <div className="p-6">
             <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
                 <div>
-                    <h3 className="text-xl font-bold text-gray-800">Simulador de Anulações</h3>
-                    <p className="text-sm text-gray-500">Selecione questões para ver o impacto na sua nota. Cada questão anulada é contada como um acerto.</p>
+                    <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100">Simulador de Anulações</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Selecione questões para ver o impacto na sua nota. Cada questão anulada é contada como um acerto.</p>
                 </div>
                 <div className="flex items-center gap-2">
                     <button onClick={handleSaveSimulation} disabled={isSaving} className="font-semibold bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition disabled:opacity-50">
                         {isSaving ? 'Salvando...' : 'Salvar Simulação'}
                     </button>
-                    <button onClick={clearSelection} className="font-semibold bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300 transition">Limpar Seleção</button>
+                    <button onClick={clearSelection} className="font-semibold bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-100 py-2 px-4 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition">Limpar Seleção</button>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {/* Painel de Resultados */}
                 <div className="md:col-span-1 lg:col-span-1 space-y-4">
-                    <div className="p-4 bg-gray-100 rounded-lg text-center">
-                        <p className="font-bold text-gray-700">Pontuação Original</p>
-                        <p className="text-4xl font-light text-gray-800">{performanceData.original.score.toFixed(2).replace('.',',')}</p>
-                        <p className="text-sm text-gray-600 mt-1">
+                    <div className="p-4 bg-gray-100 dark:bg-gray-800/50 rounded-lg text-center">
+                        <p className="font-bold text-gray-700 dark:text-gray-300">Pontuação Original</p>
+                        <p className="text-4xl font-light text-gray-800 dark:text-gray-100">{performanceData.original.score.toFixed(2).replace('.',',')}</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                             {performanceData.original.acertos} acertos, {performanceData.original.erros} erros
                         </p>
                     </div>
-                    <div className="p-4 bg-blue-100 rounded-lg border border-blue-300 text-center">
-                        <p className="font-bold text-blue-800">Pontuação Simulada</p>
-                        <p className="text-4xl font-bold text-blue-600">{performanceData.simulated.score.toFixed(2).replace('.',',')}</p>
-                        <p className="text-sm text-blue-600 mt-1">{performanceData.simulated.acertos} acertos, {performanceData.simulated.erros} erros</p>
-                        <p className={`font-bold text-lg mt-1 ${performanceData.difference > 0 ? 'text-green-600' : (performanceData.difference < 0 ? 'text-red-600' : 'text-gray-600')}`}>
+                    <div className="p-4 bg-blue-100 dark:bg-blue-900/30 rounded-lg border border-blue-300 dark:border-blue-700 text-center">
+                        <p className="font-bold text-blue-800 dark:text-blue-300">Pontuação Simulada</p>
+                        <p className="text-4xl font-bold text-blue-600 dark:text-blue-400">{performanceData.simulated.score.toFixed(2).replace('.',',')}</p>
+                        <p className="text-sm text-blue-600 dark:text-blue-400 mt-1">{performanceData.simulated.acertos} acertos, {performanceData.simulated.erros} erros</p>
+                        <p className={`font-bold text-lg mt-1 ${performanceData.difference > 0 ? 'text-green-600 dark:text-green-400' : (performanceData.difference < 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-600 dark:text-gray-400')}`}>
                             {performanceData.difference > 0 ? '+' : ''}{performanceData.difference.toFixed(2).replace('.',',')} pontos
                         </p>
                     </div>
                 </div>
 
                 {/* --- SELETOR DE QUESTÕES (CÓDIGO RESTAURADO) --- */}
-                <div className="md:col-span-2 lg:col-span-3 p-4 border rounded-lg">
+                <div className="md:col-span-2 lg:col-span-3 p-4 border dark:border-gray-700 rounded-lg">
                     <div className="flex justify-between items-center mb-4">
-                        <p className="font-bold">Selecione as questões:</p>
-                        <span className="text-sm font-medium text-gray-600 bg-gray-200 px-3 py-1 rounded-full">
+                        <p className="font-bold dark:text-gray-200">Selecione as questões:</p>
+                        <span className="text-sm font-medium text-gray-600 dark:text-gray-200 bg-gray-200 dark:bg-gray-700 px-3 py-1 rounded-full">
                             {selectedAnnulments.size} selecionada(s)
                         </span>
                     </div>
@@ -175,22 +175,22 @@ const SimulateAnnulmentTab = ({ proof, refreshProof }) => {
                             const officialAnswerUpper = officialAnswer ? String(officialAnswer).trim().toUpperCase() : '';
                             const isOfficiallyAnnulled = ['X', 'N', 'ANULADA'].includes(officialAnswerUpper);
 
-                            let questionColor = 'bg-gray-100 border-gray-300 text-gray-600'; // Cor padrão para em branco
+                            let questionColor = 'bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300'; // Cor padrão para em branco
 
                             if (isOfficiallyAnnulled) {
                                 // Questões anuladas oficialmente contam como acerto e ficam verdes
-                                questionColor = 'bg-green-200 border-green-400 text-green-800';
+                                questionColor = 'bg-green-200 dark:bg-green-800/50 border-green-400 dark:border-green-600 text-green-800 dark:text-green-200';
                             } else if (userAnswer && officialAnswer) {
                                 // Se não for anulada, verifica acerto/erro
                                 if (userAnswer === officialAnswer) {
-                                    questionColor = 'bg-green-200 border-green-400 text-green-800'; // Acerto
+                                    questionColor = 'bg-green-200 dark:bg-green-800/50 border-green-400 dark:border-green-600 text-green-800 dark:text-green-200'; // Acerto
                                 } else {
-                                    questionColor = 'bg-red-200 border-red-400 text-red-800'; // Erro
+                                    questionColor = 'bg-red-200 dark:bg-red-800/50 border-red-400 dark:border-red-600 text-red-800 dark:text-red-200'; // Erro
                                 }
                             }
                             
                             const isSelectedForAnnulment = selectedAnnulments.has(qStr);
-                            const labelClass = `flex items-center justify-center p-2 border-2 rounded-md cursor-pointer transition font-semibold ${isSelectedForAnnulment ? 'ring-4 ring-blue-400 ring-offset-0 bg-blue-500 border-blue-600 text-white' : questionColor}`;
+                            const labelClass = `flex items-center justify-center p-2 border-2 rounded-md cursor-pointer transition font-semibold ${isSelectedForAnnulment ? 'ring-4 ring-blue-400 dark:ring-blue-500 ring-offset-0 bg-blue-500 border-blue-600 text-white' : questionColor}`;
 
                             return (
                                 <div key={qNumber}>
