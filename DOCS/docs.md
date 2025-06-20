@@ -280,8 +280,38 @@ Para configurar e executar o projeto em um ambiente de desenvolvimento local:
 
 **Observação**: Certifique-se de que ambos os servidores (frontend e backend) estejam em execução simultaneamente para que a aplicação funcione corretamente.
 
+**Executando os Testes**
+
+Para garantir a qualidade e a estabilidade do código, o projeto conta com uma suíte de testes automatizados tanto para o backend quanto para o frontend.
+
+- **Executando Testes do Backend**:
+  ```bash
+  cd backend
+  npm test
+  ```
+  Para gerar um relatório de cobertura de testes:
+  ```bash
+  npm run coverage
+  ```
+
+- **Executando Testes do Frontend**:
+  ```bash
+  cd meu-dashboard-pro
+  npm test
+  ```
+  Para gerar um relatório de cobertura de testes:
+  ```bash
+  npm run coverage
+  ```
+
 ## 9. Log de Alterações (Changelog)
 Esta seção documenta as principais mudanças e melhorias implementadas no projeto ao longo do tempo.
+
+- **v1.9.2 (DATA_ATUAL)**
+    - **Implementação de Testes Abrangentes e Correção de Bugs**:
+        - **Backend (Jest & Supertest)**: Introduzida uma suíte de testes completa para o backend. Testes unitários para a lógica de correção (`correcao.js`) e testes de integração para todos os endpoints da API. Corrigidos bugs na lógica de parsing de gabaritos e no cálculo de aproveitamento revelados pelos testes.
+        - **Frontend (Vitest & React Testing Library)**: Configurado ambiente de teste com Vitest. Adicionados testes unitários para utilitários (`formatters.js`), hooks (`useDebouncedState.js`) e componentes (`StatusBadge`, `AdvancedBankConfig`). Corrigida falha de lógica no componente `StatusBadge`.
+        - **Infraestrutura de Testes**: Configurados bancos de dados de teste isolados, scripts de execução (`npm test`, `npm run coverage`) e simulação de API (mocking) para garantir testes rápidos, confiáveis e independentes.
 
 - **v1.7.0 (06/01/2025)**
     - **Análise Completa e Limpeza do Projeto**:

@@ -357,17 +357,11 @@ app.get('/api/bancas/:nome/configuracoes', async (req, res) => {
     }
 });
 
-// Inicia o servidor
-app.listen(PORT, () => {
-    console.log(`🚀 Servidor backend rodando na porta ${PORT}`);
-});
+// Inicia o servidor apenas se o arquivo for executado diretamente
+if (require.main === module) {
+    app.listen(PORT, () => {
+        console.log(`🚀 Servidor backend rodando na porta ${PORT}`);
+    });
+}
 
-// Tratamento de erros não capturados
-process.on('unhandledRejection', (err) => {
-    console.error('Erro não tratado:', err);
-});
-
-process.on('uncaughtException', (err) => {
-    console.error('Exceção não capturada:', err);
-    process.exit(1);
-});
+module.exports = app; // Exporta o app para testes

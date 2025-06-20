@@ -7,10 +7,12 @@ const { aplicarRegraAnulacao } = require('./regrasAnulacao');
  */
 function parseGabarito(gabaritoString) {
     if (!gabaritoString || gabaritoString.trim() === '') return new Map();
-    return new Map(gabaritoString.split(',').map(pair => {
-        const [q, a] = pair.split(':');
-        return [q, a];
-    }));
+    
+    const pairs = gabaritoString.split(',')
+      .map(pair => pair.split(':'))
+      .filter(([q, a]) => q && q.trim() !== '' && a && a.trim() !== '');
+
+    return new Map(pairs);
 }
 
 /**
@@ -146,4 +148,4 @@ function calculateOverallPerformance(proof, calculatedResults) {
     };
 }
 
-module.exports = { corrigirProva, calculateOverallPerformance };
+module.exports = { parseGabarito, corrigirProva, calculateOverallPerformance };
