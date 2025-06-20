@@ -736,3 +736,19 @@ Usuários precisavam configurar manualmente o tipo de pontuação (líquida vs b
 - ✅ **Visual Profissional**: O gráfico agora possui uma aparência moderna e limpa.
 - ✅ **Leitura Facilitada**: As informações são apresentadas de forma mais clara e hierárquica.
 - ✅ **Contexto Imediato**: Os rótulos do gráfico fornecem informações mais relevantes, melhorando a experiência do usuário.
+
+### Simplificação das Regras de Anulação - Versão 1.8.4
+
+#### Aprimoramentos de Lógica (Janeiro 2025)
+
+##### 🗑️ **Remoção da Regra "Cespe Dinâmico"**
+- **Problema**: A opção "Cespe Dinâmico" para o tratamento de questões anuladas era uma regra complexa e raramente utilizada, adicionando uma sobrecarga desnecessária à interface do usuário.
+- **Solução**:
+  - **Remoção da Interface**: A opção "Cespe Dinâmico" foi removida da lista de sugestões de regras para a banca "Cespe/Cebraspe", simplificando a tela de configuração.
+  - **Limpeza do Backend**: Toda a lógica associada à regra `CESPE_CALCULADO` foi removida do arquivo `regrasAnulacao.js`, incluindo a constante `TIPOS_REGRA_ANULACAO` e o bloco `case` correspondente na função `aplicarRegraAnulacao`.
+  - **Foco nas Regras Essenciais**: A interface agora se concentra nas duas regras mais comuns e compreensíveis para o Cespe: "Cespe Padrão" e "Cespe Meio Ponto".
+
+##### ✅ **Resultados Obtidos**
+- ✅ **Interface Mais Limpa**: Menos opções na tela de configuração, tornando a escolha do usuário mais direta.
+- ✅ **Código Simplificado**: O backend ficou mais enxuto e fácil de manter com a remoção de uma lógica complexa.
+- ✅ **Experiência Focada**: O usuário é guiado para as configurações mais relevantes e utilizadas.

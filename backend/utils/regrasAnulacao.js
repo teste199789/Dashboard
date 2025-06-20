@@ -10,7 +10,6 @@ const TIPOS_REGRA_ANULACAO = {
     PADRAO: 'PADRAO',                    // Anulada = +1 ponto (padrão atual)
     CESPE_INTEGRAL: 'CESPE_INTEGRAL',    // Anulada anula 1 certa (cancela 1 erro)
     CESPE_MEIO: 'CESPE_MEIO',           // Anulada anula 0.5 certa
-    CESPE_CALCULADO: 'CESPE_CALCULADO', // Fórmula complexa baseada no total
     PERSONALIZADO: 'PERSONALIZADO'       // Valor customizado pelo usuário
 };
 
@@ -115,22 +114,6 @@ function aplicarRegraAnulacao(proof, totals) {
             }
             break;
 
-        case TIPOS_REGRA_ANULACAO.CESPE_CALCULADO:
-            // Fórmula complexa: valor da anulada baseado no percentual de anuladas
-            const percentualAnuladas = totals.anuladas / proof.totalQuestoes;
-            const valorDinamico = percentualAnuladas > 0.1 ? 0.5 : 1.0; // Se >10% anuladas, vale 0.5
-            
-            if (proof.tipoPontuacao === 'liquida') {
-                const pontosAnuladas = totals.anuladas * valorDinamico;
-                pontuacaoFinal = (totals.acertos - totals.anuladas) + pontosAnuladas - totals.erros;
-                detalhesCalculo.explicacao = `Cespe Calculado: ${totals.anuladas} anuladas × ${valorDinamico} = +${pontosAnuladas} pontos`;
-            } else {
-                const pontosAnuladas = totals.anuladas * valorDinamico;
-                pontuacaoFinal = (totals.acertos - totals.anuladas) + pontosAnuladas;
-                detalhesCalculo.explicacao = `Cespe Calculado: ${totals.anuladas} anuladas × ${valorDinamico} = +${pontosAnuladas} pontos`;
-            }
-            break;
-
         case TIPOS_REGRA_ANULACAO.PERSONALIZADO:
             // Valor customizado pelo usuário
             if (proof.tipoPontuacao === 'liquida') {
@@ -209,12 +192,6 @@ function gerarSugestoesBanca(nomeBanca) {
                 regraAnulacao: TIPOS_REGRA_ANULACAO.CESPE_MEIO,
                 valorAnulacao: 0.5,
                 descricao: 'Cada anulada vale 0.5 ponto'
-            },
-            {
-                nome: 'Cespe Dinâmico',
-                regraAnulacao: TIPOS_REGRA_ANULACAO.CESPE_CALCULADO,
-                valorAnulacao: 1.0,
-                descricao: 'Valor da anulada varia conforme quantidade (1.0 ou 0.5)'
             }
         ];
     }

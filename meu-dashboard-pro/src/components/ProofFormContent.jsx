@@ -19,7 +19,6 @@ const ProofFormContent = ({ proofData, type = 'CONCURSO', onSave, initialStep = 
         totalQuestoes: type === 'CONCURSO' ? 120 : 50,
         tipoPontuacao: 'liquida',
         orgao: '',
-        cargo: '',
         notaDiscursiva: null,
         resultadoObjetiva: null,
         resultadoDiscursiva: null,
@@ -41,7 +40,6 @@ const ProofFormContent = ({ proofData, type = 'CONCURSO', onSave, initialStep = 
                 totalQuestoes: proofData.totalQuestoes || (type === 'CONCURSO' ? 120 : 50),
                 tipoPontuacao: proofData.tipoPontuacao || 'liquida',
                 orgao: proofData.orgao || '',
-                cargo: proofData.cargo || '',
                 notaDiscursiva: proofData.notaDiscursiva,
                 resultadoObjetiva: proofData.resultadoObjetiva,
                 resultadoDiscursiva: proofData.resultadoDiscursiva,
@@ -111,7 +109,6 @@ const ProofFormContent = ({ proofData, type = 'CONCURSO', onSave, initialStep = 
                          {type === 'CONCURSO' && (
                             <>
                                 <input type="text" name="orgao" placeholder="Órgão (Ex: TRT-10)" value={formData.orgao || ''} onChange={handleChange} className="w-full p-2 border bg-white dark:bg-gray-700 rounded-md"/>
-                                <input type="text" name="cargo" placeholder="Cargo (Ex: Analista Judiciário)" value={formData.cargo || ''} onChange={handleChange} className="w-full p-2 border bg-white dark:bg-gray-700 rounded-md"/>
                             </>
                         )}
                         <input type="date" name="data" value={formData.data || ''} onChange={handleChange} className="w-full p-2 border bg-white dark:bg-gray-700 rounded-md"/>
