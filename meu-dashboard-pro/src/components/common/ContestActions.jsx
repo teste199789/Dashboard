@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PencilIcon, TrashIcon } from '../icons';
+import { PencilIcon, TrashIcon, DotsVerticalIcon } from '../icons';
 
 // Ações primárias com estilo de destaque
 const PrimaryButton = ({ onClick, children, className = 'bg-teal-600 hover:bg-teal-700' }) => (
@@ -13,12 +13,52 @@ const PrimaryButton = ({ onClick, children, className = 'bg-teal-600 hover:bg-te
 );
 
 // Ações secundárias, mais discretas
-const IconButton = ({ onClick, children, title }) => (
-     <button onClick={onClick} className="p-2 text-gray-500 hover:text-blue-600" title={title}>
+const IconButton = ({ onClick, children, title, className = '' }) => (
+     <button onClick={onClick} className={`p-2 text-gray-500 hover:text-blue-600 ${className}`} title={title}>
         {children}
     </button>
 );
 
+const ActionMenu = ({ onEdit, onDelete }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const menuRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (menuRef.current && !menuRef.current.contains(event.target)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    return (
+        <div className="relative" ref={menuRef}>
+            <IconButton onClick={() => setIsOpen(!isOpen)} title="Mais opções">
+                <DotsVerticalIcon className="w-5 h-5" />
+            </IconButton>
+            {isOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg z-10 border border-gray-200 dark:border-gray-700">
+                    <button
+                        onClick={() => { onEdit(); setIsOpen(false); }}
+                        className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
+                        <PencilIcon className="w-4 h-4 mr-3" />
+                        Editar
+                    </button>
+                    <button
+                        onClick={() => { onDelete(); setIsOpen(false); }}
+                        className="flex items-center w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
+                        <TrashIcon className="w-4 h-4 mr-3" />
+                        Deletar
+                    </button>
+                </div>
+            )}
+        </div>
+    );
+};
 
 const ContestActions = ({ proof, onEdit, onDelete, onGrade }) => {
     const navigate = useNavigate();
@@ -50,13 +90,11 @@ const ContestActions = ({ proof, onEdit, onDelete, onGrade }) => {
             <div className="flex-shrink-0">
                 {getPrimaryAction()}
             </div>
-            <div className="flex items-center border-l border-gray-200 dark:border-gray-600 ml-2 pl-2">
-                 <IconButton onClick={() => onEdit(proof, 1)} title="Editar">
-                    <PencilIcon className="w-5 h-5"/>
-                </IconButton>
-                <IconButton onClick={() => onDelete(proof.id)} title="Deletar">
-                    <TrashIcon className="w-5 h-5 text-gray-500 hover:text-red-600"/>
-                </IconButton>
+            <div className="border-l border-gray-200 dark:border-gray-600 ml-2 pl-2">
+                <ActionMenu 
+                    onEdit={() => onEdit(proof, 1)}
+                    onDelete={() => onDelete(proof.id)}
+                />
             </div>
         </div>
     );

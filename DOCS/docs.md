@@ -291,6 +291,14 @@ Esta seção documenta as principais mudanças e melhorias implementadas no proj
         - **Novo Design Visual**: Dashboard redesenhado com estilo moderno: cabeçalho laranja (`bg-orange-400`), colunas em verde-azulado (`bg-teal-200`), linhas alternadas, layout de 9 colunas incluindo campo "Anuladas". Mantida funcionalidade completa com visual aprimorado.
         - **Correções React Router**: Adicionadas flags de future (`v7_startTransition`, `v7_relativeSplatPath`) para eliminar warnings de compatibilidade.
 
+- **v1.9.0 (DATA_ATUAL)**
+    - **Melhoria Abrangente da Tabela de Controle de Concursos**:
+        - **Indicadores Visuais de Desempenho**: A coluna "Aproveitamento" foi transformada em uma barra de progresso colorida, proporcionando uma leitura visual imediata e comparativa do desempenho.
+        - **Hierarquia Visual e Ações Simplificadas**: O título do concurso agora é destacado em negrito para melhor legibilidade. As ações secundárias ("Editar", "Deletar") foram agrupadas em um menu de "três pontos", limpando a interface e focando na ação principal.
+        - **Status Inteligente de Próxima Ação**: Foi introduzida a coluna "Próxima Ação", que utiliza badges coloridos para indicar o estado de cada concurso (ex: "Pendente Meu Gabarito", "Pronto para Corrigir", "Finalizado"), guiando o usuário no seu fluxo de trabalho.
+        - **Filtros Avançados e Busca**: A tabela agora conta com um campo de busca global e filtros específicos por "Banca" e "Próxima Ação", permitindo uma análise de dados muito mais granular e poderosa.
+        - **Ordenação por Colunas**: Todas as colunas agora são ordenáveis, facilitando a análise de tendências ao longo do tempo.
+
 - **v1.6.0 (19/06/2025)**
     - **Refatoração da Interface e Correção de Bugs Críticos**:
         - **Melhoria Geral da UI/UX**: Realizada uma refatoração completa da navegação principal, extraindo-a para um componente modular e centralizando a configuração de links para facilitar a manutenção. Melhorada a consistência visual dos temas claro/escuro em diversos componentes (botões, cartões, inputs).

@@ -1,4 +1,4 @@
-import { useReactTable, getCoreRowModel, flexRender } from '@tanstack/react-table';
+import { useReactTable, getCoreRowModel, getFilteredRowModel, getSortedRowModel, getPaginationRowModel, flexRender } from '@tanstack/react-table';
 import React, { useState, useMemo, useCallback } from 'react';
 import { useProofs } from '../hooks/useProofs';
 import { useNavigate } from 'react-router-dom';
@@ -6,11 +6,24 @@ import StatsRow from '../components/common/StatsRow';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import ConfirmationModal from '../components/common/ConfirmationModal';
 import ContestActions from '../components/common/ContestActions';
+import StatusBadge, { getStatus } from '../components/common/StatusBadge';
+import ProgressBar from '../components/common/ProgressBar';
+
+const SortIcon = ({ isSorted }) => {
+    if (!isSorted) return <span className="w-4 h-4 ml-1"></span>; // Placeholder for alignment
+    if (isSorted === 'asc') {
+        return <svg className="w-4 h-4 ml-1 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 15l7-7 7 7"></path></svg>;
+    }
+    return <svg className="w-4 h-4 ml-1 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>;
+};
 
 const Dashboard = () => {
     const navigate = useNavigate();
     const { proofs, consolidatedData, isLoading, dashboardFilter, setDashboardFilter, modalState, closeDeleteModal, handleDeleteProof, handleGradeProof } = useProofs();
     const [isGrading, setIsGrading] = useState(false);
+    const [sorting, setSorting] = useState([]);
+    const [globalFilter, setGlobalFilter] = useState('');
+    const [columnFilters, setColumnFilters] = useState([]);
 
     const handleNavigateToProof = useCallback((proofId, initialTab = '') => {
         const path = `/minhas-provas/${proofId}${initialTab ? `?tab=${initialTab}` : ''}`;
@@ -35,8 +48,11 @@ const Dashboard = () => {
         {
             accessorKey: 'titulo',
             header: 'Título',
-            cell: ({ getValue }) => (
-                <div className="font-medium text-gray-900 dark:text-gray-100">
+            cell: ({ getValue, row }) => (
+                <div 
+                    className="font-bold text-gray-900 dark:text-gray-100 cursor-pointer hover:text-teal-600"
+                    onClick={() => handleNavigateToProof(row.original.id)}
+                >
                     {getValue()}
                 </div>
             ),
@@ -63,45 +79,28 @@ const Dashboard = () => {
             ),
         },
         {
+            accessorKey: 'orgao',
+            header: 'Órgão',
+            cell: ({ getValue }) => (
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                    {getValue() || '-'}
+                </div>
+            ),
+        },
+        {
             accessorKey: 'aproveitamento',
             header: 'Aproveitamento',
             cell: ({ getValue }) => {
                 const percentage = getValue();
                 if (percentage == null) return <span className="text-gray-400">-</span>;
-                return (
-                    <div className="text-sm font-medium">
-                        {percentage.toFixed(1)}%
-                    </div>
-                );
+                return <ProgressBar value={percentage} />;
             },
         },
         {
-            accessorKey: 'resultadoFinal',
-            header: 'Status',
-            cell: ({ getValue }) => {
-                const resultado = getValue();
-                if (!resultado) return <span className="text-gray-400">Pendente</span>;
-                
-                const getStatusColor = (status) => {
-                    if (!status) return 'bg-gray-100 text-gray-800';
-                    switch (status.toLowerCase()) {
-                        case 'aprovado':
-                        case 'classificado':
-                            return 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-200';
-                        case 'reprovado':
-                        case 'eliminado':
-                            return 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-200';
-                        default:
-                            return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
-                    }
-                };
-                
-                return (
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(resultado)}`}>
-                        {resultado}
-                    </span>
-                );
-            },
+            id: 'nextAction',
+            accessorFn: (row) => getStatus(row).text,
+            header: 'Próxima Ação',
+            cell: ({ row }) => <StatusBadge proof={row.original} />,
         },
         {
             id: 'actions',
@@ -121,8 +120,33 @@ const Dashboard = () => {
     const table = useReactTable({
         data: proofs,
         columns,
+        state: {
+            sorting,
+            globalFilter,
+            columnFilters,
+        },
+        onSortingChange: setSorting,
+        onGlobalFilterChange: setGlobalFilter,
+        onColumnFiltersChange: setColumnFilters,
         getCoreRowModel: getCoreRowModel(),
+        getFilteredRowModel: getFilteredRowModel(),
+        getSortedRowModel: getSortedRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
     });
+
+    const filterableBancas = useMemo(() => {
+        const bancas = new Set(proofs.map(p => p.banca).filter(Boolean));
+        return ['Todas', ...Array.from(bancas)];
+    }, [proofs]);
+
+    const filterableStatus = [
+        'Todos',
+        'Finalizado', 
+        'Lançar Resultado', 
+        'Pronto para Corrigir', 
+        'Pendente Gabarito Oficial', 
+        'Pendente Meu Gabarito'
+    ];
 
     if (isLoading) {
         return <LoadingSpinner />;
@@ -181,7 +205,35 @@ const Dashboard = () => {
             {/* Table Section */}
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
                 <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                    <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Controle de Concursos</h2>
+                    <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Controle de Concursos</h2>
+                        <input
+                            type="text"
+                            value={globalFilter ?? ''}
+                            onChange={e => setGlobalFilter(e.target.value)}
+                            className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                            placeholder="Buscar em todos os campos..."
+                        />
+                    </div>
+                    <div className="flex items-center space-x-4">
+                        {/* Filtro por Banca */}
+                        <select
+                            value={table.getColumn('banca')?.getFilterValue() || 'Todas'}
+                            onChange={e => table.getColumn('banca')?.setFilterValue(e.target.value === 'Todas' ? null : e.target.value)}
+                             className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm"
+                        >
+                            {filterableBancas.map(banca => <option key={banca} value={banca}>{banca}</option>)}
+                        </select>
+
+                        {/* Filtro por Status */}
+                         <select
+                            value={table.getColumn('nextAction')?.getFilterValue() || 'Todos'}
+                            onChange={e => table.getColumn('nextAction')?.setFilterValue(e.target.value === 'Todos' ? null : e.target.value)}
+                            className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm"
+                        >
+                            {filterableStatus.map(status => <option key={status} value={status}>{status}</option>)}
+                        </select>
+                    </div>
                 </div>
                 <div className="overflow-x-auto">
                     <table className="w-full">
@@ -192,11 +244,16 @@ const Dashboard = () => {
                                         <th
                                             key={header.id}
                                             className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                                            onClick={header.column.getToggleSortingHandler()}
+                                            style={{ cursor: header.column.getCanSort() ? 'pointer' : 'default' }}
                                         >
-                                            {header.isPlaceholder
-                                                ? null
-                                                : flexRender(header.column.columnDef.header, header.getContext())
-                                            }
+                                            <div className="flex items-center">
+                                                {header.isPlaceholder
+                                                    ? null
+                                                    : flexRender(header.column.columnDef.header, header.getContext())
+                                                }
+                                                <SortIcon isSorted={header.column.getIsSorted()} />
+                                            </div>
                                         </th>
                                     ))}
                                 </tr>
@@ -217,6 +274,31 @@ const Dashboard = () => {
                             ))}
                         </tbody>
                     </table>
+                </div>
+                {/* Pagination Controls */}
+                <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                        Página{' '}
+                        <strong>
+                            {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
+                        </strong>
+                    </span>
+                    <div className="flex items-center space-x-2">
+                        <button
+                            onClick={() => table.previousPage()}
+                            disabled={!table.getCanPreviousPage()}
+                            className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            Anterior
+                        </button>
+                        <button
+                            onClick={() => table.nextPage()}
+                            disabled={!table.getCanNextPage()}
+                            className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            Próximo
+                        </button>
+                    </div>
                 </div>
             </div>
 
