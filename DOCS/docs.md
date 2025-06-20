@@ -307,9 +307,15 @@ Para garantir a qualidade e a estabilidade do código, o projeto conta com uma s
 ## 9. Log de Alterações (Changelog)
 Esta seção documenta as principais mudanças e melhorias implementadas no projeto ao longo do tempo.
 
+- **v1.9.3 (DATA_ATUAL)**
+    - **Correção de Bug Crítico e Melhoria de UX na Exclusão**:
+        - **Correção do Bug de Exclusão**: Resolvido um bug crítico que impedia a exclusão de concursos. O erro ocorria porque o frontend enviava o objeto de prova inteiro (`[object Object]`) para a API de exclusão em vez de apenas o ID numérico, causando uma falha no backend. A lógica no `ProofsContext` foi corrigida para garantir que apenas o ID seja enviado.
+        - **Botão de Excluir na Página de Detalhes**: Adicionado um botão "Excluir" na página de detalhes da prova, permitindo que o usuário delete um concurso diretamente dessa tela, melhorando o fluxo de trabalho.
+        - **Refatoração do Modal de Confirmação**: O modal de confirmação de exclusão foi centralizado no layout principal da aplicação (`MainLayout.jsx`) para garantir consistência e reutilização de código, em vez de ser implementado em cada página separadamente.
+
 - **v1.9.2 (DATA_ATUAL)**
     - **Implementação de Testes Abrangentes e Correção de Bugs**:
-        - **Backend (Jest & Supertest)**: Introduzida uma suíte de testes completa para o backend. Testes unitários para a lógica de correção (`correcao.js`) e testes de integração para todos os endpoints da API. Corrigidos bugs na lógica de parsing de gabaritos e no cálculo de aproveitamento revelados pelos testes.
+        - **Backend (Jest & Supertest)**: Introduzida uma suíte de testes completa para o backend. Testes unitários para a lógica de correção (`correcao.js`) e testes de integração para todos os primeiros da API. Corrigidos bugs na lógica de parsing de gabaritos e no cálculo de aproveitamento revelados pelos testes.
         - **Frontend (Vitest & React Testing Library)**: Configurado ambiente de teste com Vitest. Adicionados testes unitários para utilitários (`formatters.js`), hooks (`useDebouncedState.js`) e componentes (`StatusBadge`, `AdvancedBankConfig`). Corrigida falha de lógica no componente `StatusBadge`.
         - **Infraestrutura de Testes**: Configurados bancos de dados de teste isolados, scripts de execução (`npm test`, `npm run coverage`) e simulação de API (mocking) para garantir testes rápidos, confiáveis e independentes.
 

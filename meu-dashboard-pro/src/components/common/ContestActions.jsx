@@ -93,7 +93,7 @@ const ContestActions = ({ proof, onEdit, onDelete, onGrade }) => {
             <div className="border-l border-gray-200 dark:border-gray-600 ml-2 pl-2">
                 <ActionMenu 
                     onEdit={() => onEdit(proof, 1)}
-                    onDelete={() => onDelete(proof.id)}
+                    onDelete={() => onDelete(proof)}
                 />
             </div>
         </div>

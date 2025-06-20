@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, useLocation } from 'react-router-dom';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import * as api from '../api/apiService';
 import { formatDate } from '../utils/formatters';
 import { useProofs } from '../hooks/useProofs';
@@ -14,6 +14,7 @@ import SimulateAnnulmentTab from './tabs/SimulateAnnulmentTab';
 import RankingTab from './tabs/RankingTab';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import PencilIcon from '../components/icons/PencilIcon';
+import TrashIcon from '../components/icons/TrashIcon';
 import LockIcon from '../components/icons/LockIcon';
 import ProofForm from '../components/ProofForm';
 
@@ -36,12 +37,14 @@ const getSmartTab = (proof) => {
 const ProofDetail = () => {
     const { proofId } = useParams();
     const location = useLocation();
+    const navigate = useNavigate();
     const [proof, setProof] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('info');
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     
-    const { handleGradeProof } = useProofs();
+    const { handleGradeProof, openDeleteModal, modalState } = useProofs();
+    const prevModalState = React.useRef(modalState.isOpen);
 
     const fetchProof = useCallback(async () => {
         try {
@@ -73,8 +76,21 @@ const ProofDetail = () => {
         fetchProof();
     }, [fetchProof]);
 
+    useEffect(() => {
+        // Se o modal foi fechado e antes estava aberto (o que acontece após a confirmação)
+        // e não estamos mais na página da prova (porque ela foi deletada)
+        if (prevModalState.current && !modalState.isOpen) {
+             // A prova foi deletada, então o fetch vai falhar.
+             // Podemos redirecionar o usuário.
+             if (!proof) { // Se o estado da prova já é nulo
+                navigate('/dashboard');
+             }
+        }
+        prevModalState.current = modalState.isOpen;
+    }, [modalState.isOpen, navigate, proof]);
+
     if (isLoading) return <LoadingSpinner message="Carregando detalhes da prova..." />;
-    if (!proof) return <div className="text-center p-10 font-bold text-red-500">Prova não encontrada.</div>;
+    if (!proof) return <div className="text-center p-10 font-bold text-red-500">Prova não encontrada. Redirecionando...</div>;
 
     const hasSubjects = proof.subjects && proof.subjects.length > 0;
     const disabledTooltip = "Primeiro, cadastre as matérias na aba 'Informações e Matérias'.";
@@ -112,10 +128,16 @@ const ProofDetail = () => {
                              <p className="text-gray-500 dark:text-gray-400">{proof.orgao} • {proof.cargo}</p>
                         )}
                     </div>
-                    <button onClick={() => setIsEditModalOpen(true)} className="flex-shrink-0 flex items-center gap-2 py-2 px-4 bg-white dark:bg-gray-700 border dark:border-gray-600 rounded-md shadow-sm hover:bg-gray-100 dark:hover:bg-gray-600 font-semibold text-sm transition-colors">
-                        <PencilIcon className="w-4 h-4" />
-                        Editar Dados Gerais
-                    </button>
+                    <div className="flex-shrink-0 flex items-center gap-2">
+                        <button onClick={() => setIsEditModalOpen(true)} className="flex items-center gap-2 py-2 px-4 bg-white dark:bg-gray-700 border dark:border-gray-600 rounded-md shadow-sm hover:bg-gray-100 dark:hover:bg-gray-600 font-semibold text-sm transition-colors">
+                            <PencilIcon className="w-4 h-4" />
+                            Editar Dados Gerais
+                        </button>
+                        <button onClick={() => openDeleteModal(proof)} className="flex items-center gap-2 py-2 px-4 bg-red-600 text-white border border-red-600 rounded-md shadow-sm hover:bg-red-700 font-semibold text-sm transition-colors">
+                            <TrashIcon className="w-4 h-4" />
+                            Excluir
+                        </button>
+                    </div>
                 </div>
             </div>
 

@@ -146,10 +146,20 @@ app.get('/api/proofs/:id', async (req, res) => {
 app.delete('/api/proofs/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        await prisma.proof.delete({ where: { id: parseInt(id) } });
+        const numericId = parseInt(id, 10);
+
+        if (isNaN(numericId)) {
+            return res.status(400).json({ error: "ID inválido. Deve ser um número." });
+        }
+
+        await prisma.proof.delete({
+            where: {
+                id: numericId,
+            },
+        });
         res.status(204).send();
     } catch (error) {
-        console.error("Erro ao deletar prova:", error);
+        console.error('Erro ao deletar prova:', error);
         res.status(500).json({ error: "Não foi possível deletar a prova." });
     }
 });

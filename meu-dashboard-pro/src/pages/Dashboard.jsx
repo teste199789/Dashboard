@@ -4,9 +4,8 @@ import { useProofs } from '../hooks/useProofs';
 import { useNavigate } from 'react-router-dom';
 import StatsRow from '../components/common/StatsRow';
 import LoadingSpinner from '../components/common/LoadingSpinner';
-import ConfirmationModal from '../components/common/ConfirmationModal';
 import ContestActions from '../components/common/ContestActions';
-import StatusBadge, { getStatus } from '../components/common/StatusBadge';
+import StatusBadge from '../components/common/StatusBadge';
 import ProgressBar from '../components/common/ProgressBar';
 import ProofForm from '../components/ProofForm';
 
@@ -25,12 +24,9 @@ const Dashboard = () => {
         consolidatedData, 
         isLoading, 
         dashboardFilter, 
-        setDashboardFilter, 
-        modalState, 
+        setDashboardFilter,
         openDeleteModal,
-        closeDeleteModal, 
-        handleDeleteProof, 
-        handleGradeProof 
+        handleGradeProof
     } = useProofs();
     const [isGrading, setIsGrading] = useState(false);
     const [sorting, setSorting] = useState([]);
@@ -249,21 +245,20 @@ const Dashboard = () => {
                                                     ? null
                                                     : flexRender(header.column.columnDef.header, header.getContext())
                                                 }
-                                                <SortIcon isSorted={header.column.getIsSorted()} />
+                                                {header.column.getCanSort() && (
+                                                    <SortIcon isSorted={header.column.getIsSorted()} />
+                                                )}
                                             </div>
                                         </th>
                                     ))}
                                 </tr>
                             ))}
                         </thead>
-                        <tbody className="bg-white dark:bg-gray-800">
+                        <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                             {table.getRowModel().rows.map(row => (
-                                <tr key={row.id} className="even:bg-gray-100 dark:even:bg-gray-900/50 hover:bg-teal-50 dark:hover:bg-teal-900/50">
+                                <tr key={row.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                                     {row.getVisibleCells().map(cell => (
-                                        <td
-                                            key={cell.id}
-                                            className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200"
-                                        >
+                                        <td key={cell.id} className="px-6 py-4 whitespace-nowrap">
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </td>
                                     ))}
@@ -299,23 +294,14 @@ const Dashboard = () => {
                 </div>
             </div>
 
-            {isModalOpen && (
-                <ProofForm
-                    isOpen={isModalOpen}
-                    onClose={handleCloseModal}
-                    proofData={selectedProof}
-                    type={selectedProof?.type}
-                    initialStep={initialStep}
-                />
-            )}
-
-            {/* Confirmation Modal */}
-            <ConfirmationModal
-                isOpen={modalState.isOpen}
-                onClose={closeDeleteModal}
-                onConfirm={handleDeleteProof}
-                title="Deletar Concurso"
-                message="Tem certeza de que deseja deletar este concurso? Esta ação não pode ser desfeita."
+            <ProofForm 
+                isOpen={isModalOpen}
+                onClose={() => {
+                    setIsModalOpen(false);
+                }}
+                proofData={selectedProof}
+                type={selectedProof?.type || 'CONCURSO'}
+                initialStep={initialStep}
             />
         </div>
     );

@@ -59,20 +59,21 @@ export const ProofsProvider = ({ children }) => {
         return true;
     };
 
-    const openDeleteModal = (id) => setModalState({ isOpen: true, proofId: id });
+    const openDeleteModal = (proof) => setModalState({ isOpen: true, proofId: proof.id });
     const closeDeleteModal = () => setModalState({ isOpen: false, proofId: null });
 
     const handleDeleteProof = async () => {
-        const id = modalState.proofId;
-        if (!id) return;
+        const proofIdToDelete = modalState.proofId;
+        if (!proofIdToDelete) return;
         try {
-            await api.deleteProof(id);
+            await api.deleteProof(proofIdToDelete);
             toast.success("Item deletado com sucesso!");
             closeDeleteModal();
             fetchProofs();
-        } catch {
+        } catch (error) {
             toast.error("Falha ao deletar o item.");
             setError("Falha ao deletar o item.");
+            console.error("Erro no handleDeleteProof:", error);
             closeDeleteModal();
         }
     };
