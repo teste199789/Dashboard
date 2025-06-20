@@ -5,4 +5,6 @@ export { default as PencilIcon } from './PencilIcon.jsx';
 export { default as SparklesIcon } from './SparklesIcon.jsx';
 export { default as TrashIcon } from './TrashIcon.jsx';
 export { default as XIcon } from './XIcon.jsx';
-export { default as DotsVerticalIcon } from './DotsVerticalIcon.jsx'; 
+export { default as DotsVerticalIcon } from './DotsVerticalIcon.jsx';
+export { default as CheckIcon } from './CheckIcon.jsx';
+export { default as MinusCircleIcon } from './MinusCircleIcon.jsx'; 

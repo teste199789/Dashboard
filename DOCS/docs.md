@@ -300,6 +300,12 @@ Esta seção documenta as principais mudanças e melhorias implementadas no proj
         - **Ordenação por Colunas**: Todas as colunas agora são ordenáveis, facilitando a análise de tendências ao longo do tempo.
         - **Unificação Visual**: O estilo da tabela foi alinhado ao da seção "Dados Consolidados", com cabeçalho verde-azulado e linhas zebradas para maior consistência visual.
 
+- **v1.9.1 (DATA_ATUAL)**
+    - **Aprimoramento do Card de Resumo de Resultados**:
+        - **Métricas Detalhadas**: O card de resumo na aba "Resultado Final" foi redesenhado para exibir métricas detalhadas (Acertos, Erros, Brancos, Aproveitamento) para o Total, Conhecimentos Básicos e Conhecimentos Específicos.
+        - **Visualização Hierárquica**: O card agora inclui uma barra de progresso empilhada que mostra a proporção de questões básicas e específicas na prova.
+        - **Clareza e Contexto**: Ícones e cores foram adicionados para reforçar o significado de cada métrica, e as cores da barra correspondem às seções para uma associação visual clara.
+
 - **v1.6.0 (19/06/2025)**
     - **Refatoração da Interface e Correção de Bugs Críticos**:
         - **Melhoria Geral da UI/UX**: Realizada uma refatoração completa da navegação principal, extraindo-a para um componente modular e centralizando a configuração de links para facilitar a manutenção. Melhorada a consistência visual dos temas claro/escuro em diversos componentes (botões, cartões, inputs).

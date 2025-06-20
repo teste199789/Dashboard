@@ -3,6 +3,7 @@ import { useProofs } from '../../hooks/useProofs';
 import toast from 'react-hot-toast';
 import ResultGrid from '../../components/common/ResultGrid';
 import { formatPercentAlreadyScaled } from '../../utils/formatters';
+import PerformanceSummaryCard from '../../components/common/PerformanceSummaryCard';
 
 const ResultTab = ({ proof, refreshProof }) => {
     const [isGrading, setIsGrading] = useState(false);
@@ -23,9 +24,9 @@ const ResultTab = ({ proof, refreshProof }) => {
         }
     };
 
-    const performanceData = useMemo(() => {
+    const { performanceData, summaryStats } = useMemo(() => {
         if (!proof || !proof.results || proof.results.length === 0) {
-            return null;
+            return { performanceData: null, summaryStats: null };
         }
 
         const subjectQuestionMap = new Map(proof.subjects.map(s => [s.disciplina || s.nome, s.questoes]));
@@ -59,7 +60,27 @@ const ResultTab = ({ proof, refreshProof }) => {
         totals.percentualBruta = totals.questoes > 0 ? (totals.acertos / totals.questoes) * 100 : 0;
         totals.percentualLiquidos = totals.questoes > 0 ? Math.max(0, totals.liquidos / totals.questoes) * 100 : 0;
         
-        return { detailedResults, totals };
+        const createStatObject = (item) => ({
+            acertos: item ? item.acertos : 0,
+            erros: item ? item.erros : 0,
+            brancos: item ? item.brancos : 0,
+            questoes: item ? item.questoes : 0,
+            aproveitamento: item ? item.percentualLiquidos : 0,
+        });
+        
+        const basicKnowledge = detailedResults.find(r => r.disciplina.toLowerCase().includes('básico'));
+        const specificKnowledge = detailedResults.find(r => r.disciplina.toLowerCase().includes('específico'));
+
+        const calculatedSummaryStats = {
+            total: createStatObject(totals),
+            basic: createStatObject(basicKnowledge),
+            specific: createStatObject(specificKnowledge),
+        };
+
+        return { 
+            performanceData: { detailedResults, totals }, 
+            summaryStats: calculatedSummaryStats 
+        };
 
     }, [proof]);
 
@@ -81,6 +102,11 @@ const ResultTab = ({ proof, refreshProof }) => {
                 </div>
             ) : (
                 <div className="space-y-8">
+                    {/* Summary Stats Section */}
+                    {summaryStats && (
+                        <PerformanceSummaryCard summary={summaryStats} />
+                    )}
+
                     {/* Tabela de Desempenho */}
                     <div>
                         <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">Desempenho Detalhado por Matéria</h3>
