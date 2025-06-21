@@ -37,7 +37,7 @@ fi
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 BACKUP_DIR="./backups"
 LOCAL_BACKUP_PATH="$BACKUP_DIR/backup_${TIMESTAMP}.sql.gz"
-DB_CONTAINER_NAME="dashboard-db-prod"
+DB_CONTAINER_NAME="dashboard-postgres-prod"
 
 # Verificar se o diretório de backup existe
 mkdir -p "$BACKUP_DIR"
@@ -45,7 +45,7 @@ mkdir -p "$BACKUP_DIR"
 # Verificar se o container do banco está rodando
 if ! docker ps | grep -q "$DB_CONTAINER_NAME"; then
     echo -e "${YELLOW}⚠️  Container do banco não está rodando. Iniciando...${NC}"
-    docker compose -f docker-compose.prod.yml up -d db-prod
+    docker compose -f docker-compose.prod.yml up -d postgres-prod
     
     # Aguardar o banco ficar pronto
     echo -e "${BLUE}⏳ Aguardando banco de dados ficar pronto...${NC}"
@@ -119,7 +119,7 @@ cd ..
 # Parar container se ele não estava rodando antes
 if [ "$CONTAINER_WAS_STOPPED" = true ]; then
     echo -e "${BLUE}⏹️  Parando container do banco...${NC}"
-    docker compose -f docker-compose.prod.yml stop db-prod
+    docker compose -f docker-compose.prod.yml stop postgres-prod
 fi
 
 echo -e "${GREEN}🎉 Processo de backup concluído com sucesso!${NC}"

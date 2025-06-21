@@ -23,7 +23,7 @@ fi
 
 # Parar os contêineres de produção
 echo "Parando os contêineres de produção..."
-if docker-compose -f docker-compose.prod.yml down --volumes --remove-orphans; then
+if docker compose -f docker-compose.prod.yml down --volumes --remove-orphans; then
   echo "Contêineres de produção parados com sucesso."
 else
   echo "Falha ao parar os contêineres de produção. Pode ser que eles já estivessem parados."

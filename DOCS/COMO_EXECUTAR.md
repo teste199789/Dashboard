@@ -51,9 +51,9 @@ Para iniciar o ambiente de produção, que utiliza imagens otimizadas e serve o 
 
 **Importante:** Na primeira vez que o ambiente de produção é iniciado, o banco PostgreSQL estará vazio. Você precisa aplicar as migrações manualmente com o seguinte comando:
 ```bash
-docker exec dashboard-backend-prod npx prisma migrate deploy
+docker compose -f docker-compose.prod.yml exec backend-prod npx prisma migrate deploy
 ```
-Este comando só precisa ser executado uma vez.
+Este comando só precisa ser executado uma vez, ou sempre que houver novas migrações.
 
 - **Aplicação:** Acessível em `http://localhost:5173`
 
@@ -105,10 +105,9 @@ Este script verifica:
 ## Comandos Gerais
 
 - **Verificar os logs**:
-  - `docker compose logs -f` (todos os serviços)
-  - `docker compose logs -f backend`
-  - `docker compose logs -f frontend`
-  - `docker compose logs -f db-prod` (PostgreSQL produção)
+  - `docker compose -f docker-compose.dev.yml logs -f` (desenvolvimento)
+  - `docker compose -f docker-compose.prod.yml logs -f` (produção)
+  - `docker compose -f docker-compose.dev.yml logs -f backend-dev` (backend dev)
 
 ## Comandos Úteis
 
@@ -122,10 +121,10 @@ Este script verifica:
 -   **Acessar o PostgreSQL diretamente**:
     ```bash
     # Desenvolvimento
-    docker compose -f docker-compose.dev.yml exec db-dev psql -U $POSTGRES_USER_DEV -d $POSTGRES_DB_DEV
+    docker compose -f docker-compose.dev.yml exec postgres-dev psql -U $POSTGRES_USER_DEV -d $POSTGRES_DB_DEV
     
     # Produção
-    docker compose -f docker-compose.prod.yml exec db-prod psql -U $POSTGRES_USER -d $POSTGRES_DB
+    docker compose -f docker-compose.prod.yml exec postgres-prod psql -U $POSTGRES_USER -d $POSTGRES_DB
     ```
 
 -   **Verificar segurança antes de commit**:
@@ -160,18 +159,8 @@ cp .env.example .env
 docker compose -f docker-compose.dev.yml exec backend-dev npx prisma migrate dev
 
 # Produção
-docker exec dashboard-backend-prod npx prisma migrate deploy
+docker compose -f docker-compose.prod.yml exec backend-prod npx prisma migrate deploy
 ```
 
 ### Erro: "Verificação de segurança falhou"
-```bash
-./scripts/check-security.sh
-# Siga as instruções do script para corrigir os problemas
 ```
-
-## 📋 Checklist Antes de Commit
-
-- [ ] Execute `./scripts/check-security.sh`
-- [ ] Verifique se `.env` não está sendo commitado
-- [ ] Teste o ambiente de desenvolvimento
-- [ ] Verifique se não há credenciais hardcoded no código
