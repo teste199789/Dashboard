@@ -2,6 +2,29 @@
 
 Este projeto é totalmente containerizado com Docker, separando os ambientes de desenvolvimento e produção.
 
+## ❗ Configuração Inicial Obrigatória (.env)
+
+Antes de iniciar o projeto pela primeira vez, você **precisa** criar um arquivo de configuração de ambiente.
+
+1.  Crie um arquivo chamado `.env` na raiz do projeto.
+2.  Copie e cole o seguinte conteúdo dentro dele:
+
+    ```env
+    # Variáveis de Ambiente para o Banco de Dados
+    # Este arquivo NÃO deve ser comitado no Git.
+
+    # Produção
+    POSTGRES_USER=user
+    POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    POSTGRES_DB=dashboard_prod
+
+    # Desenvolvimento
+    POSTGRES_USER_DEV=user_dev
+    POSTGRES_PASSWORD_DEV=password_dev
+    POSTGRES_DB_DEV=dashboard_dev
+    ```
+3.  Você pode alterar os valores de usuário e senha, se desejar. O restante do sistema usará esses valores automaticamente.
+
 ## Pré-requisitos
 
 - Docker
@@ -49,6 +72,20 @@ Para parar todos os contêineres (sejam de desenvolvimento ou produção), utili
 ```
 
 Este comando irá parar e remover todos os contêineres relacionados a este projeto.
+
+## Backup do Banco de Dados
+
+O projeto inclui um script para realizar backups automáticos do banco de dados de **produção** e enviá-los para o Google Drive.
+
+**Pré-requisito:** Você precisa ter o `rclone` instalado e configurado com um remote chamado `backup_gdrive`.
+
+Para executar o backup manualmente a qualquer momento:
+```bash
+./backup.sh
+```
+O script é inteligente: ele iniciará o contêiner do banco de dados se estiver parado, realizará o backup e o desligará ao final, caso não estivesse rodando antes.
+
+**Nota:** Um backup também é executado automaticamente sempre que o comando `./stop.sh` é utilizado com o ambiente de produção ativo.
 
 ## Comandos Gerais
 

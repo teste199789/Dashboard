@@ -2,9 +2,9 @@ services:
   postgres-prod:
     image: postgres:16-alpine
     environment:
-      - POSTGRES_USER=user
+      - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=dashboard_prod
+      - POSTGRES_DB=${POSTGRES_DB}
     volumes:
       - postgres-prod-data:/var/lib/postgresql/data
     ports:
@@ -21,7 +21,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile.prod
     environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres-prod:5432/dashboard_prod
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres-prod:5432/${POSTGRES_DB}
     ports:
       - "3001:3001"
     depends_on:

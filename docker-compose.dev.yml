@@ -2,9 +2,9 @@ services:
   postgres-dev:
     image: postgres:16-alpine
     environment:
-      - POSTGRES_USER=user
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=dashboard_dev
+      - POSTGRES_USER=${POSTGRES_USER_DEV}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD_DEV}
+      - POSTGRES_DB=${POSTGRES_DB_DEV}
     volumes:
       - postgres-dev-data:/var/lib/postgresql/data
     ports:
@@ -16,7 +16,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres-dev:5432/dashboard_dev
+      - DATABASE_URL=postgresql://${POSTGRES_USER_DEV}:${POSTGRES_PASSWORD_DEV}@postgres-dev:5432/${POSTGRES_DB_DEV}
     command: npm run dev
     volumes:
       - ./backend:/app
