@@ -2,7 +2,7 @@ services:
   backend-migrate:
     build:
       context: ./backend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.prod
     environment:
       # O Prisma encontrará o DB em /app/prisma/dev.db
       - DATABASE_URL=file:./prisma/dev.db
@@ -15,13 +15,13 @@ services:
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.prod
     ports:
       - "3001:3001"
     volumes:
-      # Mapeia todo o backend. O DB agora viverá dentro de ./backend/prisma/
-      - ./backend:/app
-      - /app/node_modules
+      # Em produção, o banco de dados é o único volume que precisamos persistir.
+      # O código da aplicação já está na imagem.
+      - ./backend/prisma:/app/prisma
     environment:
       - DATABASE_URL=file:./prisma/dev.db
     container_name: dashboard-backend
@@ -32,18 +32,13 @@ services:
   frontend:
     build:
       context: ./meu-dashboard-pro
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.prod
     ports:
-      - "5173:5173"
-    volumes:
-      # Mapeia o código-fonte para hot-reload no frontend.
-      - ./meu-dashboard-pro:/app
-      # Impede que a pasta node_modules local sobrescreva a do contêiner.
-      - /app/node_modules
-    # Garante que o frontend só inicie depois que o backend estiver pronto.
+      # Mapeia a porta 5173 da sua máquina para a porta 80 do contêiner Nginx.
+      - "5173:80"
+    container_name: dashboard-frontend
     depends_on:
       - backend
-    container_name: dashboard-frontend
 
 # Define a rede para que os contêineres possam se comunicar.
 networks:
