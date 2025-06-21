@@ -9,6 +9,13 @@ const MainLayout = () => {
 
     return (
         <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900 font-sans text-gray-900 dark:text-gray-100">
+            {/* Banner de Modo Desenvolvimento */}
+            {import.meta.env.DEV && (
+                <div className="fixed bottom-4 left-4 z-50 bg-yellow-400 text-black px-3 py-1 text-sm font-semibold rounded-lg shadow-lg">
+                    Modo de Desenvolvimento
+                </div>
+            )}
+
             <ConfirmationModal
                 isOpen={modalState.isOpen}
                 onCancel={closeDeleteModal}

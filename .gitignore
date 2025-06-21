@@ -17,6 +17,7 @@ yarn-error.log*
 *.db
 *.db-journal
 /backend/prisma/dev.db
+/backend/prisma/dev.test.db
 
 # Environment variables
 .env

@@ -1,63 +1,48 @@
 # Como Executar a Aplicação com Docker
 
-Este guia explica como iniciar a aplicação em modo de **Desenvolvimento** (para fazer alterações no código) e em modo de **Produção** (uma versão otimizada para uso).
+Este guia explica como iniciar, parar e gerenciar a aplicação usando scripts simples.
 
 ##  Pré-requisitos
 
-1.  **Instale o Docker**: Certifique-se de que o [Docker Desktop](https://www.docker.com/products/docker-desktop/) esteja instalado e em execução.
+1.  **Instale o Docker**: Certifique-se de que o [Docker Desktop](https://www.docker.com/products/docker-desktop/) (ou Docker Engine no Linux) esteja instalado e em execução.
 
 ---
 
-## Modo de Desenvolvimento (Padrão)
+## Como Iniciar em Modo de Desenvolvimento
 
-Use este modo quando quiser programar. Ele ativa o "hot-reloading", então qualquer alteração que você salvar nos arquivos será refletida instantaneamente na aplicação.
+Use este modo quando quiser programar. Ele ativa o "hot-reloading" e usa um **banco de dados de teste isolado (`dev.test.db`)**, para que você possa fazer experimentos sem medo de afetar os dados de produção.
 
-1.  **Verifique a existência do arquivo `docker-compose.override.yml`**: Este arquivo é o que ativa o modo de desenvolvimento. Ele já está criado no projeto.
-
-2.  **Abra um terminal** na pasta raiz do projeto.
-
-3.  **Execute o seguinte comando:**
+-   No seu terminal, na raiz do projeto, execute:
     ```bash
-    docker compose up --build -d
+    ./start-dev.sh
     ```
-    - O Docker Compose irá combinar `docker-compose.yml` + `docker-compose.override.yml` automaticamente.
 
-4.  **Acesse a Aplicação**: Estará disponível em [**http://localhost:5173**](http://localhost:5173).
+A aplicação estará disponível em [**http://localhost:5174**](http://localhost:5174) e você verá um banner "Modo de Desenvolvimento" no canto da tela.
 
 ---
 
-## Modo de Produção (Uso Otimizado)
+## Como Iniciar em Modo de Produção
 
-Use este modo para rodar a aplicação de forma estável e performática. Ele usa imagens otimizadas e não reflete alterações no código em tempo real.
+Use este modo para rodar a aplicação de forma estável e performática com seus **dados reais (`dev.db`)**.
 
-1.  **Renomeie ou remova o `docker-compose.override.yml`**: Para que o Docker Compose não o aplique, você pode, por exemplo, renomeá-lo:
+-   No seu terminal, na raiz do projeto, execute:
     ```bash
-    mv docker-compose.override.yml docker-compose.override.yml.bak
+    ./start-prod.sh
     ```
-
-2.  **Abra um terminal** na pasta raiz do projeto.
-
-3.  **Execute o comando de build e subida:**
-    ```bash
-    docker compose up --build -d
-    ```
-    - Desta vez, apenas as configurações do `docker-compose.yml` (produção) serão utilizadas.
-
-4.  **Acesse a Aplicação**: Estará disponível no mesmo endereço: [**http://localhost:5173**](http://localhost:5173).
-
-5.  **Para voltar ao modo de desenvolvimento**, basta renomear o arquivo de volta:
-    ```bash
-    mv docker-compose.override.yml.bak docker-compose.override.yml
-    ```
+A aplicação estará disponível em [**http://localhost:5173**](http://localhost:5173).
 
 ---
+
+## Como Parar a Aplicação
+
+Para parar completamente todos os contêineres (seja de dev ou prod):
+
+-   No seu terminal, na raiz do projeto, execute:
+    ```bash
+    ./stop.sh
+    ```
 
 ## Comandos Gerais
-
-- **Parar a Aplicação (em qualquer modo)**:
-  ```bash
-  docker compose down
-  ```
 
 - **Verificar os logs**:
   - `docker compose logs -f` (todos os serviços)

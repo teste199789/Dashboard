@@ -305,40 +305,39 @@ Para garantir a qualidade e a estabilidade do código, o projeto conta com uma s
   ```
 
 ## 9. Executando o Projeto com Docker (Recomendado)
-Para simplificar a execução e garantir um ambiente consistente, o projeto está totalmente configurado para rodar com Docker. Esta é a maneira recomendada de iniciar a aplicação.
+Para simplificar a execução e garantir um ambiente consistente, o projeto está totalmente configurado para rodar com Docker e scripts auxiliares. Esta é a maneira recomendada de iniciar a aplicação.
 
-### Pré-requisitos
-- **Instale o Docker**: Certifique-se de que o [Docker Desktop](https://www.docker.com/products/docker-desktop/) (ou Docker Engine no Linux) esteja instalado e em execução. A versão 2 do Docker Compose, que é necessária, já vem integrada nas instalações recentes.
+### Ambientes
+- **Desenvolvimento**: Ideal para programar. Ativa o "hot-reloading" para refletir mudanças no código instantaneamente e usa um banco de dados de teste isolado (`dev.test.db`).
+- **Produção**: Versão otimizada para uso, com melhor performance e utilizando o banco de dados principal (`dev.db`).
 
 ### Como Iniciar
-1.  **Abra um terminal** na pasta raiz do projeto (onde o arquivo `docker-compose.yml` está localizado).
+- **Modo de Desenvolvimento**:
+  ```bash
+  ./start-dev.sh
+  ```
+  Acesse em: `http://localhost:5174`
 
-2.  **Execute o seguinte comando:**
-    ```bash
-    docker compose up --build -d
-    ```
-    -   `up`: Cria e inicia os contêineres.
-    -   `--build`: Constrói as imagens na primeira vez ou se houver alterações nos `Dockerfiles`.
-    -   `-d`: Executa os contêineres em segundo plano.
-
-3.  **Acesse a Aplicação**: Após a conclusão, a aplicação estará totalmente funcional no seu navegador em:
-    [**http://localhost:5173**](http://localhost:5173)
+- **Modo de Produção**:
+  ```bash
+  ./start-prod.sh
+  ```
+  Acesse em: `http://localhost:5173`
 
 ### Como Parar
-- Para parar todos os contêineres da aplicação, execute no terminal:
+- Para parar a aplicação em qualquer um dos modos:
   ```bash
-  docker compose down
+  ./stop.sh
   ```
-  Seus dados **não serão perdidos**, pois o banco de dados agora reside na pasta `backend/prisma/`.
 
 ## 10. Log de Alterações (Changelog)
 Esta seção documenta as principais mudanças e melhorias implementadas no projeto ao longo do tempo.
 
 - **v1.9.8 (DATA_ATUAL)**
-    - **Correção de Redirecionamento e Adição de Testes**:
-        - **Correção do Bug de 404 na Exclusão**: Resolvido um bug crítico onde a exclusão de um concurso a partir da página de detalhes redirecionava o usuário para uma página 404. O problema foi causado pelo uso de `window.location.href`, que recarrega a página de forma inadequada em uma SPA. A solução envolveu a refatoração do `App.jsx` para que o `ProofsProvider` ficasse dentro do `Router`, permitindo o uso do hook `useNavigate` no contexto para uma navegação programática correta.
-        - **Adição de Testes de Contexto**: Criado um novo arquivo de teste (`ProofsContext.test.jsx`) para a lógica de gerenciamento de estado das provas. Os testes cobrem os cenários de sucesso e falha na exclusão, garantindo que a API seja chamada corretamente e que o estado da aplicação seja atualizado como esperado, prevenindo futuras regressões.
-        - **Robustez na Passagem de Funções**: A forma como a função de exclusão era passada como propriedade no `Dashboard.jsx` foi tornada mais explícita para evitar bugs sutis de passagem de argumentos.
+    - **Melhoria do Fluxo de Trabalho Docker**:
+        - **Scripts de Gerenciamento**: Introduzidos scripts (`start-dev.sh`, `start-prod.sh`, `stop.sh`) para simplificar o gerenciamento dos ambientes, eliminando a necessidade de renomear arquivos.
+        - **Isolamento de Banco de Dados**: O ambiente de desenvolvimento agora utiliza um banco de dados de teste (`dev.test.db`), isolando completamente os dados de desenvolvimento dos dados de produção.
+        - **Feedback Visual**: Adicionado um banner na interface que identifica claramente quando a aplicação está rodando em "Modo de Desenvolvimento".
 
 - **v1.9.7 (DATA_ATUAL)**
     - **Conteinerização com Docker**:

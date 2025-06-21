@@ -52,10 +52,15 @@ app.use((req, res, next) => {
 });
 
 // Configuração do CORS mais robusta
-const whitelist = ['http://localhost:5173', 'http://localhost:3000', 'http://127.0.0.1:5173'];
+const allowedOrigins = [
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'http://127.0.0.1:5173',
+    'http://localhost:3000'
+];
 const corsOptions = {
     origin: function (origin, callback) {
-        if (whitelist.indexOf(origin) !== -1 || !origin) {
+        if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
             callback(null, true);
         } else {
             console.error(`[Backend] CORS: Origem ${origin} não permitida.`);

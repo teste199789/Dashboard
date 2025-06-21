@@ -12,13 +12,19 @@ const ArrowLeftIcon = ({ className }) => (
     </svg>
 );
 
-
 const FocusedLayout = () => {
     const navigate = useNavigate();
     const { modalState, closeDeleteModal, handleDeleteProof } = useProofs();
 
     return (
         <div className="bg-gray-100 dark:bg-gray-900 min-h-screen font-sans text-gray-800 dark:text-gray-200">
+            {/* Banner de Modo Desenvolvimento */}
+            {import.meta.env.DEV && (
+                <div className="fixed bottom-4 left-4 z-50 bg-yellow-400 text-black px-3 py-1 text-sm font-semibold rounded-lg shadow-lg">
+                    Modo de Desenvolvimento
+                </div>
+            )}
+
             {/* Cabeçalho Simplificado */}
             <header className="bg-white dark:bg-gray-800 shadow-sm">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
