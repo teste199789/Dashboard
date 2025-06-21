@@ -1026,6 +1026,7 @@ Esta seção documenta as principais mudanças e melhorias implementadas no proj
     - **Lógica Inteligente**: O script é capaz de iniciar o contêiner do banco de dados caso ele esteja parado, realizar o backup e, em seguida, pará-lo novamente, garantindo que os backups agendados (via `cron`) funcionem de forma autônoma.
     - **Limpeza Automática**: O script remove backups com mais de 7 dias do Google Drive para gerenciar o espaço de armazenamento.
 - **Melhoria no Script `stop.sh`**: O script de parada da aplicação agora invoca automaticamente o `backup.sh` antes de desligar os contêineres de produção, garantindo uma última cópia de segurança.
+- **Correção de Robustez**: A lógica de carregamento de variáveis do arquivo `.env` no `backup.sh` foi aprimorada para usar o comando `source`, tornando-a mais segura e compatível com diferentes formatos de arquivo, evitando erros de parsing.
 
 - **v1.9.8 (DATA_ATUAL)**
     - **Melhoria do Fluxo de Trabalho Docker**:
@@ -1706,3 +1707,18 @@ Após as correções anteriores, um erro `exit 1` persistia no contêiner de mig
   - **A Solução Definitiva:** Adicionar a linha `RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*` ao `Dockerfile` do backend resolveu o problema permanentemente.
 
 - **Conclusão:** A simplificação do `docker-compose.prod.yml` (removendo o contêiner de migração dedicado) foi mantida como a abordagem final, por ser mais robusta e fácil de depurar. A migração em produção agora é um passo manual executado uma única vez, conforme documentado.
+
+## 10. Log de Alterações (Changelog)
+Esta seção documenta as principais mudanças e melhorias implementadas no projeto ao longo do tempo.
+
+### Backup Automatizado com Rclone e Google Drive
+- **Problema Resolvido**: Ausência de uma estratégia de backup off-site, deixando os dados vulneráveis a falhas locais de hardware.
+- **Solução Implementada**:
+    - **Script `backup.sh`**: Criação de um script robusto na raiz do projeto para automatizar todo o processo de backup do banco de dados PostgreSQL de produção.
+    - **Integração com `pg_dump`**: Utiliza a ferramenta padrão do PostgreSQL para criar dumps de dados consistentes e seguros, sem a necessidade de parar a aplicação.
+    - **Compressão em Tempo Real**: O dump é compactado com `gzip` em tempo real, economizando espaço em disco e tempo de upload.
+    - **Upload para Google Drive**: Integração com a ferramenta `rclone` para enviar de forma segura os backups compactados para uma pasta dedicada no Google Drive.
+    - **Lógica Inteligente**: O script é capaz de iniciar o contêiner do banco de dados caso ele esteja parado, realizar o backup e, em seguida, pará-lo novamente, garantindo que os backups agendados (via `cron`) funcionem de forma autônoma.
+    - **Limpeza Automática**: O script remove backups com mais de 7 dias do Google Drive para gerenciar o espaço de armazenamento.
+- **Melhoria no Script `stop.sh`**: O script de parada da aplicação agora invoca automaticamente o `backup.sh` antes de desligar os contêineres de produção, garantindo uma última cópia de segurança.
+- **Correção de Robustez**: A lógica de carregamento de variáveis do arquivo `.env` no `backup.sh` foi aprimorada para usar o comando `source`, tornando-a mais segura e compatível com diferentes formatos de arquivo, evitando erros de parsing.

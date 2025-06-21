@@ -23,7 +23,10 @@ echo ">>> Iniciando processo de backup inteligente..."
 # Carregar variáveis de ambiente do arquivo .env
 if [ -f "$ENV_FILE" ]; then
     echo "Carregando variáveis de ambiente do arquivo $ENV_FILE..."
-    export $(grep -v '^#' $ENV_FILE | xargs)
+    # Lógica robusta para ler o .env, ignorando comentários, linhas vazias e malformadas.
+    set -o allexport
+    source "$ENV_FILE"
+    set +o allexport
 else
     echo "ERRO: Arquivo de ambiente '$ENV_FILE' não encontrado. Abortando."
     exit 1
