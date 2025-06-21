@@ -70,6 +70,12 @@ Para parar todos os contêineres (sejam de desenvolvimento ou produção), utili
 ```bash
 ./stop.sh
 ```
+Por padrão, este comando tentará executar um backup do ambiente de produção se ele estiver ativo.
+
+Para parar os contêineres **sem** executar o backup, utilize a flag `--no-backup`:
+```bash
+./stop.sh --no-backup
+```
 
 Este comando irá parar e remover todos os contêineres relacionados a este projeto.
 
