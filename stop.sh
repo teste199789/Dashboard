@@ -1,25 +1,30 @@
 #!/bin/bash
 set -e
 
-# Verifica se o contêiner de produção está em execução antes de fazer o backup
-PROD_CONTAINER_NAME="dashboard-postgres-prod"
-# O comando 'docker ps' filtra pelo nome exato do contêiner. Se retornar algo, o contêiner está ativo.
-if [ -n "$(docker ps -q -f name=^/${PROD_CONTAINER_NAME}$)" ]; then
-    echo "📦 Ambiente de produção detectado. Executando script de backup antes de parar..."
-    
-    # Verifica se o script de backup existe e é executável
-    if [ -x "./backup.sh" ]; then
-        ./backup.sh
-    else
-        echo "AVISO: O script backup.sh não foi encontrado ou não é executável. Pulando etapa do backup."
-    fi
-else
-    echo "🔎 Ambiente de produção não parece estar em execução. Pulando o backup."
+# Default to running backup
+RUN_BACKUP=true
+
+# Check for --no-backup flag
+if [ "$1" == "--no-backup" ]; then
+  RUN_BACKUP=false
 fi
 
-echo "🛑 Parando todos os contêineres do projeto (dev e prod)..."
+# Executar backup ANTES de parar os contêineres, se a flag não for passada
+if [ "$RUN_BACKUP" = true ]; then
+  echo "Executando o script de backup..."
+  if [ -f ./backup.sh ]; then
+      ./backup.sh
+  else
+    echo "AVISO: Script backup.sh não encontrado. Pulando etapa de backup."
+  fi
+else
+    echo "O backup não será executado (--no-backup)."
+fi
 
-# Tenta parar ambos os ambientes. O Docker ignora os arquivos que não se aplicam.
-docker compose -f docker-compose.dev.yml -f docker-compose.prod.yml down
-
-echo "✅ Contêineres parados com sucesso." 
+# Parar os contêineres de produção
+echo "Parando os contêineres de produção..."
+if docker-compose -f docker-compose.prod.yml down --volumes --remove-orphans; then
+  echo "Contêineres de produção parados com sucesso."
+else
+  echo "Falha ao parar os contêineres de produção. Pode ser que eles já estivessem parados."
+fi
