@@ -274,32 +274,35 @@ const Dashboard = () => {
             </div>
 
             {/* Table Section */}
-            <div className="bg-white dark:bg-gray-900/50 rounded-lg shadow">
-                <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                    <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Controle de Concursos</h2>
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 sm:p-6">
+                <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Controle de Concursos</h2>
+                    <div className="flex items-center space-x-2">
                         <input
                             type="text"
-                            value={globalFilter ?? ''}
+                            value={globalFilter}
                             onChange={e => setGlobalFilter(e.target.value)}
-                            className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-teal-500"
                             placeholder="Buscar em todos os campos..."
+                            className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm"
                         />
-                    </div>
-                    <div className="flex items-center space-x-4">
-                        {/* Filtro por Banca */}
                         <select
                             value={table.getColumn('banca')?.getFilterValue() || 'Todas'}
-                            onChange={e => table.getColumn('banca')?.setFilterValue(e.target.value === 'Todas' ? null : e.target.value)}
+                            onChange={e => {
+                                const value = e.target.value;
+                                table.getColumn('banca')?.setFilterValue(value === 'Todas' ? null : value);
+                            }}
                             className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm"
                         >
-                            {filterableBancas.map(banca => <option key={banca} value={banca}>{banca}</option>)}
+                            {filterableBancas.map(banca => (
+                                <option key={banca} value={banca}>{banca}</option>
+                            ))}
                         </select>
                     </div>
                 </div>
+
                 <div className="overflow-x-auto">
-                    <table className="w-full">
-                        <thead className="bg-teal-200 dark:bg-teal-800">
+                    <table className="min-w-full">
+                        <thead className="bg-teal-200 dark:bg-teal-700">
                             {table.getHeaderGroups().map(headerGroup => (
                                 <tr key={headerGroup.id}>
                                     {headerGroup.headers.map(header => (
@@ -336,13 +339,14 @@ const Dashboard = () => {
                         </tbody>
                     </table>
                 </div>
-                {/* Pagination Controls */}
-                <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                        Página{' '}
-                        <strong>
-                            {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
-                        </strong>
+                
+                {/* Controles da tabela: filtros e paginação */}
+                <div className="mt-4 flex flex-col sm:flex-row justify-between items-center space-y-2 sm:space-y-0">
+                    <div className="flex items-center space-x-2">
+                        {/* Seletor de filtro por banca */}
+                    </div>
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                        Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
                     </span>
                     <div className="flex items-center space-x-2">
                         <button

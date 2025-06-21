@@ -333,6 +333,23 @@ Para simplificar a execução e garantir um ambiente consistente, o projeto est�
 ## 10. Log de Alterações (Changelog)
 Esta seção documenta as principais mudanças e melhorias implementadas no projeto ao longo do tempo.
 
+### Backup Automatizado com Rclone e Google Drive
+- **Problema Resolvido**: Ausência de uma estratégia de backup off-site, deixando os dados vulneráveis a falhas locais de hardware.
+- **Solução Implementada**:
+    - **Script `backup.sh`**: Criação de um script robusto na raiz do projeto para automatizar todo o processo de backup do banco de dados PostgreSQL de produção.
+    - **Integração com `pg_dump`**: Utiliza a ferramenta padrão do PostgreSQL para criar dumps de dados consistentes e seguros, sem a necessidade de parar a aplicação.
+    - **Compressão em Tempo Real**: O dump é compactado com `gzip` em tempo real, economizando espaço em disco e tempo de upload.
+    - **Upload para Google Drive**: Integração com a ferramenta `rclone` para enviar de forma segura os backups compactados para uma pasta dedicada no Google Drive.
+    - **Lógica Inteligente**: O script é capaz de iniciar o contêiner do banco de dados caso ele esteja parado, realizar o backup e, em seguida, pará-lo novamente, garantindo que os backups agendados (via `cron`) funcionem de forma autônoma.
+    - **Limpeza Automática**: O script remove backups com mais de 7 dias do Google Drive para gerenciar o espaço de armazenamento.
+- **Melhoria no Script `stop.sh`**: O script de parada da aplicação agora invoca automaticamente o `backup.sh` antes de desligar os contêineres de produção, garantindo uma última cópia de segurança.
+- **Correção de Robustez**: A lógica de carregamento de variáveis do arquivo `.env` no `backup.sh` foi aprimorada para usar o comando `source`, tornando-a mais segura e compatível com diferentes formatos de arquivo, evitando erros de parsing.
+
+- **Correção de Robustez**: A lógica de carregamento de variáveis do arquivo `.env` no `backup.sh` foi aprimorada para usar o comando `source`, tornando-a mais segura e compatível com diferentes formatos de arquivo, evitando erros de parsing.
+
+### Melhorias de UI no Dashboard
+- **Alinhamento de Filtros**: Os controles de filtro da tabela "Controle de Concursos" (busca e seletor de bancas) foram agrupados e realinhados à direita do título, corrigindo o layout e melhorando a consistência visual.
+
 - **v1.9.8 (DATA_ATUAL)**
     - **Melhoria do Fluxo de Trabalho Docker**:
         - **Scripts de Gerenciamento**: Introduzidos scripts (`start-dev.sh`, `start-prod.sh`, `stop.sh`) para simplificar o gerenciamento dos ambientes, eliminando a necessidade de renomear arquivos.
@@ -1028,6 +1045,11 @@ Esta seção documenta as principais mudanças e melhorias implementadas no proj
 - **Melhoria no Script `stop.sh`**: O script de parada da aplicação agora invoca automaticamente o `backup.sh` antes de desligar os contêineres de produção, garantindo uma última cópia de segurança.
 - **Correção de Robustez**: A lógica de carregamento de variáveis do arquivo `.env` no `backup.sh` foi aprimorada para usar o comando `source`, tornando-a mais segura e compatível com diferentes formatos de arquivo, evitando erros de parsing.
 
+- **Correção de Robustez**: A lógica de carregamento de variáveis do arquivo `.env` no `backup.sh` foi aprimorada para usar o comando `source`, tornando-a mais segura e compatível com diferentes formatos de arquivo, evitando erros de parsing.
+
+### Melhorias de UI no Dashboard
+- **Alinhamento de Filtros**: Os controles de filtro da tabela "Controle de Concursos" (busca e seletor de bancas) foram agrupados e realinhados à direita do título, corrigindo o layout e melhorando a consistência visual.
+
 - **v1.9.8 (DATA_ATUAL)**
     - **Melhoria do Fluxo de Trabalho Docker**:
         - **Scripts de Gerenciamento**: Introduzidos scripts (`start-dev.sh`, `start-prod.sh`, `stop.sh`) para simplificar o gerenciamento dos ambientes, eliminando a necessidade de renomear arquivos.
@@ -1722,3 +1744,8 @@ Esta seção documenta as principais mudanças e melhorias implementadas no proj
     - **Limpeza Automática**: O script remove backups com mais de 7 dias do Google Drive para gerenciar o espaço de armazenamento.
 - **Melhoria no Script `stop.sh`**: O script de parada da aplicação agora invoca automaticamente o `backup.sh` antes de desligar os contêineres de produção, garantindo uma última cópia de segurança.
 - **Correção de Robustez**: A lógica de carregamento de variáveis do arquivo `.env` no `backup.sh` foi aprimorada para usar o comando `source`, tornando-a mais segura e compatível com diferentes formatos de arquivo, evitando erros de parsing.
+
+- **Correção de Robustez**: A lógica de carregamento de variáveis do arquivo `.env` no `backup.sh` foi aprimorada para usar o comando `source`, tornando-a mais segura e compatível com diferentes formatos de arquivo, evitando erros de parsing.
+
+### Melhorias de UI no Dashboard
+- **Alinhamento de Filtros**: Os controles de filtro da tabela "Controle de Concursos" (busca e seletor de bancas) foram agrupados e realinhados à direita do título, corrigindo o layout e melhorando a consistência visual.
