@@ -1,0 +1,43 @@
+services:
+  postgres-prod:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=dashboard_prod
+    volumes:
+      - postgres-prod-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d dashboard_prod"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    container_name: dashboard-postgres-prod
+
+  backend-prod:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres-prod:5432/dashboard_prod
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres-prod:
+        condition: service_healthy
+    container_name: dashboard-backend-prod
+
+  frontend-prod:
+    build:
+      context: ./meu-dashboard-pro
+      dockerfile: Dockerfile.prod
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend-prod
+    container_name: dashboard-frontend-prod
+
+volumes:
+  postgres-prod-data: 

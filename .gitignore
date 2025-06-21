@@ -3,31 +3,42 @@
 /backend/node_modules
 /meu-dashboard-pro/node_modules
 
+# Lockfiles
+# Manter o lockfile da raiz, mas ignorar os dos subdiretórios
+/backend/package-lock.json
+/meu-dashboard-pro/package-lock.json
+
+# Build output
+/meu-dashboard-pro/dist
+
 # Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Test Coverage
-/coverage
-/backend/coverage
-/meu-dashboard-pro/coverage
+# Docker
+.dockerignore
+docker-compose.override.yml
 
-# SQLite Database
-*.db
-*.db-journal
-/backend/prisma/dev.db
-/backend/prisma/dev.test.db
-
-# Environment variables
+# Environment Variables
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
-# Docker
-database/
+# SQLite
+/backend/prisma/*.db
+/backend/prisma/*.db-journal
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Test Coverage
+/coverage
+/backend/coverage
+/meu-dashboard-pro/coverage
 
 # System files
 .DS_Store

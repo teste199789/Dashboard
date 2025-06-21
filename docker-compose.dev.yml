@@ -1,0 +1,45 @@
+services:
+  postgres-dev:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=dashboard_dev
+    volumes:
+      - postgres-dev-data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    container_name: dashboard-postgres-dev
+
+  backend-dev:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres-dev:5432/dashboard_dev
+    command: npm run dev
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    ports:
+      - "3001:3001"
+    depends_on:
+      - postgres-dev
+    container_name: dashboard-backend-dev
+
+  frontend-dev:
+    build:
+      context: ./meu-dashboard-pro
+      dockerfile: Dockerfile
+    command: npm run dev -- --host
+    ports:
+      - "5174:5173"
+    volumes:
+      - ./meu-dashboard-pro:/app
+      - /app/node_modules
+    depends_on:
+      - backend-dev
+    container_name: dashboard-frontend-dev
+
+volumes:
+  postgres-dev-data: 

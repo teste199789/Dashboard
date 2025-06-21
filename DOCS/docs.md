@@ -955,3 +955,60 @@ Para fornecer uma visão mais clara e imediata do resultado, o card de resumo de
 - ✅ Teste unitário do componente `ContestActions`
 - ✅ Teste manual da funcionalidade completa
 - ✅ Verificação de ambos os layouts (Main e Focused)
+
+# Histórico de Dockerização e Reestruturação
+
+Este documento resume as etapas e decisões tomadas para containerizar a aplicação, separar os ambientes de desenvolvimento e produção, e migrar o banco de dados de SQLite para PostgreSQL.
+
+## Fase 1: Dockerização Inicial e Depuração de Ambiente
+
+- **Objetivo:** Containerizar os serviços de frontend (React) e backend (Node.js/Prisma) com Docker Compose.
+- **Implementação Inicial:**
+  - Criação de `Dockerfile` para frontend e backend.
+  - Criação de um `docker-compose.yml` único para orquestrar os serviços.
+  - Uso de volumes para mapear o código-fonte e permitir hot-reloading em desenvolvimento.
+  - Persistência do banco de dados SQLite em um volume local.
+- **Desafios e Soluções:**
+  - **Erro `distutils`:** Resolvido trocando o comando `docker-compose` (V1) pelo `docker compose` (V2).
+  - **Erro de Permissão:** Resolvido adicionando o usuário ao grupo `docker`.
+  - **Tabela não encontrada (Erro 500):** O backend não conseguia encontrar as tabelas do SQLite. A solução foi adicionar um serviço de migração (`backend-migrate`) no `docker-compose.yml` para executar `npx prisma migrate deploy` antes de iniciar o serviço principal do backend.
+
+## Fase 2: Separação de Ambientes (Desenvolvimento vs. Produção)
+
+- **Objetivo:** Criar configurações distintas para os ambientes de desenvolvimento e produção.
+- **Implementação:**
+  - Criação de `Dockerfile.prod` otimizados (com build de múltiplos estágios e Nginx para o frontend).
+  - Utilização de `docker-compose.prod.yml` e `docker-compose.dev.yml` para definir configurações específicas de cada ambiente.
+  - Criação de scripts de shell (`start-dev.sh`, `start-prod.sh`, `stop.sh`) para gerenciar os ambientes de forma simples, usando a flag `-f` do `docker compose` para apontar para o arquivo de configuração correto.
+- **Desafios e Soluções:**
+  - **Conflito de Portas:** Ocorreu um erro `port is already allocated` na porta `5173`. A solução pragmática foi mudar a porta de desenvolvimento para `5174`.
+  - **Erro de CORS:** A mudança da porta do frontend exigiu a atualização da lista de origens permitidas no CORS do backend.
+
+## Fase 3: Migração para PostgreSQL e Correção Final
+
+- **Objetivo:** Substituir o SQLite por PostgreSQL, mantendo a separação entre os bancos de dados de desenvolvimento e produção.
+- **Implementação:**
+  - Atualização do `schema.prisma` para usar o provider `postgresql`.
+  - Adição de serviços `postgres-dev` e `postgres-prod` aos respectivos arquivos `docker-compose`, com volumes persistentes para cada um.
+- **Desafios e Soluções:**
+  - **Erro `P1010: User was denied access`:** Ocorreu em desenvolvimento devido a credenciais antigas persistidas no volume do banco de dados. A solução foi remover o volume do Docker (`docker volume rm ...`) para forçar a recriação do banco com as novas credenciais.
+  - **Falha na Inicialização do Contêiner do PostgreSQL:** O contêiner do Postgres encerrava inesperadamente (código 0) quando orquestrado. O problema foi isolado na diretiva `healthcheck`, que foi removida da configuração de desenvolvimento para simplificar e estabilizar a inicialização.
+  - **Erro 500 em Produção:** O serviço de migração (`backend-migrate-prod`) falhava porque o `Dockerfile.prod` não instalava as `devDependencies` (incluindo o `prisma`). A solução foi ajustar o Dockerfile para primeiro instalar todas as dependências, executar a geração e migração, e só então remover as dependências de desenvolvimento com `npm prune --omit=dev`, garantindo uma imagem final enxuta.
+- **Ajuste Final:** Adicionada a instalação do `openssl` no `Dockerfile` do backend para remover um aviso de compatibilidade do Prisma.
+
+## Fase 4: A Depuração Final (O Erro Persistente)
+
+Após as correções anteriores, um erro `exit 1` persistia no contêiner de migração em produção, acompanhado de um erro genérico `Schema engine error:`. Isso desencadeou uma longa e complexa investigação.
+
+- **Hipóteses Testadas e Descartadas:**
+  - **Falha de Orquestração (`depends_on`):** Simplificar o `docker-compose.prod.yml` removendo o contêiner de migração não resolveu o erro, que podia ser replicado manualmente com `docker exec`.
+  - **Conflito de `package-lock.json`:** Excluir o `lockfile` e forçar uma reinstalação limpa das dependências não teve efeito.
+  - **Problema na Ordem do `Dockerfile`:** Múltiplas reestruturações nas instruções `COPY` e `RUN` não resolveram o problema.
+  - **Cópia Indevida de `node_modules`:** A causa mais provável, a cópia da `node_modules` do host para a imagem, foi corrigida com a criação de um arquivo `.dockerignore` no backend. No entanto, o erro persistiu, indicando que este era apenas um dos problemas.
+
+- **A Causa Raiz Real:**
+  - Após esgotar todas as outras possibilidades, a causa final foi identificada: o aviso `Prisma failed to detect the libssl/openssl version` não era um simples aviso, mas sim um erro fatal disfarçado.
+  - O ambiente mínimo da imagem `node:20-slim` (baseada em Alpine Linux) não incluía a biblioteca `openssl`. O binário do "Schema Engine" do Prisma depende dessa biblioteca para funcionar. Sem ela, ele falhava de forma não explícita, retornando o erro genérico.
+  - **A Solução Definitiva:** Adicionar a linha `RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*` ao `Dockerfile` do backend resolveu o problema permanentemente.
+
+- **Conclusão:** A simplificação do `docker-compose.prod.yml` (removendo o contêiner de migração dedicado) foi mantida como a abordagem final, por ser mais robusta e fácil de depurar. A migração em produção agora é um passo manual executado uma única vez, conforme documentado.

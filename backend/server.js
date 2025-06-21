@@ -5,7 +5,6 @@ const { corrigirProva, calculateOverallPerformance } = require('./utils/correcao
 const { gerarSugestoesBanca, obterConfiguracaoPadraoBanca } = require('./utils/regrasAnulacao');
 
 const app = express();
-const prisma = new PrismaClient();
 
 // Funções utilitárias para parse de números
 const parseFlexibleFloat = (value) => {
@@ -81,6 +80,7 @@ const PORT = process.env.PORT || 3001;
 
 // POST /api/proofs - Cria um novo concurso ou simulado
 app.post('/api/proofs', async (req, res) => {
+    const prisma = new PrismaClient();
     try {
         const {
             titulo, banca, data, totalQuestoes, tipoPontuacao, type, orgao, cargo, notaDiscursiva,
@@ -112,6 +112,7 @@ app.post('/api/proofs', async (req, res) => {
 
 // GET /api/proofs - Busca todas as provas e simulados
 app.get('/api/proofs', async (req, res) => {
+    const prisma = new PrismaClient();
     try {
         const proofs = await prisma.proof.findMany({
             include: { results: true, subjects: true },
@@ -126,6 +127,7 @@ app.get('/api/proofs', async (req, res) => {
 
 // GET /api/proofs/:id - Busca uma prova específica
 app.get('/api/proofs/:id', async (req, res) => {
+    const prisma = new PrismaClient();
     const { id } = req.params;
     try {
         const proof = await prisma.proof.findUnique({
@@ -149,6 +151,7 @@ app.get('/api/proofs/:id', async (req, res) => {
 
 // DELETE /api/proofs/:id - Deleta uma prova
 app.delete('/api/proofs/:id', async (req, res) => {
+    const prisma = new PrismaClient();
     try {
         const { id } = req.params;
         const numericId = parseInt(id, 10);
@@ -171,6 +174,7 @@ app.delete('/api/proofs/:id', async (req, res) => {
 
 // PUT /api/proofs/:id/details - Atualiza detalhes da prova
 app.put('/api/proofs/:id/details', async (req, res) => {
+    const prisma = new PrismaClient();
     try {
         const { id } = req.params;
         const {

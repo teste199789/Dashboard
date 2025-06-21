@@ -1,23 +1,23 @@
 # Use uma imagem oficial do Node.js como base.
 FROM node:20-slim
 
+# Instala o OpenSSL, que pode ser uma dependência oculta do Prisma.
+RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
+
 # Define o diretório de trabalho.
 WORKDIR /app
 
 # Copia os arquivos de definição de pacotes.
 COPY package*.json ./
 
-# Instala apenas as dependências de produção para uma imagem mais leve.
-RUN npm install --omit=dev
+# Instala TODAS as dependências, incluindo as de desenvolvimento.
+RUN npm install
 
-# Copia o schema do Prisma.
-COPY prisma ./prisma/
-
-# Gera o cliente Prisma.
-RUN npx prisma generate
-
-# Copia o restante do código da aplicação.
+# Copia o restante do código da aplicação (respeitando o .dockerignore).
 COPY . .
+
+# Gera o cliente Prisma com base no schema copiado.
+RUN npx prisma generate
 
 # Expõe a porta da API.
 EXPOSE 3001

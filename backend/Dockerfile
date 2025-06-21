@@ -1,30 +1,26 @@
 # Use uma imagem oficial do Node.js como base.
-# Escolha uma versão LTS (Long Term Support) para estabilidade.
 FROM node:20-slim
 
-# Define o diretório de trabalho dentro do contêiner.
+# Define o diretório de trabalho da aplicação.
 WORKDIR /app
 
-# Copia os arquivos de definição de pacotes.
-# O '.*' é para incluir arquivos como .npmrc se existirem.
+# Instala o OpenSSL, uma dependência comum para o Prisma.
+RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
+
+# Copia os arquivos de gerenciamento de pacotes.
 COPY package*.json ./
 
 # Instala as dependências do projeto.
 RUN npm install
 
-# Copia o schema do Prisma para dentro do contêiner.
-COPY prisma ./prisma/
-
-# Gera o cliente Prisma. Este passo é crucial para o ORM funcionar.
-RUN npx prisma generate
-
-# Copia o restante do código da aplicação.
+# Copia o restante dos arquivos da aplicação (respeitando o .dockerignore).
 COPY . .
 
-# Expõe a porta que a API usa para se comunicar.
+# Gera o cliente do Prisma com base no schema copiado.
+RUN npx prisma generate
+
+# Expõe a porta que a aplicação usará.
 EXPOSE 3001
 
-# Comando para iniciar a aplicação.
-# Usamos "npm run dev" conforme a configuração do seu projeto.
-# Para um ambiente de produção real, seria ideal ter um script "start" que use "node server.js".
+# O comando padrão para iniciar o container em desenvolvimento.
 CMD ["npm", "run", "dev"] 
