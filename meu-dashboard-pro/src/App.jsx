@@ -17,13 +17,13 @@ import ProofDetail from './pages/ProofDetail';
 // ÚNICA DEFINIÇÃO DA FUNÇÃO APP
 function App() {
   return (
-    <ProofsProvider>
-      <Router 
-        future={{
-          v7_startTransition: true,
-          v7_relativeSplatPath: true
-        }}
-      >
+    <Router 
+      future={{
+        v7_startTransition: true,
+        v7_relativeSplatPath: true
+      }}
+    >
+      <ProofsProvider>
         <Toaster
           position="top-right"
           toastOptions={{
@@ -35,6 +35,7 @@ function App() {
         <Routes>
           {/* Rotas que usam o Layout Principal */}
           <Route element={<MainLayout />}>
+            <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/" element={<Dashboard />} />
             <Route path="/meus-concursos" element={<MeusConcursos />} />
             <Route path="/cadastrar-prova" element={<AddProof />} />
@@ -48,8 +49,8 @@ function App() {
           
           <Route path="*" element={<h2 className="text-center p-8">404: Página Não Encontrada</h2>} />
         </Routes>
-      </Router>
-    </ProofsProvider>
+      </ProofsProvider>
+    </Router>
   );
 }
 

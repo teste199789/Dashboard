@@ -189,7 +189,7 @@ const Dashboard = () => {
                         proof={row.original} 
                         onEdit={handleOpenModal}
                         onGrade={onGrade}
-                        onDelete={openDeleteModal}
+                        onDelete={(proof) => openDeleteModal(proof)}
                         isGrading={isGrading}
                     />
                 </div>

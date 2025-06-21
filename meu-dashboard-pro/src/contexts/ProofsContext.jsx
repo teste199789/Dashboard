@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect, useMemo, useCallback, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import * as api from '../api/apiService';
 import toast from 'react-hot-toast';
 
@@ -15,6 +16,7 @@ export const ProofsProvider = ({ children }) => {
     const [error, setError] = useState(null);
     const [modalState, setModalState] = useState({ isOpen: false, proofId: null });
     const [dashboardFilter, setDashboardFilter] = useState('TODOS');
+    const navigate = useNavigate();
 
     const fetchProofs = useCallback(async () => {
         setError(null);
@@ -70,10 +72,9 @@ export const ProofsProvider = ({ children }) => {
             toast.success("Item deletado com sucesso!");
             closeDeleteModal();
             
-            // Se estivermos na página de detalhes da prova que foi excluída, redirecionar
             const currentPath = window.location.pathname;
             if (currentPath.includes(`/minhas-provas/${proofIdToDelete}`)) {
-                window.location.href = '/dashboard';
+                navigate('/dashboard');
             } else {
                 fetchProofs();
             }
